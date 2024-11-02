@@ -9,40 +9,41 @@
   font-style: normal;
 }
 
+/* 기본 스타일 리셋 */
 * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
   font-family: 'Pretendard-Regular';
 }
 
-#app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  font-weight: normal;
+/* 뷰포트 크기 제한 */
+html,
+body {
+  width: 100%;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
 }
 
-a,
-.green {
-  text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
-  transition: 0.4s;
-  padding: 3px;
+/* 메인 컨테이너 - 항상 768px 고정 */
+.main-container {
+  width: 768px;
+  height: 100vh;
+  position: relative;
+  overflow-y: auto;
 }
 
-@media (hover: hover) {
-  a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
-  }
-}
-
-@media (min-width: 1024px) {
+/* 모바일 환경 (768px 미만) */
+@media (max-width: 767px) {
+  html,
   body {
-    display: flex;
-    place-items: center;
+    width: 768px; /* 모바일에서도 768px 유지 */
   }
 
-  #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
+  .main-container {
+    width: 768px; /* 모바일에서도 768px 유지 */
   }
 }
