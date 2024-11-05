@@ -26,24 +26,13 @@ body {
   padding: 0;
   display: flex;
   justify-content: center;
+  align-items: center; /* 수직 중앙 정렬 추가 */
 }
 
-/* 메인 컨테이너 - 항상 768px 고정 */
+/* 메인 컨테이너 - 9:16 비율 유지 */
 .main-container {
-  width: 768px;
-  height: 100vh;
+  width: calc(100vh * 9 / 16); /* 9:16 비율의 너비 계산 */
+  height: 100vh; /* 높이는 100vh */
   position: relative;
   overflow-y: auto;
-}
-
-/* 모바일 환경 (768px 미만) */
-@media (max-width: 767px) {
-  html,
-  body {
-    width: 768px; /* 모바일에서도 768px 유지 */
-  }
-
-  .main-container {
-    width: 768px; /* 모바일에서도 768px 유지 */
-  }
 }
