@@ -104,7 +104,8 @@ public class PromptService {
      * @param additionalInfo 추가 정보
      * @return 프롬프트 메시지를 포함한 리스트
      */
-    public List<Map<String, String>> chatbotPrompt(
+    public List<Map<String, String>>
+    chatbotPrompt(
             List<String> promptFilePathList,
             String input,
             List<ConversationLogResponse> conversationLogs,
