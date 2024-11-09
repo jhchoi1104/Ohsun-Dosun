@@ -6,6 +6,7 @@ import com.OhsunDosun.dto.ConversationRequest;
 import com.OhsunDosun.dto.ConversationResponse;
 import com.OhsunDosun.exception.ConversationRoomNotFoundException;
 import com.OhsunDosun.dto.ChatbotResponse;
+import com.OhsunDosun.service.conversation.TextResponseService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 public class ConversationService {
 
     private final ConversationRoomService conversationRoomService;
+    private final TextResponseService textResponseService;
 
     public ConversationResponse conversation(ConversationRequest request, int userNo) {
         // 방 존재 여부 검사

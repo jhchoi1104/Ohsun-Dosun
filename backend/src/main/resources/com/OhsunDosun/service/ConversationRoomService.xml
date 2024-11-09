@@ -11,8 +11,8 @@
     </select>
 
 
-    <select id="findLastNByConversationRoomNo" resultType="java.lang.String">
-        SELECT message_text
+    <select id="findLastNByConversationRoomNo" resultType="com.OhsunDosun.dto.Log">
+        SELECT message_text, sender_type
         FROM chatbot_history
         WHERE session_id = #{sessionId}
         ORDER BY timestamp DESC

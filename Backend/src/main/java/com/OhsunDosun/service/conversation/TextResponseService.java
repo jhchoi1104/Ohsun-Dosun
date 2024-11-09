@@ -1,8 +1,9 @@
-package com.OhsunDosun.service;
+package com.OhsunDosun.service.conversation;
 
 
 import com.OhsunDosun.dto.ChatbotResponse;
 import com.OhsunDosun.dto.ConversationRequest;
+import com.OhsunDosun.service.ConversationRoomService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,8 +34,8 @@ public class TextResponseService {
 
         // 첫 인사 생성
         if (conversationLogs.isEmpty() && request.getInput().equals("Greeting")) {
-            response = greetingTaskService.generateGreeting(request, user.getUserNo());
-            log.info("🖐️ [{}] Greeting generated for: {}", user.getUserId(), response.getContent());
+            response = greetingTaskService.generateGreeting(request, userNo);
+            log.info("🖐️ [{}] Greeting generated for: {}", userNo, response.getContent());
             return response;
         }
 

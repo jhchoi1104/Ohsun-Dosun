@@ -22,6 +22,7 @@ public class ConversationController {
     private final ConversationService conversationService;
 
     // 말동무 대화 답변 생성
+    // 만약 처음 상황이라면 "Greeting"을 Requestbody의 reqeust input에 넣어주어야 함.
     @PostMapping
     public ResponseEntity<ConversationResponse> conversation(
             @RequestHeader("userId") int userNo,
