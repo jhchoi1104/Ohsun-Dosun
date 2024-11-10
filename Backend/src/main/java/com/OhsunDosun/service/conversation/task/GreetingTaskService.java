@@ -4,6 +4,7 @@ import com.OhsunDosun.dto.ChatbotResponse;
 import com.OhsunDosun.dto.ConversationRequest;
 import com.OhsunDosun.dto.Log;
 import com.OhsunDosun.service.ConversationRoomService;
+import com.OhsunDosun.service.conversation.ChainService;
 import com.OhsunDosun.service.conversation.PromptService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,7 @@ public class GreetingTaskService {
         List<String> promptFilePathList = Arrays.asList("prompts/basic.prompt", "prompts/greeting.prompt");
         List<Log> conversationLogs = Collections.emptyList();
         List<Map<String, String>> chatbotPrompt = promptService.chatbotPrompt(promptFilePathList, "", conversationLogs, conversationLogListString);
+        // 여기부터 해야함.
         return chainService.chatbotChain(chatbotPrompt);
     }
 }

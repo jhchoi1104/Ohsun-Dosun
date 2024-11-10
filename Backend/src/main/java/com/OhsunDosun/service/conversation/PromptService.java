@@ -30,6 +30,35 @@ public class PromptService {
 
     /**
      * <pre>
+     * 메소드명   : classificationPrompt
+     * 설명       : 분류 작업을 위한 프롬프트를 생성.
+     * </pre>
+     * @param input 사용자의 입력값
+     * @param conversationLogs 대화 로그 리스트
+     * @return 프롬프트 메시지를 포함한 리스트
+     */
+    public List<Map<String, String>> classificationPrompt(String input, List<Log> conversationLogs) {
+        String systemPrompt = loadPrompt("prompts/classification.prompt");
+        return makePrompt(systemPrompt, input, conversationLogs);
+    }
+
+    /**
+     * <pre>
+     * 메소드명   : chatbotPrompt
+     * 설명       : 여러 프롬프트 파일을 로드하여 기본 챗봇 프롬프트를 생성. 현재 날짜가 포함됨.
+     * </pre>
+     * @param promptFilePathList 프롬프트 파일 경로 리스트
+     * @param input 사용자의 입력값
+     * @param conversationLogs 대화 로그 리스트
+     * @return 프롬프트 메시지를 포함한 리스트
+     */
+    public List<Map<String, String>> chatbotPrompt(List<String> promptFilePathList, String input, List<Log> conversationLogs) {
+        String systemPrompt = loadPrompts(promptFilePathList) + getCurrentDate();
+        return makePrompt(systemPrompt, input, conversationLogs);
+    }
+
+    /**
+     * <pre>
      * 메소드명   : chatbotPrompt (오버로드)
      * 설명       : 여러 프롬프트 파일을 로드하여 기본 챗봇 프롬프트를 생성. 추가 정보와 현재 날짜가 포함됨.
      * </pre>

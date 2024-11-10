@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.OhsunDosun.mapper.CreateConversationLogMapper">
+
+    <insert id="createConversationLogUser">
+        <!-- 첫 번째 INSERT: User 질문 -->
+        INSERT INTO chatbot_history (
+        session_id, message_text, sender_type, message_type, timestamp
+        )
+        VALUES (
+        #{conversationRoomNo},
+        #{conversationLogInput},
+        'User',
+        '질문',
+        NOW()
+        );
+    </insert>
+
+    <insert id="createConversationLogBot">
+        <!-- 두 번째 INSERT: Bot 응답 -->
+        INSERT INTO chatbot_history (
+        session_id, message_text, sender_type, message_type, timestamp
+        )
+        VALUES (
+        #{conversationRoomNo},
+        #{conversationLogResponse},
+        'Bot',
+        '응답',
+        NOW()
+        );
+    </insert>
+
+
+</mapper>

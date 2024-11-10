@@ -11,4 +11,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ConversationResponse {
     private String content;
+    private int totalTokens;
 }
