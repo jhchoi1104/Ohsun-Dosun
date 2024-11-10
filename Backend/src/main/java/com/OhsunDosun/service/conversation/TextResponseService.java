@@ -33,7 +33,7 @@ public class TextResponseService {
         String input = request.getInput();
 
         // 이전 대화내용 조회
-        List<Log> conversationLogs = conversationRoomService.findLastNByConversationRoomNo(5, request.getConversationRoomNo());
+        List<Log> conversationLogs = conversationRoomService.findLastNByConversationRoomNo(10, request.getConversationRoomNo());
 
         // 첫 인사 생성
         if (conversationLogs.isEmpty() && request.getInput().equals("Greeting")) {
