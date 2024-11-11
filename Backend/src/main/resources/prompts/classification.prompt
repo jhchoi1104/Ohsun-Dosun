@@ -1,36 +1,22 @@
-작업은 사용자 입력을 각각 작업 번호와 관련된 세 가지 주요 범주(가능한 하위 카테고리 포함) 중 하나로 분류하고 결과를 엄격한 JSON 형식으로 반환하는 것입니다.
-
-주요 카테고리:
-1. 송금하기 서비스(Main Task 003): 송금 서비스와 관련된 문의. 하위 카테고리는 다음과 같다:
-   - 사용자가 아무 정보를 제시하지 않고 송금 요청(Sub Task 003.01): 사용자가 송금하기 서비스를 이용하기 원하는 상황에서 보내는 대상의 이름 또는 별칭, 송금 금액, 거래를 희망하는 계좌에 대한 정보를 제공하지 않았을 경우
-   - 사용자가 보내는 대상의 이름 또는 별칭을 제시하며 송금 요청(Sub Task 003.02): 사용자가 송금하기 서비스를 이용하기 원하는 상황에서 보내는 대상의 이름 또는 별칭은 제시하였으나 송금 금액, 거래를 희망하는 계좌에 대한 정보를 제공하지 않았을 경우
-   - 사용자가 송금을 원하는 금액을 제시하며 송금 요청(Sub Task 003.03): 사용자가 송금하기 서비스를 이용하기 원하는 상황에서 송금 금액은 제시하였으나 보내는 대상의 이름 또는 별칭, 거래를 희망하는 계좌에 대한 정보를 제공하지 않았을 경우
-
-응답 형식:
-각 사용자 입력에 대해 적절한 메인 카테고리와 하위 카테고리(해당되는 경우)를 결정하고 해당 작업 번호를 다음과 같은 엄격한 JSON 형식으로 반환합니다:
-```
-{
-  "Main Task Number": "000", // "000", "001" 또는 "002"
-  "Sub Task Number": "001.01" // 해당되는 경우 Sub Task Number 사용, 그렇지 않은 경우 null
-}
-```
-출력이 이 JSON 구조를 엄격하게 준수하는지 확인합니다. Sub Task Number를 적용할 수 없는 경우 값을 null로 설정합니다.
-
-
 Your task is to categorize user inputs into one of three main categories (with possible subcategories), each associated with a task number, and return the result in strict JSON format.
 
 Main Categories:
-1.Daily Conversation (Main Task 000): Casual, non-service-related interactions, including greetings, small talk, or general inquiries about the user's day, mood, or feelings.
-2.Welfare Services (Main Task 001): Inquiries related to welfare services or support. Subcategories include:
- - Service Guidance (Sub Task 001-01): Questions about welfare service availability, registration, and general information.
- - Direct Access to Welfare Services (Sub Task 001-02): Requests to directly access or navigate to specific welfare services or platforms.
- - Care Service Reservations (Sub Task 001-03): Inquiries related to booking or scheduling care services.
- - Care Service Reservation Status (Sub Task 001-04): Inquiries related to checking the status of previously made care service reservations.
- - Cultural Programs, Job Search Programs, Educational Programs: Inquiries related to these specific programs should also be categorized under Welfare Services.
-3. Financial Services (Main Task 002): Inquiries related to financial services offered by the platform, specifically:
-   - Transaction History Inquiry (Sub Task 002-01): Requests for checking or reviewing transaction history.
-   - Spending Report Inquiry (Sub Task 002-02): Requests for information regarding spending reports or summaries.
-
+0.Daily Conversation (Main Task 000): Casual, non-service-related interactions, including greetings, small talk, or general inquiries about the user's day, mood, or feelings.
+1.Loan Services (Main Task 001): Inquiries related to Loan services or support. The subcategories are as follows:
+	- User loan application request (Main Task 001.01): If the user does not provide the information and requests only by voice saying 'loan'
+	- User loan product type request (Main Task 001.02): If the user requests 'find out loan products' by voice without providing information
+	- Loan product request (Main Task 001.03): When a user makes a voice request for one of the product types called through Main Task 001.02
+2.Customer Support Connection Service (Main Task 002): This refers to inquiries where the user wants to be directly connected to a representative through the chatbot. The subcategories are as follows:
+	- Connect to a Representative (Main Task 002.01): When the customer explicitly requests to be connected to a representative.
+	- Connect to a Representative during Chatbot Interaction (Main Task 002.02): When the user requests a service that the chatbot cannot directly provide while using financial services.
+3. Money Transfer Service (Main Task 003): Inquiries related to money transfer services. The subcategories are as follows:
+	- User requests transfer without providing any information (Sub Task 003.01): When the user wishes to use the money transfer service but does not provide details such as the recipient’s name or alias, transfer amount, or the account they wish to use for the transaction.
+	- User provides recipient's name or alias but does not provide other information (Sub Task 003.02): When the user wishes to use the money transfer service and provides the recipient’s name or alias but does not provide the transfer amount or account details.
+	- User provides the transfer amount but does not provide other information (Sub Task 003.03): When the user wishes to use the money transfer service and provides the transfer amount but does not provide the recipient’s name or alias or account details.
+4. Passbook Reissuance Service (Main Task 004): Inquiries related to passbook loss and reissuance. The subcategories are as follows:
+User requests reissuance without providing any information (Sub Task 004.01): When the user requests passbook reissuance but does not provide any details regarding the reissuance.
+	- User specifies the reissuance method (Sub Task 004.02): When the user requests passbook reissuance by specifying a method such as branch collection, STM collection, or registered mail delivery.
+5. New Deposit Account Opening Service (Main Task 005): Inquiries related to the issuance of new deposit accounts.
 Response Format:
 For each user input, determine the appropriate main category and subcategory (if applicable) and return the corresponding task numbers in the following strict JSON format:
 ```
