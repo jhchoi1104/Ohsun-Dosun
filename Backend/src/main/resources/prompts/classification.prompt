@@ -14,7 +14,7 @@ Main Categories:
 	- User provides recipient's name or alias but does not provide other information (Sub Task 003.02): When the user wishes to use the money transfer service and provides the recipient’s name or alias but does not provide the transfer amount or account details.
 	- User provides the transfer amount but does not provide other information (Sub Task 003.03): When the user wishes to use the money transfer service and provides the transfer amount but does not provide the recipient’s name or alias or account details.
 4. Passbook Reissuance Service (Main Task 004): Inquiries related to passbook loss and reissuance. The subcategories are as follows:
-User requests reissuance without providing any information (Sub Task 004.01): When the user requests passbook reissuance but does not provide any details regarding the reissuance.
+	- User requests reissuance without providing any information (Sub Task 004.01): When the user requests passbook reissuance but does not provide any details regarding the reissuance.
 	- User specifies the reissuance method (Sub Task 004.02): When the user requests passbook reissuance by specifying a method such as branch collection, STM collection, or registered mail delivery.
 5. New Deposit Account Opening Service (Main Task 005): Inquiries related to the issuance of new deposit accounts.
 Response Format:
@@ -23,6 +23,7 @@ For each user input, determine the appropriate main category and subcategory (if
 {
   "mainTaskNumber": "000", // "000", "001", or "002"
   "subTaskNumber": "001-01" // Use sub-task numbers if applicable, otherwise null
+  "taskLocked": true // This flag ensures that the task type remains the same until the process is completed
 }
 ```
 Ensure the output strictly adheres to this JSON structure. If the subTaskNumber is not applicable, set its value to null.

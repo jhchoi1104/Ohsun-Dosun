@@ -56,7 +56,8 @@ public class TextResponseService {
         ClassificationResponse classificationResult = classificationTaskService.classificationTask(input, conversationLogs);
         String mainTaskNo = classificationResult.getMainTaskNumber();
         String subTaskNo = classificationResult.getSubTaskNumber();
-        log.info("🔗1️⃣ [{}] Task Classification Completed by - Main Task No: \u001B[34m{}\u001B[0m, Sub Task No: \u001B[34m{}\u001B[0m", userNo, mainTaskNo, subTaskNo);
+        Boolean taskLocked = classificationResult.getTaskLocked();
+        log.info("🔗1️⃣ [{}] Task Classification Completed by - Main Task No: \u001B[34m{}\u001B[0m, Sub Task No: \u001B[34m{}\u001B[0m", userNo, mainTaskNo, subTaskNo, taskLocked);
 
         // Main Task 분류
         switch (mainTaskNo) {
@@ -75,15 +76,18 @@ public class TextResponseService {
                 response = transferService.generateTransferConversation(input, conversationLogs);
 
             }
-            // 통장 신규 생성 서비스
+
+            // 통장 재발행 서비스
             case "004" -> {
+                response = reissuanceService.generateReissuanceConversation(input, conversationLogs);
+            }
+
+            // 통장 신규 생성 서비스
+            case "005" -> {
                 response = newissuanceService.generateNewissuanceConversation(input, conversationLogs);
             }
 
-            // 통장 재발행 서비스
-            case "005" -> {
-                response = reissuanceService.generateReissuanceConversation(input, conversationLogs);
-            }
+
             // 일상 대화
             default -> {
                 response = dailyConversationTaskService.generateDailyConversation(input, conversationLogs);

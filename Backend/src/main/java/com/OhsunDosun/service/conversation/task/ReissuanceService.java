@@ -18,7 +18,7 @@ public class ReissuanceService {
     private final ChainService chainService;
 
     public ChatbotResponse generateReissuanceConversation(String input, List<Log> conversationLogs) throws JsonProcessingException {
-        List<String> promptFilePathList = Collections.singletonList("prompts/ReIssued.prompt");
+        List<String> promptFilePathList = Collections.singletonList("prompts/Reissued.prompt");
         List<Map<String, String>> chatbotPrompt = promptService.chatbotPrompt(promptFilePathList, input, conversationLogs);
         return chainService.chatbotChain(chatbotPrompt);
     }
