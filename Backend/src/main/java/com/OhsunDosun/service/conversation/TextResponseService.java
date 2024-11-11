@@ -13,6 +13,7 @@ import com.OhsunDosun.service.conversation.task.TransferService;
 import com.OhsunDosun.service.conversation.task.LoanService;
 import com.OhsunDosun.service.conversation.task.ConsultantService;
 import com.OhsunDosun.service.conversation.task.NewissuanceService;
+import com.OhsunDosun.service.conversation.task.ReissuanceService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,7 @@ public class TextResponseService {
     private final LoanService loanService;
     private final ConsultantService consultantService;
     private final NewissuanceService newissuanceService;
+    private final ReissuanceService reissuanceService;
     public ChatbotResponse TextResponse(ConversationRequest request, int userNo) throws JsonProcessingException {
         ChatbotResponse response;
         String input = request.getInput();
@@ -73,11 +75,15 @@ public class TextResponseService {
                 response = transferService.generateTransferConversation(input, conversationLogs);
 
             }
-            // 통장 및 계좌 생성 서비스
+            // 통장 신규 생성 서비스
             case "004" -> {
                 response = newissuanceService.generateNewissuanceConversation(input, conversationLogs);
             }
 
+            // 통장 재발행 서비스
+            case "005" -> {
+                response = reissuanceService.generateReissuanceConversation(input, conversationLogs);
+            }
             // 일상 대화
             default -> {
                 response = dailyConversationTaskService.generateDailyConversation(input, conversationLogs);

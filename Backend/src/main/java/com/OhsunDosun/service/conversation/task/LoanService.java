@@ -18,7 +18,7 @@ public class LoanService {
     private final ChainService chainService;
 
     public ChatbotResponse generateLoanConversation(String input, List<Log> conversationLogs) throws JsonProcessingException {
-        List<String> promptFilePathList = Collections.singletonList("prompts/transfer.prompt");
+        List<String> promptFilePathList = Collections.singletonList("prompts/loan.prompt");
         List<Map<String, String>> chatbotPrompt = promptService.chatbotPrompt(promptFilePathList, input, conversationLogs);
         return chainService.chatbotChain(chatbotPrompt);
     }

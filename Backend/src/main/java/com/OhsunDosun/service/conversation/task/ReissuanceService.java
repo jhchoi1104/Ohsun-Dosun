@@ -13,12 +13,12 @@ import java.util.List;
 import java.util.Map;
 @Service
 @RequiredArgsConstructor
-public class NewissuanceService {
+public class ReissuanceService {
     private final PromptService promptService;
     private final ChainService chainService;
 
-    public ChatbotResponse generateNewissuanceConversation(String input, List<Log> conversationLogs) throws JsonProcessingException {
-        List<String> promptFilePathList = Collections.singletonList("prompts/NewIssuance.prompt");
+    public ChatbotResponse generateReissuanceConversation(String input, List<Log> conversationLogs) throws JsonProcessingException {
+        List<String> promptFilePathList = Collections.singletonList("prompts/ReIssued.prompt");
         List<Map<String, String>> chatbotPrompt = promptService.chatbotPrompt(promptFilePathList, input, conversationLogs);
         return chainService.chatbotChain(chatbotPrompt);
     }
