@@ -9,7 +9,12 @@ import com.OhsunDosun.service.ConversationRoomService;
 import com.OhsunDosun.service.conversation.task.ClassificationTaskService;
 import com.OhsunDosun.service.conversation.task.DailyConversationTaskService;
 import com.OhsunDosun.service.conversation.task.GreetingTaskService;
+import com.OhsunDosun.service.conversation.task.TransferService;
+import com.OhsunDosun.service.conversation.task.LoanService;
+import com.OhsunDosun.service.conversation.task.ConsultantService;
+import com.OhsunDosun.service.conversation.task.NewissuanceService;
 import com.fasterxml.jackson.core.JsonProcessingException;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,7 +32,10 @@ public class TextResponseService {
     private final ClassificationTaskService classificationTaskService;
     private final GreetingTaskService greetingTaskService;
     private final DailyConversationTaskService dailyConversationTaskService;
-
+    private final TransferService transferService;
+    private final LoanService loanService;
+    private final ConsultantService consultantService;
+    private final NewissuanceService newissuanceService;
     public ChatbotResponse TextResponse(ConversationRequest request, int userNo) throws JsonProcessingException {
         ChatbotResponse response;
         String input = request.getInput();
@@ -50,18 +58,26 @@ public class TextResponseService {
 
         // Main Task 분류
         switch (mainTaskNo) {
-            // 복지 서비스
+            // 대출 서비스
             case "001" -> {
-                response = ChatbotResponse.builder()
-                        .content("안녕하세요. 저는 1번 케이스입니다.")
-                        .build();;
+                response = loanService.generateLoanConversation(input, conversationLogs);
             }
-            // 금융 서비스
+
+            //상담원 연결 서비스
             case "002" -> {
-                response = ChatbotResponse.builder()
-                        .content("안녕하세요. 저는 2번 케이스입니다.")
-                        .build();;
+                response = consultantService.generateConsultConversation(input, conversationLogs);
             }
+
+            // 송금하기 서비스
+            case "003" -> {
+                response = transferService.generateTransferConversation(input, conversationLogs);
+
+            }
+            // 통장 및 계좌 생성 서비스
+            case "004" -> {
+                response = newissuanceService.generateNewissuanceConversation(input, conversationLogs);
+            }
+
             // 일상 대화
             default -> {
                 response = dailyConversationTaskService.generateDailyConversation(input, conversationLogs);
