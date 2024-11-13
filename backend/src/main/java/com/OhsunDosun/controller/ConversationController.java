@@ -31,14 +31,15 @@ public class ConversationController {
 
         long startTime = System.currentTimeMillis();
         ConversationResponse response = conversationService.conversation(request, userNo);
+        log.info("log check : {}", response);
         long endTime = System.currentTimeMillis();
         long duration = endTime - startTime;
 
-        log.info("📌 Chatbot response: ", duration);
+        log.info("📌 Chatbot response: {}", duration);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        return new ResponseEntity<>(response, headers, HttpStatus.OK);
+        return new ResponseEntity<>(new ConversationResponse(response.getContent()), headers, HttpStatus.OK);
 
     }
 

@@ -80,6 +80,11 @@ public class ChatbotService {
         if (responseEntity.getStatusCode() == HttpStatus.OK) {
             try {
                 log.debug("📍 Chatbot Response:\n{}", responseEntity.getBody());
+//                ChatbotResponse fullResponse = parseResponse(responseEntity.getBody());
+//                return ChatbotResponse.builder()
+//                        .content(fullResponse.getContent()) // content 필드만 반환
+//                        .totalTokens(fullResponse.getTotalTokens())
+//                        .build();
                 return parseResponse(responseEntity.getBody());
             } catch (Exception e) {
                 throw new ChatbotException("Failed to parse chatbot response", e);
