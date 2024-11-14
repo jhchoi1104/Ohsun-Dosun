@@ -16,8 +16,11 @@ import com.OhsunDosun.service.conversation.task.NewissuanceService;
 import com.OhsunDosun.service.conversation.task.ReissuanceService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -73,7 +76,39 @@ public class TextResponseService {
 
             // 송금하기 서비스
             case "003" -> {
+
                 response = transferService.generateTransferConversation(input, conversationLogs);
+                ObjectMapper objectMapper = new ObjectMapper();
+                String jsonString = response.getContent()
+                        .replaceAll("```json", "")
+                        .replaceAll("```", "")
+                        .trim();
+                JsonNode jsonNode = objectMapper.readTree(jsonString);
+                Integer step = jsonNode.get("step").asInt();
+                System.out.println("step : 값은 " + step);
+
+                if(step == 2){
+                    String step2_content_name = jsonNode.get("name").asText();
+                    // DB user 이름 혹은 별칭 조회
+                    //존재하는 경우 003.a.01
+                    String step2_content_message = String.format("%s님에게 송금하시겠습니까?", step2_content_name);
+                    //존재하지 않을 경우 003.a.02
+                    //String step2_content_message = "송금하신적 없는 분이네요. 계좌번호를 입력해주세요.";
+
+                    // 사용자가 금액에 대한 정보를 미리 말한 경우와 그렇지 않은 경우 구분하기 위함
+                    JSONObject step2_content_json = new JSONObject();
+                    step2_content_json.put("content", step2_content_message);
+                    step2_content_json.put("step", 2);
+                    String amount = jsonNode.get("amount").asText();
+                    if(!amount.equals("")){
+                        step2_content_json.put("amount", amount);
+                    }
+                    String step2_content_string = step2_content_json.toString();
+                    response = new ChatbotResponse();
+                    response.setContent(step2_content_string);
+                }
+
+
 
             }
 
