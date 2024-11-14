@@ -16,7 +16,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -51,8 +53,45 @@ public class ConversationService {
         // Chatbot 답변 검사
         ConversationLogRequest conversationLog = makeConversationLogRequest(request, response);
 
+
         // 대화 내역 저장
         conversationLogService.createConversationLog(conversationLog);
+        // 송금하기는 json으로 필드값의 정보를 받아오고, 그 외의 기능에서는 String으로 된 chatbot의 응답을 return 할 예정
+
+        String content = response.getContent();
+
+        if (content.trim().startsWith("{") || content.trim().startsWith("```"))  {
+            // JSON 형식일 경우
+            try {
+                ObjectMapper objectMapper = new ObjectMapper();
+
+                // 불필요한 문자 제거 (예: ```json ... ```)
+                String jsonString = content.replaceAll("```json", "").replaceAll("```", "").trim();
+                // JSON 파싱
+                JsonNode jsonNode = objectMapper.readTree(jsonString);
+                String extractedContent = jsonNode.get("content").asText();
+
+                return ConversationResponse.builder()
+                        .content(extractedContent)
+                        .totalTokens(response.getTotalTokens())
+                        .build();
+            } catch (IOException e) {
+                log.error("JSON 파싱 오류: content 필드에서 값을 추출할 수 없습니다.", e);
+                return ConversationResponse.builder()
+                        .content("JSON 파싱 오류가 발생했습니다.")
+                        .totalTokens(response.getTotalTokens())
+                        .build();
+            }
+        } else {
+            // JSON이 아닌 경우는 단순 메시지로 처리
+            return ConversationResponse.builder()
+                    .content(content)
+                    .totalTokens(response.getTotalTokens())
+                    .build();
+        }
+
+
+
 
 //        // 음성 데이터 생성
 //        byte[] audioData = textToSpeechService.convertTextToSpeech(conversationLog.getConversationLogResponse());
@@ -79,10 +118,7 @@ public class ConversationService {
 //                    .build();
 //        }
 
-        return ConversationResponse.builder()
-                .content(response.getContent())
-                .totalTokens(response.getTotalTokens())
-                .build();
+
 
 //        return ConversationResponse.builder()
 //                .content(response.getContent())
