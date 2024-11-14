@@ -1,24 +1,20 @@
+<script setup>
+import Header from '../../components/Header.vue';
+</script>
 <template>
+  <Header />
   <div class="main-container">
     <div class="sub-container">
-      <div id="main-logo">
-        <img src="@/assets/images/logo.png" alt="" />
-      </div>
       <div id="main-character">
         <img src="@/assets/images/sooni.png" alt="" />
       </div>
     </div>
     <div class="button-section">
-      <router-link class="chat-button" to="/chat">시작하기</router-link>
+      <button class="chat-button">말하기</button>
     </div>
   </div>
 </template>
-
-<script>
-import '@/assets/main.css';
-</script>
-
-<style scoped>
+<style>
 .main-container {
   display: flex;
   flex-direction: column;
@@ -26,6 +22,7 @@ import '@/assets/main.css';
   justify-content: space-between; /* 요소 간의 공간을 균등하게 분배 */
   /* border: 1px solid blue; */
   height: 100vh; /* 전체 화면 높이에 맞춤 */
+  height: calc(100vh - 70px); /* 화면에서 Header를 제외한 나머지 높이 */
 }
 
 .sub-container {
@@ -37,11 +34,10 @@ import '@/assets/main.css';
 }
 
 .button-section {
-  margin-bottom: 30px; /* 하단에서 20px 간격 설정 */
+  margin-bottom: 30px; /* 하단에서 30px 간격 설정 */
   width: 100%; /* 버튼 섹션의 너비를 100%로 설정 */
   padding: 0 20px; /* 좌우 패딩 20px 추가 */
 }
-
 .chat-button {
   background-color: red;
   color: white;
