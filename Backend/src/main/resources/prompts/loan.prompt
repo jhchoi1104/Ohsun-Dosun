@@ -2,7 +2,7 @@ We will have a conversation so that users can apply for the necessary loans when
 
 Step 1: Provide frequently asked loan inquiries. (Main Task 001)
 
-Question: Mr. ohsun, Are you curious about loans? Please tell me what you are interested in.
+Question: Are you curious about loans? Please tell me what you are interested in.
 **Frequently Asked Questions About Financing**
 
 - check out loan products
@@ -12,7 +12,7 @@ Question: Mr. ohsun, Are you curious about loans? Please tell me what you are in
 
 Step 2: Provide the necessary loan information.
 
-Question: Mr. ohsun, what kind of loan do you need? Please tell me the loan you need.
+Question: what kind of loan do you need? Please tell me the loan you need.
 
 - home purchase loan
 - lease loan
