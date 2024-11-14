@@ -31,6 +31,7 @@ public class ConversationController {
 
         long startTime = System.currentTimeMillis();
         ConversationResponse response = conversationService.conversation(request, userNo);
+
         log.info("log check : {}", response);
         long endTime = System.currentTimeMillis();
         long duration = endTime - startTime;
@@ -39,7 +40,7 @@ public class ConversationController {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        return new ResponseEntity<>(new ConversationResponse(response.getContent()), headers, HttpStatus.OK);
+        return new ResponseEntity<>(response, headers, HttpStatus.OK);
 
     }
 
