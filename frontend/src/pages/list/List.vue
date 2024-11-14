@@ -1,4 +1,6 @@
+List
 <template>
+  <div class="main-container">
     <Navbar />
     <div class="container">
       <div class="d-flex" id="top">
@@ -15,16 +17,6 @@
           <div class="middle-item">
             <img src="../../assets/계좌내역.png" alt="계좌 아이콘" class="icon">
             계좌 내역 조회
-            <span class="arrow">></span>
-          </div>
-          <div class="middle-item">
-            <img src="../../assets/송금내역.png" alt="송금 아이콘" class="icon">
-            송금 내역 조회
-            <span class="arrow">></span>
-          </div>
-          <div class="middle-item">
-            <img src="../../assets/대출내역.png" alt="대출 아이콘" class="icon">
-            대출 내역 조회
             <span class="arrow">></span>
           </div>
           <div class="middle-item">
@@ -56,17 +48,33 @@
         </div>
       </div>
     </div>
+    </div>
     </template>
     <script setup>
     import Navbar from '../../components/Navbar.vue';
     </script>
+
     <style>
+    .page-wrapper {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
     .container{
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start; 
+      height: 90vh; /* 전체 화면 높이에 맞춤 */
+      background-color: #FFF5F2;
+      padding: 20px; /* 추가적인 패딩 적용 */
       background-color: #FFF5F2;
     }
     #top{
-      padding-top: 10px;
-      padding-bottom: 10px;
+      width: 90%;
+      display: flex;
+      justify-content: space-around; /* 상단 요소 간의 공간을 균등하게 분배 */
+      padding: 0 0 25px 0;
     }
     .chatbot, .call {
       background-color: #FFFFFF;
@@ -75,13 +83,14 @@
       align-items: center;
       justify-content: center;
       padding: 15px 25px; 
-      width: 80%; 
+      width:45%;
       white-space: nowrap;
     }
     .chatbot {
       margin-right: 20px; 
     }
     #middle {
+      width: 90%;
       border-radius: 10px;
       background-color: #FFFFFF;
       padding: 10px;
@@ -105,9 +114,11 @@
       color: #C0C0C0;
     }
     #bottom{
+      width: 90%;
       background-color: #FFFFFF;
-      margin-top: 10px;
+      margin-top: 25px;
       margin-bottom:10px;
+      border-radius: 10px;
     }
     .bottom-item{
       padding-bottom: 10px;
@@ -118,7 +129,7 @@
       padding: 15px; 
     }
     .ars1, .ars2 {
-      background-color: #FFFFFF;
+     background-color: #FFFFFF;
       border:groove black 1px;
       border-radius: 10px;
       display: flex;
@@ -128,6 +139,13 @@
       width: 60%;
       white-space: nowrap;
       font-size: 12px;
+     /* width: 100%;
+        background-color: #FFFFFF;
+        border-radius: 10px; 
+        padding: 15px; 
+        display: flex;
+        flex-direction: column;
+        align-items: center;*/
     }
     .ars1 {
       margin-right: 20px; 
