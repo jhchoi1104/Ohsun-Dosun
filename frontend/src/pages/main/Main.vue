@@ -2,7 +2,7 @@
   <div class="main-container">
     <div class="sub-container">
       <div id="main-logo">
-        <img src="@/assets/images/logo.png" alt="" />
+        <img src="@/assets/images/ohsundosunlogo.png" alt="" />
       </div>
       <div id="main-character">
         <img src="@/assets/images/sooni.png" alt="" />
@@ -52,7 +52,7 @@ export default {
 }
 
 .chat-button {
-  background-color: red;
+  background-color: #ef5554;
   color: white;
   border: none;
   border-radius: 10px;
@@ -89,7 +89,7 @@ export default {
 }
 
 #main-logo > img {
-  width: 250px; /* 로고 이미지의 너비 설정 */
+  width: 300px; /* 로고 이미지의 너비 설정 */
   height: auto; /* 비율 유지 */
 }
 </style>
