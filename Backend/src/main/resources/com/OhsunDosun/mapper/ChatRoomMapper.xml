@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.OhsunDosun.mapper.ChatRoomMapper">
+    <select id="bringChatRoom" resultType="com.OhsunDosun.dto.ChatbotRoom">
+        select session_id , start_time, end_time, service_type, title from chatbot_session;
+    </select>
+
+    <select id="bringMessage" resultType="com.OhsunDosun.dto.Message">
+        select message_id, session_id, sender_type, message_text, `timestamp`
+        from chatbot_history
+        where session_id = #{id};
+    </select>
+
+</mapper>
