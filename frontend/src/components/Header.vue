@@ -34,7 +34,7 @@ const toggleNavShow = () => {
             </router-link>
           </li>
           <li class="nav-item">
-            <router-link class="nav-link" to="/chatbot">
+            <router-link class="nav-link" to="/chatbotList">
               챗봇 내역 조회
             </router-link>
           </li>
