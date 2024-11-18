@@ -1,7 +1,5 @@
-List
 <template>
-  <div class="main-container">
-    <Navbar />
+    <Navbar/>
     <div class="container">
       <div class="d-flex" id="top">
         <div class="chatbot">
@@ -14,11 +12,11 @@ List
         </div>
       </div>
       <div class="d-flex flex-column" id="middle">
-          <div class="middle-item">
-            <img src="../../assets/계좌내역.png" alt="계좌 아이콘" class="icon">
-            계좌 내역 조회
-            <span class="arrow">></span>
-          </div>
+        <div class="middle-item" @click="navigateToHistory" :style="{ cursor: 'pointer' }">
+    <img src="../../assets/계좌내역.png" alt="계좌 아이콘" class="icon" />
+    계좌 내역 조회
+    <span class="arrow">></span>
+  </div>
           <div class="middle-item">
             <img src="../../assets/챗봇.png" alt="챗봇 아이콘" class="icon">
             챗봇 내역 조회
@@ -30,7 +28,7 @@ List
             <span class="arrow">></span>
           </div>
         </div>
-      <div class="d-flex"id="bottom">
+      <div class="d-flex" id="bottom">
         <div class="ars">
           <div class="bottom-item">
           <img src="../../assets/ars.png" alt="ars 아이콘" class="icon">사고신고 전화(ARS)
@@ -48,10 +46,25 @@ List
         </div>
       </div>
     </div>
-    </div>
-    </template>
+   </template>
     <script setup>
-    import Navbar from '../../components/Navbar.vue';
+    import Navbar from '@/components/Navbar.vue';
+
+        const props = defineProps({
+      isNavShow: Boolean
+    });
+
+    const emits = defineEmits(['closeNav']); // closeNav 이벤트를 emits로 선언
+
+
+    import Header from '@/components/Header.vue';
+    import { useRouter } from 'vue-router';
+
+    const router = useRouter();
+
+      function navigateToHistory() {
+      router.push('/history');
+      }
     </script>
 
     <style>
@@ -65,7 +78,7 @@ List
       flex-direction: column;
       align-items: center;
       justify-content: flex-start; 
-      height: 90vh; /* 전체 화면 높이에 맞춤 */
+      height: 100vh; /* 전체 화면 높이에 맞춤 */
       background-color: #FFF5F2;
       padding: 20px; /* 추가적인 패딩 적용 */
       background-color: #FFF5F2;
@@ -93,7 +106,7 @@ List
       width: 90%;
       border-radius: 10px;
       background-color: #FFFFFF;
-      padding: 10px;
+      padding: 1px;
     }
     .middle-item {
       display: flex;
@@ -115,10 +128,11 @@ List
     }
     #bottom{
       width: 90%;
+      margin: auto; /* 중앙 정렬 */
       background-color: #FFFFFF;
       margin-top: 25px;
-      margin-bottom:10px;
       border-radius: 10px;
+      padding:1px;
     }
     .bottom-item{
       padding-bottom: 10px;
@@ -126,7 +140,7 @@ List
     .ars {
       background-color: #FFFFFF;
       border-radius: 10px; 
-      padding: 15px; 
+      padding: 10px; 
     }
     .ars1, .ars2 {
      background-color: #FFFFFF;
@@ -136,7 +150,7 @@ List
       align-items: center;
       justify-content: center;
       padding: 8px 15px; 
-      width: 60%;
+      width: 40%;
       white-space: nowrap;
       font-size: 12px;
      /* width: 100%;
@@ -155,5 +169,16 @@ List
       height: 14px;
       margin-right: 10px;
     }
+
+  .container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  height: 90vh;
+  background-color: #FFF5F2;
+  padding: 20px;
+  width: 100%;
+}
     </style>
     
