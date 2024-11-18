@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Navbar />
+    <Header />
     <div class="container">
       <div class="header">
         <button @click="prevMonth">＜</button>
@@ -38,13 +38,11 @@
   </div>
 </template>
 
-
 <script setup>
 import { ref, onMounted } from 'vue';
 import { Chart, PieController, ArcElement, Tooltip, Legend } from 'chart.js';
 import Navbar from '@/components/Navbar.vue';
 
-// 필요한 컴포넌트 등록
 Chart.register(PieController, ArcElement, Tooltip, Legend);
 
 const currentMonth = ref("2024.10");
@@ -52,7 +50,6 @@ const currentMonth = ref("2024.10");
 const transactions = ref([
   { date: "2024. 10. 30", icon: "../../assets/계절밥상.png", description: "계절밥상", type: "withdraw", amount: "7,000", balance: "7,000,000" },
   { date: "2024. 10. 30", icon: "../../assets/홈플러스.png", description: "홈플러스", type: "deposit", amount: "7,000", balance: "7,000,000" },
-  // 추가적인 거래 항목을 여기에 입력
 ]);
 
 const depositPercentage = 51;
@@ -78,7 +75,7 @@ onMounted(() => {
       labels: ['입금', '출금'],
       datasets: [{
         data: [depositPercentage, withdrawalPercentage],
-        backgroundColor: ['#4CAF50', '#FF5733'],
+        backgroundColor: ['#a9c9e3', '#f799c8'],
       }]
     },
     options: {
@@ -95,9 +92,21 @@ onMounted(() => {
 
 <style scoped>
 .container {
+  height: calc(100vh - 70px);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  box-sizing: border-box; /* 패딩을 너비에 포함 */
   background-color: #FFF5F2;
 }
 
+.balance-section, .transaction-list {
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box; /* 패딩을 너비에 포함 */
+  background-color: #FFFFFF;
+  border-radius: 10px;
+}
 .header {
   display: flex;
   justify-content: center;
@@ -111,58 +120,63 @@ onMounted(() => {
   font-size: 18px;
   color: #333;
   margin: 0 10px;
+  cursor: pointer;
 }
 
 .chart-section {
   display: flex;
   justify-content: center;
   padding: 20px 0;
-}
-
-.pie-chart {
-  width: 150px;
-  height: 150px;
+  width: 100%;
 }
 
 .balance-section {
+  display: flex;
+  flex-direction: column;
+  width: 100%; /* 부모 너비에 맞춰 확장 */
   background-color: #FFFFFF;
   border-radius: 10px;
-  padding: 10px;
+  padding: 20px;
   margin: 10px 0;
 }
 
 .balance-bar {
   display: flex;
+  width: 100%; /* 부모 너비에 맞춰 확장 */
   height: 10px;
   border-radius: 5px;
   overflow: hidden;
 }
 
 .deposit {
-  background-color: #4CAF50;
+  background-color: #a9c9e3;
 }
 
 .withdrawal {
-  background-color: #FF5733;
+  background-color: #f799c8;
 }
 
 .balance-info {
   display: flex;
   justify-content: space-between;
   padding-top: 5px;
-  font-size: 12px;
+  font-size: 14px;
   color: #666;
 }
 
 .transaction-list {
   background-color: #FFFFFF;
   border-radius: 10px;
-  padding: 10px;
+  padding: 20px;
+  margin: 20px 0;
+  width: 100%;
+  overflow-y: auto; /* 스크롤 추가 */
+  max-height: 40vh; /* 리스트 최대 높이 설정 */
 }
 
 .transaction-item {
   border-bottom: 1px solid #E5E5E5;
-  padding: 10px 0;
+  padding: 15px 0;
 }
 
 .transaction-item:last-child {
@@ -170,7 +184,7 @@ onMounted(() => {
 }
 
 .date {
-  font-size: 12px;
+  font-size: 14px;
   color: #999;
 }
 
@@ -185,16 +199,12 @@ onMounted(() => {
   margin-right: 10px;
 }
 
-.deposit, .withdrawal {
-  font-size: 14px;
-}
-
 .withdraw {
-  color: #FF5733;
+  color: #a9c9e3;
 }
 
 .deposit {
-  color: #4CAF50;
+  color: #f799c8;
 }
 
 .balance {
