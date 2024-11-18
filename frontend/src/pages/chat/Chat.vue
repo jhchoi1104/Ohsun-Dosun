@@ -39,7 +39,7 @@ import Header from '../../components/Header.vue';
   padding: 0 20px; /* 좌우 패딩 20px 추가 */
 }
 .chat-button {
-  background-color: red;
+  background-color: #ef5554;
   color: white;
   border: none;
   border-radius: 10px;
