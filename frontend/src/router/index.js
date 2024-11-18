@@ -38,12 +38,12 @@ const router = createRouter({
       name: 'ChatbotListDetail',
       component: ChatbotListDetail,
     },
+    {
       // 조회페이지
       path: '/History',
       name: 'History',
       component: History,
     },
-    
   ],
 });
 
