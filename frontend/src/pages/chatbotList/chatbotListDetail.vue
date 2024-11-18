@@ -30,7 +30,7 @@ onMounted(() => {
 </script>
 <template>
   <Header />
-  <div class="main-container mt-5">
+  <div class="main-container chat-container mt-5">
     <div>
       <div
         v-for="message in messages"
