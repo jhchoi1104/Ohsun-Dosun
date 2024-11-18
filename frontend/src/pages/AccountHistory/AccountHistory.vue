@@ -13,45 +13,44 @@
       </div>
 
       <div class="balance-section">
-  <div class="balance-title">입출금 현황</div>
-  <div class="balance-bar">
-    <div class="depositBar" :style="{ width: depositPercentage + '%' }"></div>
-    <div class="withdrawal" :style="{ width: withdrawalPercentage + '%' }"></div>
-  </div>
-  <div class="balance-info">
-    <div class="balance-row">
-      <div class="balance-item">
-        <span class="dot deposit-dot"></span>
-        <span>입금 {{ depositPercentage }}%</span>
+        <div class="balance-title">입출금 현황</div>
+        <div class="balance-bar">
+          <div class="depositBar" :style="{ width: depositPercentage + '%' }"></div>
+          <div class="withdrawal" :style="{ width: withdrawalPercentage + '%' }"></div>
+        </div>
+        <div class="balance-info">
+          <div class="balance-row">
+            <div class="balance-item">
+              <span class="dot deposit-dot"></span>
+              <span>입금 {{ depositPercentage }}%</span>
+            </div>
+            <span class="amount">{{ depositTotal.toLocaleString() }}원</span>
+          </div>
+          <div class="balance-row">
+            <div class="balance-item">
+              <span class="dot withdrawal-dot"></span>
+              <span>출금 {{ withdrawalPercentage }}%</span>
+            </div>
+            <span class="amount">{{ withdrawalTotal.toLocaleString() }}원</span>
+          </div>
+        </div>
       </div>
-      <span class="amount">{{ depositTotal.toLocaleString() }}원</span>
-    </div>
-    <div class="balance-row">
-      <div class="balance-item">
-        <span class="dot withdrawal-dot"></span>
-        <span>출금 {{ withdrawalPercentage }}%</span>
+
+      <div class="transaction-list">
+        <div class="transaction-item" v-for="(transaction, index) in transactions" :key="index">
+          <div class="date">{{ transaction.date }}</div>
+          <div class="details">
+            <div class="description-container">
+              <span>{{ transaction.description }}</span>
+            </div>
+            <span :class="transaction.type">{{ transaction.amount }}원</span>
+          </div>
+          <div class="balance">{{ transaction.balance }}</div>
+        </div>
       </div>
-      <span class="amount">{{ withdrawalTotal.toLocaleString() }}원</span>
     </div>
-  </div>
-</div>
-<div class="transaction-list">
-<div class="transaction-item" v-for="(transaction, index) in transactions" :key="index">
-  <div class="date">{{ transaction.date }}</div>
-  <div class="details">
-    <div class="description-container">
-      <!-- <img :src="transaction.icon" alt="Icon" class="transaction-icon"> -->
-      <span>{{ transaction.description }}</span>
-    </div>
-    <span :class="transaction.type">{{ transaction.amount }}원</span>
-  </div>
-  <div class="balance">{{ transaction.balance }}</div>
-</div>
-    </div>
-  </div>
   </div>
 </template>
-
 
 <script setup>
 import { ref, onMounted, onUnmounted, nextTick } from 'vue';
@@ -61,16 +60,15 @@ import HistoryApi from '@/api/HistoryApi';
 
 Chart.register(PieController, ArcElement, Tooltip, Legend);
 
-const currentMonth = ref("2024.10");
+// 현재 월을 초기값으로 설정
+const currentMonth = ref(new Date().getFullYear() + "." + String(new Date().getMonth() + 1).padStart(2, "0"));
 const transactions = ref([]);
 const depositPercentage = ref(0);
 const withdrawalPercentage = ref(0);
-let chart = null; // 차트 인스턴스 저장 변수
-
-// deposit , withdrawl TOTAL
 const depositTotal = ref(0);
 const withdrawalTotal = ref(0);
-
+const allTransactions = ref([]); // 전체 거래 데이터 저장
+let chart = null;
 
 // 날짜 포맷팅 함수
 function formatDate(timestamp) {
@@ -78,16 +76,25 @@ function formatDate(timestamp) {
   return `${date.getFullYear()}. ${String(date.getMonth() + 1).padStart(2, '0')}. ${String(date.getDate()).padStart(2, '0')}`;
 }
 
-// API 응답 데이터를 화면에 맞는 형식으로 변환하는 함수
+// 월별 데이터 필터링 함수
+function filterTransactionsByMonth(transactions, yearMonth) {
+  const [year, month] = yearMonth.split(".");
+  return transactions.filter(transaction => {
+    const transactionDate = new Date(transaction.transactionDate);
+    return transactionDate.getFullYear() === parseInt(year) && 
+           (transactionDate.getMonth() + 1) === parseInt(month);
+  });
+}
+
+// API 응답 데이터 변환 함수
 function transformTransaction(transaction) {
   const isWithdrawal = transaction.senderId === 1;
   return {
     date: formatDate(transaction.transactionDate),
-    // icon: isWithdrawal ? "/src/assets/출금.png" : "/src/assets/입금.png", // 절대 경로로 수정
     description: isWithdrawal ? "출금" : "입금",
     type: isWithdrawal ? "withdraw" : "deposit",
     amount: transaction.amount.toLocaleString(),
-    balance: "잔액 확인 중" // 실제 잔액 데이터가 있다면 그것을 사용
+    balance: "잔액 확인 중"
   };
 }
 
@@ -111,7 +118,6 @@ function calculatePercentages(transactions) {
     return { deposit: 50, withdrawal: 50 };
   }
 
-  // 총액 저장
   depositTotal.value = depositAmount;
   withdrawalTotal.value = withdrawalAmount;
 
@@ -120,21 +126,24 @@ function calculatePercentages(transactions) {
     withdrawal: Math.round((withdrawalAmount / total) * 100)
   };
 }
+
+// 월 이동 함수
 function prevMonth() {
   const [year, month] = currentMonth.value.split(".");
-  const newDate = new Date(year, month - 2, 1);
+  const newDate = new Date(year, parseInt(month) - 2, 1);
   currentMonth.value = `${newDate.getFullYear()}.${String(newDate.getMonth() + 1).padStart(2, "0")}`;
+  updateDisplayData();
 }
 
 function nextMonth() {
   const [year, month] = currentMonth.value.split(".");
-  const newDate = new Date(year, month, 1);
+  const newDate = new Date(year, parseInt(month), 1);
   currentMonth.value = `${newDate.getFullYear()}.${String(newDate.getMonth() + 1).padStart(2, "0")}`;
+  updateDisplayData();
 }
 
 // 차트 생성 함수
 function createChart(deposit, withdrawal) {
-  // 이미 차트가 존재하면 제거
   if (chart) {
     chart.destroy();
   }
@@ -165,24 +174,25 @@ function createChart(deposit, withdrawal) {
   });
 }
 
+// 화면 데이터 업데이트 함수
+async function updateDisplayData() {
+  const filteredTransactions = filterTransactionsByMonth(allTransactions.value, currentMonth.value);
+  transactions.value = filteredTransactions.map(transformTransaction);
+  
+  const percentages = calculatePercentages(filteredTransactions);
+  depositPercentage.value = percentages.deposit;
+  withdrawalPercentage.value = percentages.withdrawal;
+  
+  await nextTick(() => {
+    createChart(depositPercentage.value, withdrawalPercentage.value);
+  });
+}
+
 onMounted(async () => {
   try {
     const response = await HistoryApi.getHistory(1);
-    console.log('API Response:', response); // 응답 데이터 확인
-
-    // 거래 내역 변환
-    transactions.value = response.map(transformTransaction);
-    
-    // 비율 계산
-    const percentages = calculatePercentages(response);
-    depositPercentage.value = percentages.deposit;
-    withdrawalPercentage.value = percentages.withdrawal;
-    
-    // DOM이 완전히 업데이트된 후 차트 생성
-    await nextTick(() => {
-      createChart(depositPercentage.value, withdrawalPercentage.value);
-    });
-
+    allTransactions.value = response;
+    updateDisplayData();
   } catch (error) {
     console.error('거래 내역을 불러오는데 실패했습니다:', error);
   }
@@ -317,7 +327,7 @@ onUnmounted(() => {
   width: 100%;
   overflow-y: auto;
   max-height: 40vh;
-  scrollbar-width: none; /* Firefox에서 스크롤바 숨기기 */
+  scrollbar-width: none;
 }
 
 .transaction-item {
@@ -338,12 +348,6 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-}
-
-.transaction-icon {
-  width: 24px;
-  height: 24px;
-  margin-right: 10px;
 }
 
 .description-container {
