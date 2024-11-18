@@ -1,49 +1,67 @@
 <template>
-  <nav class="navbar navbar-light bg-light">
-    <div class="container-fluid">
-      <span class="navbar-brand" id="logotext" @click="goToPage('/')">
-        오순도순
-        <img src="../assets/로고이미지.png" alt="Logo" width="30" height="24" class="d-inline-block align-text-top">
-      </span>
-      <button @click="goToPage('/list')" id="menu" type="button">
-        조회하기
-      </button>
-    </div>
-  </nav>
-</template>
+    <nav class="navbar navbar-light ">
+      <div class="container-fluid nav-container">
+        <span class="navbar-brand" href="#" id="logotext" @click="goToPage('/')">
+          오순도순
+          <img src="../assets/로고이미지.png" alt="" width="30" height="24" class="d-inline-block align-text-top">
+        </span>
+        <button @click="closeNav" id="menu" type="button" aria-label="Close" width="100%">
+          X
+        </button>
+      </div>
+    </nav>
+  </template>
+  
+  <script setup>
+import { ref } from 'vue';
+import { useRouter } from 'vue-router'; // 페이지 이동을 위한 router 사용
+import { useMenuStore } from '@/stores/close.js';
 
-<script setup>
-import { useRouter } from 'vue-router'
+const router = useRouter(); // router 인스턴스 생성
+const menuStore = useMenuStore();
+const closeNav = menuStore.closeNav;
 
-const router = useRouter()
+const isMenuOpen = ref(false); // 메뉴의 열림/닫힘 상태를 저장하는 변수
+
+// 페이지 이동 함수
 const goToPage = (path) => {
-  router.push(path);
+  router.push(path).then(()=>{
+    //네비게이션 완료 후 메뉴 상태 초기화
+    menuStore.isNavShow = false;
+  }) // path로 이동
 };
-</script>
 
-<style scoped>
-#logotext {
-  color: red;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  font-size: 1.2rem;
+// 메뉴 토글 함수
+const toggleMenu = () => {
+  isMenuOpen.value = !isMenuOpen.value; // 메뉴 상태 변경
+  closeNav(); // 메뉴를 닫는 액션 호출 (store에서 정의된 대로)
+};
+  </script>
+
+  
+  <style>
+/* 네비게이션 바 스타일 */
+.nav-container {
+  display: flex; /* flexbox 활성화 */
+  justify-content: space-between; /* 요소를 양쪽 끝으로 배치 */
+  align-items: center; /* 세로 방향 가운데 정렬 */
+  padding: 0 16px; /* 좌우 여백 추가 */
+  outline: 1px ;
+  width: 100%;
 }
 
-#menu {
-  background-color: #FFFFFF;
-  border: 1px solid #ccc;
-  color: black;
-  padding: 8px 20px; /* padding을 축소하여 버튼 크기를 조정 */
-  font-size: 1rem;
-  border-radius: 5px;
-  cursor: pointer;
-}
+  #logotext{
+    flex: 1;
+    text-align: left;
+    color:red;
+    cursor:pointer;
+  } 
 
-.container-fluid {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 20px; /* 전체 nav바 padding 조정 */
-}
-</style>
+  #menu{
+    flex:0;
+    background-color: #FFFFFF;
+    border-style:none;
+    color: black;
+    padding:8px 20px;
+  }
+  </style>
