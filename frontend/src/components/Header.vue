@@ -29,7 +29,7 @@ const toggleNavShow = () => {
       <div :class="['navbar-collapse', isNavShow ? 'show' : 'collapse']">
         <ul class="navbar-nav ms-auto">
           <li class="nav-item">
-            <router-link class="nav-link" to="/account">
+            <router-link class="nav-link" to="/history">
               계좌 내역 조회
             </router-link>
           </li>
@@ -116,6 +116,6 @@ const toggleNavShow = () => {
 
 /* 각 항목 사이 여백 설정 */
 .navbar-nav .nav-item {
-  margin: 10px 0; /* 항목 간 간격 설정 */
+  margin: 5px 0; /* 항목 간 간격 설정 */
 }
 </style>
