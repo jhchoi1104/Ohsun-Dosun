@@ -1,74 +1,65 @@
 <script setup>
 import Header from '../../components/Header.vue';
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
 const id = route.params.id; // 동적 경로의 id 가져오기
+
+// 메시지를 저장할 변수
+const messages = ref([]);
+
+// 메시지 가져오는 함수
+const fetchMessages = async () => {
+  try {
+    const response = await axios.get(
+      `http://localhost:8080/api/chatbotRoom/${id}`
+    );
+    messages.value = response.data; // 서버 응답 데이터를 messages에 저장
+    console.log(messages.value);
+  } catch (error) {
+    console.error('Error fetching messages:', error);
+  }
+};
+
+// 컴포넌트가 마운트될 때 메시지 가져오기
+onMounted(() => {
+  fetchMessages();
+});
 </script>
 <template>
   <Header />
   <div class="main-container mt-5">
-    <div class="card chatbot-response bg-white border-light p-4 mb-4">
-      <div class="d-flex justify-content-between align-items-center mb-2">
-        <span class="font-small">
-          <img
-            class="avatar-sm img-fluid rounded-circle mr-2"
-            src="@/assets/images/sooni.png"
-            alt="avatar"
-          />
-          <span class="font-weight-bold">쑤니</span>
-          <span class="ml-2 ms-3">March 26, 19:25</span>
-        </span>
+    <div>
+      <div
+        v-for="message in messages"
+        :key="message.messageId"
+        :class="[
+          'card border-light p-4 mb-4',
+          message.senderType === 'Bot'
+            ? 'chatbot-response bg-light text-dark'
+            : 'user-request bg-light text-dark ',
+        ]"
+      >
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="font-small">
+            <img
+              v-if="message.senderType === 'Bot'"
+              class="avatar-sm img-fluid rounded-circle mr-2"
+              src="@/assets/images/sooni.png"
+              alt="avatar"
+            />
+            <span class="font-weight-bold">
+              {{ message.senderType === 'Bot' ? '순이' : '김대한' }}
+            </span>
+            <span class="ml-2 ms-3">{{ message.timestamp }}</span>
+          </span>
+        </div>
+        <p class="m-0">
+          {{ message.messageText }}
+        </p>
       </div>
-      <p class="m-0">
-        Hi Chris! Thanks a lot for this very useful template. Saved me a lot of
-        time and searches on the internet.
-      </p>
-    </div>
-    <div
-      class="card user-request bg-primary text-white border-light p-4 ml-md-5 ml-lg-6 mb-4"
-    >
-      <div class="d-flex justify-content-between align-items-center mb-2">
-        <span class="font-small">
-          <span class="font-weight-bold">사용자</span>
-          <span class="ml-2 ms-3">March 26, 19:25</span>
-        </span>
-      </div>
-      <p class="m-0">
-        Hi Neil, thanks for sharing your thoughts regarding Spaces. Hi Neil,
-        thanks for sharing your thoughts regarding Spaces.
-      </p>
-    </div>
-    <div class="card chatbot-response bg-white border-light p-4 mb-4">
-      <div class="d-flex justify-content-between align-items-center mb-2">
-        <span class="font-small">
-          <img
-            class="avatar-sm img-fluid rounded-circle mr-2"
-            src="@/assets/images/sooni.png"
-            alt="avatar"
-          />
-          <span class="font-weight-bold">쑤니</span>
-          <span class="ml-2 ms-3">March 26, 19:25</span>
-        </span>
-      </div>
-      <p class="m-0">
-        Hi Chris! Thanks a lot for this very useful template. Saved me a lot of
-        time and searches on the internet.
-      </p>
-    </div>
-    <div
-      class="card user-request bg-primary text-white border-light p-4 ml-md-5 ml-lg-6 mb-4"
-    >
-      <div class="d-flex justify-content-between align-items-center mb-2">
-        <span class="font-small">
-          <span class="font-weight-bold">Your Answer</span>
-          <span class="ml-2">March 26, 19:25</span>
-        </span>
-      </div>
-      <p class="m-0">
-        Hi Neil, thanks for sharing your thoughts regarding Spaces. Hi Neil,
-        thanks for sharing your thoughts regarding Spaces.
-      </p>
     </div>
   </div>
 </template>

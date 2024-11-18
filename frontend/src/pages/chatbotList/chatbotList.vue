@@ -1,10 +1,37 @@
 <script setup>
 import Header from '../../components/Header.vue';
-
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
 import { useRouter } from 'vue-router';
 
-const router = useRouter();
+const chatRoomList = ref([]); // 메시지를 저장할 변수
 
+// 메시지 데이터를 가져오는 함수
+const fetchChatRoomList = async () => {
+  try {
+    // GET 요청을 통해 데이터 가져오기
+    const response = await axios.get('http://localhost:8080/api/chatbotRoom');
+    chatRoomList.value = response.data; // 서버 응답 데이터를 messages에 저장
+    console.log(chatRoomList.value); // 콘솔에 응답 데이터 출력
+  } catch (error) {
+    console.error('Error fetching messages:', error); // 오류 처리
+  }
+};
+
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // 월은 0부터 시작하므로 +1
+  const day = String(date.getDate()).padStart(2, '0'); // 날짜는 두 자리로 표기
+  return `${year}-${month}-${day}`;
+};
+
+// 컴포넌트가 마운트될 때 fetchMessages 함수 실행
+onMounted(() => {
+  fetchChatRoomList();
+});
+
+const router = useRouter();
 function navigateTo(id) {
   router.push({ name: 'ChatbotListDetail', params: { id } });
 }
@@ -13,44 +40,30 @@ function navigateTo(id) {
   <Header />
   <div class="main-container">
     <div class="col-12">
-      <div class="card mt-4 mb-3 py-3" @click="navigateTo(1)">
+      <div
+        v-for="(chatRoom, index) in chatRoomList"
+        :key="index"
+        class="card mt-4 mb-3 py-3"
+        @click="navigateTo(chatRoom.sessionId)"
+      >
         <div class="card-body d-flex align-items-center py-0">
-          <div class="col-3 text-truncate">서비스타입</div>
+          <div class="col-3 text-truncate">
+            {{ chatRoom.serviceType }}
+          </div>
 
           <div class="col-7 px-0">
-            <div class="text-truncate">챗봇 title 명이 긴경우는 온점이</div>
+            <div class="text-truncate">
+              {{ chatRoom.title }}
+            </div>
           </div>
           <div class="col-2 ms-3">
-            <span class="text-truncate">날짜</span>
+            <span class="text-truncate">
+              {{ formatDate(chatRoom.endTime) }}
+              <!-- 날짜 포맷 -->
+            </span>
           </div>
         </div>
       </div>
-
-      <nav aria-label="Page navigation">
-        <ul class="pagination justify-content-center mt-5">
-          <li class="page-item">
-            <a class="page-link" href="#">Previous</a>
-          </li>
-          <li class="page-item active">
-            <a class="page-link" href="#">1</a>
-          </li>
-          <li class="page-item">
-            <a class="page-link" href="#">2</a>
-          </li>
-          <li class="page-item">
-            <a class="page-link" href="#">3</a>
-          </li>
-          <li class="page-item">
-            <a class="page-link" href="#">4</a>
-          </li>
-          <li class="page-item">
-            <a class="page-link" href="#">5</a>
-          </li>
-          <li class="page-item">
-            <a class="page-link" href="#">Next</a>
-          </li>
-        </ul>
-      </nav>
     </div>
   </div>
 </template>

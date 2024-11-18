@@ -20,7 +20,7 @@ public class ChatbotRoomController {
     private final ChatRoomService chatRoomService;
 
     @GetMapping
-    public List<ChatbotRoom> bringChatRoom() {
+        public List<ChatbotRoom> bringChatRoom() {
         return chatRoomService.bringChatRoom();
     }
 
