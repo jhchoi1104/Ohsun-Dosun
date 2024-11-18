@@ -6,14 +6,7 @@ import com.OhsunDosun.dto.ClassificationResponse;
 import com.OhsunDosun.dto.ConversationRequest;
 import com.OhsunDosun.dto.Log;
 import com.OhsunDosun.service.ConversationRoomService;
-import com.OhsunDosun.service.conversation.task.ClassificationTaskService;
-import com.OhsunDosun.service.conversation.task.DailyConversationTaskService;
-import com.OhsunDosun.service.conversation.task.GreetingTaskService;
-import com.OhsunDosun.service.conversation.task.TransferService;
-import com.OhsunDosun.service.conversation.task.LoanService;
-import com.OhsunDosun.service.conversation.task.ConsultantService;
-import com.OhsunDosun.service.conversation.task.NewissuanceService;
-import com.OhsunDosun.service.conversation.task.ReissuanceService;
+import com.OhsunDosun.service.conversation.task.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -41,6 +34,7 @@ public class TextResponseService {
     private final ConsultantService consultantService;
     private final NewissuanceService newissuanceService;
     private final ReissuanceService reissuanceService;
+    private final FavoritesService favoritesService;
     public ChatbotResponse TextResponse(ConversationRequest request, int userNo) throws JsonProcessingException {
         ChatbotResponse response;
         String input = request.getInput();
@@ -89,11 +83,18 @@ public class TextResponseService {
 
                 if(step == 2){
                     String step2_content_name = jsonNode.get("name").asText();
+                    Long userId = Long.valueOf(userNo); // 현재 유저의 ID로 설정
+
+                    // 별칭 존재 여부 확인
+                    boolean favoriteExists = favoritesService.isFavoriteExists(userId, step2_content_name);
+
                     // DB user 이름 혹은 별칭 조회
-                    //존재하는 경우 003.a.01
-                    String step2_content_message = String.format("%s님에게 송금하시겠습니까?", step2_content_name);
-                    //존재하지 않을 경우 003.a.02
-                    //String step2_content_message = "송금하신적 없는 분이네요. 계좌번호를 입력해주세요.";
+                    String step2_content_message;
+                    if (favoriteExists) { //존재하는 경우 003.a.01
+                        step2_content_message = String.format("%s님에게 송금하시겠습니까?", step2_content_name);
+                    } else { //존재하지 않을 경우 003.a.02
+                        step2_content_message = "송금하신적 없는 분이네요. 계좌번호를 입력해주세요.";
+                    }
 
                     // 사용자가 금액에 대한 정보를 미리 말한 경우와 그렇지 않은 경우 구분하기 위함
                     JSONObject step2_content_json = new JSONObject();
@@ -107,8 +108,6 @@ public class TextResponseService {
                     response = new ChatbotResponse();
                     response.setContent(step2_content_string);
                 }
-
-
 
             }
 
