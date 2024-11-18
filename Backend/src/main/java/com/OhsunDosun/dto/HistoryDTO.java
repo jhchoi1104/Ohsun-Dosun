@@ -11,11 +11,11 @@ import java.util.Date;
 @AllArgsConstructor
 @Builder
 public class HistoryDTO {
-    private Integer TransactionId;
-    private Integer SenderId;
+    private Integer transactionId;
+    private Integer senderId;
     private Integer receiverId;
-    private Integer Amount ;
-    private Date TransactionDate;
+    private Integer amount ;
+    private Date transactionDate;
     private String status;
     private Date createdAt;
 }
