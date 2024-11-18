@@ -19,11 +19,29 @@ const fetchChatRoomList = async () => {
 };
 
 const formatDate = (dateString) => {
+  const now = new Date();
   const date = new Date(dateString);
+
+  // 날짜 차이를 계산 (밀리초 단위)
+  const diffTime = now - date;
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)); // 밀리초를 일 단위로 변환
+
   const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0'); // 월은 0부터 시작하므로 +1
-  const day = String(date.getDate()).padStart(2, '0'); // 날짜는 두 자리로 표기
-  return `${year}-${month}-${day}`;
+  const month = date.getMonth() + 1; // 0-based month (January is 0)
+  const day = date.getDate();
+
+  // 오늘, 어제, 지난 7일 이내, 같은 해의 월, 그 외 경우 처리
+  if (diffDays === 0) {
+    return '오늘'; // 오늘 날짜
+  } else if (diffDays === 1) {
+    return '어제'; // 어제 날짜
+  } else if (diffDays <= 7) {
+    return `지난 7일`; // 이틀에서 일주일 이내
+  } else if (now.getFullYear() === year) {
+    return `${month}월`; // 같은 해에 속하는 날짜
+  } else {
+    return `${year}년`; // 다른 해의 날짜
+  }
 };
 
 // 컴포넌트가 마운트될 때 fetchMessages 함수 실행
@@ -47,17 +65,13 @@ function navigateTo(id) {
         @click="navigateTo(chatRoom.sessionId)"
       >
         <div class="card-body d-flex align-items-center py-0">
-          <div class="col-3 text-truncate">
-            {{ chatRoom.serviceType }}
-          </div>
-
-          <div class="col-7 px-0">
+          <div class="col-9 px-0">
             <div class="text-truncate">
               {{ chatRoom.title }}
             </div>
           </div>
-          <div class="col-2 ms-3">
-            <span class="text-truncate">
+          <div class="col-3 d-flex justify-content-center ms-3">
+            <span class="text-truncate text-muted">
               {{ formatDate(chatRoom.endTime) }}
               <!-- 날짜 포맷 -->
             </span>

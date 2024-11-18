@@ -53,9 +53,15 @@ onMounted(() => {
             <span class="font-weight-bold">
               {{ message.senderType === 'Bot' ? '순이' : '김대한' }}
             </span>
-            <span class="ml-2 ms-3">{{ message.timestamp }}</span>
           </span>
+          <span class="ml-auto text-end text-muted">{{
+            message.timestamp
+          }}</span>
         </div>
+        <p class="m-0">
+          {{ message.messageText }}
+        </p>
+
         <p class="m-0">
           {{ message.messageText }}
         </p>
@@ -105,7 +111,7 @@ onMounted(() => {
   margin-right: 0.5rem !important;
 }
 .font-weight-bold {
-  font-weight: 500 !important;
+  font-weight: 600 !important;
 }
 .p-4 {
   padding: 1.5rem !important;
@@ -136,5 +142,9 @@ onMounted(() => {
 }
 .border-light {
   border-color: #edf0f7 !important;
+}
+.chat-container {
+  display: flex;
+  flex-direction: column-reverse; /* 메시지를 아래에서 위로 쌓기 */
 }
 </style>
