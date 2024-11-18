@@ -10,7 +10,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class historyDTO {
+public class HistoryDTO {
     private Integer TransactionId;
     private Integer SenderId;
     private Integer receiverId;
