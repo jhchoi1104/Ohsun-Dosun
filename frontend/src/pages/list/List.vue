@@ -84,17 +84,14 @@
 </template>
 <script setup>
 import Navbar from '@/components/Navbar.vue';
-
-const props = defineProps({
-  isNavShow: Boolean,
-});
-
-const emits = defineEmits(['closeNav']); // closeNav 이벤트를 emits로 선언
-
 import Header from '@/components/Header.vue';
 import { useRouter } from 'vue-router';
 import { ref } from 'vue';
 import '@fortawesome/fontawesome-free/css/all.css';
+
+const props = defineProps({
+  isNavShow: Boolean,
+});
 
 const router = useRouter();
 
@@ -256,7 +253,7 @@ function closeModal() {
   padding: 5px;
   border-radius: 10px;
   text-align: center;
-  width: 90%;
+  width: 100%;
   max-width: 400px;
   margin-bottom: 10px; /* 아래 content와 간격 */
 }
