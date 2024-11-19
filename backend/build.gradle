@@ -86,9 +86,15 @@ dependencies {
   runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
   implementation("io.jsonwebtoken:jjwt-jackson:0.11.5")
 
-  // Google Cloud Speech-to-Text API
-  implementation 'com.google.cloud:google-cloud-speech:2.2.3'
-  implementation 'com.google.auth:google-auth-library-oauth2-http:1.11.0'  // 최신 버전으로 수정
+  //stt
+  implementation 'com.squareup.okhttp3:okhttp:4.9.0'
+  implementation 'com.google.code.gson:gson:2.8.6'
+  // Apache HttpClient dependency 추가
+  implementation 'org.apache.httpcomponents:httpcore:4.4.13' // 버전은 최신으로 설정해주세요
+  // Apache HttpClient dependency 추가
+  implementation 'org.apache.httpcomponents:httpclient:4.5.13' // 버전은 최신으로 설정해주세요
+  // Apache HttpMime dependency 추가
+  implementation 'org.apache.httpcomponents:httpmime:4.5.13' // 버전은 최신으로 설정해주세요
 
 
   // 테스트
