@@ -2,6 +2,7 @@
 import { useMenuStore } from '@/stores/close.js';
 import List from '@/pages/list/List.vue';
 import Navbar from '@/components/Navbar.vue';
+import { ref } from 'vue';
 
 const menuStore = useMenuStore();
 
@@ -27,9 +28,15 @@ const toggleNavShow = () => {
     </div>
   </nav>
 
+  <!-- 배경 어두운 오버레이 (슬라이드 메뉴 열릴 때 표시) -->
+  <div v-if="menuStore.isNavShow" class="overlay" @click="toggleNavShow"></div>
+
   <!-- List 페이지를 슬라이드로 표시 -->
   <div :class="['list-slide', menuStore.isNavShow ? 'slide-in' : 'slide-out']">
-    <List :is-nav-show="menuStore.isNavShow" @close-nav="menuStore.closeNav" />
+    <List
+      :is-nav-show="menuStore.isNavShow"
+      @close-nav="menuStore.toggleNavShow"
+    />
   </div>
 </template>
 <style scoped>
@@ -118,5 +125,36 @@ const toggleNavShow = () => {
 
 .nav-link:hover {
   color: #007bff;
+}
+
+/* 모달 콘텐츠 스타일 */
+.modal-content {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  z-index: 1000; /* 오버레이 위에 모달을 표시 */
+}
+
+/* 모달 닫기 버튼 */
+.close-button {
+  font-size: 20px;
+  background-color: transparent;
+  border: none;
+  color: #007bff;
+}
+
+/* 전체 화면 어두운 배경 */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* 어두운 배경 */
+  z-index: 999; /* 메뉴나 다른 콘텐츠 위에 표시 */
 }
 </style>

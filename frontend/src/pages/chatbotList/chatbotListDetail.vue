@@ -6,6 +6,7 @@ import { useRoute } from 'vue-router';
 
 const route = useRoute();
 const id = route.params.id; // 동적 경로의 id 가져오기
+console.log('id: ', id);
 
 // 메시지를 저장할 변수
 const messages = ref([]);
