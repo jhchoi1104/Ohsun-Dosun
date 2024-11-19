@@ -6,9 +6,20 @@
         <img src="../../assets/챗봇.png" alt="챗봇 아이콘" class="icon" />
         챗봇
       </div>
-      <div class="call">
+
+      <div class="call" @click="openModal">
         <img src="../../assets/상담사.png" alt="상담사 아이콘" class="icon" />
         상담사
+      </div>
+      <div class="modal" v-if="showModal" @click.self="closeModal">
+        <div class="modal-content">
+          <a :href="'tel:' + phoneNumber" class="phone-number">
+            통화 {{ phoneNumber }}</a
+          >
+        </div>
+        <div class="modal-content">
+          <button class="close-button" @click="closeModal">취소</button>
+        </div>
       </div>
     </div>
     <div class="d-flex flex-column" id="middle">
@@ -82,15 +93,30 @@ const emits = defineEmits(['closeNav']); // closeNav 이벤트를 emits로 선�
 
 import Header from '@/components/Header.vue';
 import { useRouter } from 'vue-router';
+import { ref } from 'vue';
+import '@fortawesome/fontawesome-free/css/all.css';
 
 const router = useRouter();
 
+//계좌 내역 조회로 이동
 function navigateToHistory() {
   router.push('/history');
 }
 
+//챗봇 내역 조회로 이동
 function navigateToChatRoom() {
   router.push('/chatbotList');
+}
+
+const showModal = ref(false);
+const phoneNumber = '1588-9999';
+
+function openModal() {
+  showModal.value = true;
+}
+
+function closeModal() {
+  showModal.value = false;
 }
 </script>
 
@@ -126,6 +152,7 @@ function navigateToChatRoom() {
   padding: 15px 25px;
   width: 45%;
   white-space: nowrap;
+  cursor: pointer;
 }
 .chatbot {
   margin-right: 20px;
@@ -208,5 +235,49 @@ function navigateToChatRoom() {
   background-color: #fff5f2;
   padding: 20px;
   width: 100%;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column; /* 세로 정렬 */
+  align-items: center;
+  justify-content: flex-end;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 5px;
+  border-radius: 10px;
+  text-align: center;
+  width: 90%;
+  max-width: 400px;
+  margin-bottom: 10px; /* 아래 content와 간격 */
+}
+
+.phone-number {
+  display: block;
+  margin: 5px 0;
+  font-size: 20px;
+  color: #007bff;
+  text-decoration: none;
+}
+
+.close-button {
+  font-size: 20px;
+  margin: 1px 0;
+  background-color: rgba(0, 0, 0, 0);
+  color: #007bff;
+  border: none;
+}
+
+.phone-number:hover {
+  text-decoration: underline;
 }
 </style>
