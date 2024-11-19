@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,7 +14,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Map;
 
 @Slf4j
@@ -67,7 +70,8 @@ public class SpeechtoTextController {
     }
 
     private boolean convertWithFfmpeg(String inputFilePath, String outputFilePath) {
-        String ffmpegPath = "/opt/homebrew/bin/ffmpeg"; // 실제 ffmpeg 경로
+        String ffmpegPath =  getFfmpegPath();
+//        String ffmpegPath = "/opt/homebrew/bin/ffmpeg"; // 실제 ffmpeg 경로
         String command = String.format("%s -i %s -acodec pcm_s16le -ar 16000 %s",
                 ffmpegPath, inputFilePath, outputFilePath);
 
@@ -102,17 +106,64 @@ public class SpeechtoTextController {
         }
     }
 
+    // ffmpeg 경로를 절대 경로로 설정
     private String getFfmpegPath() {
-        // 프로젝트 내 bin 폴더의 경로를 상대경로로 지정
-        String projectRoot = new File("").getAbsolutePath(); // 현재 프로젝트의 루트 경로
+        // 운영체제별 경로 설정
         String os = System.getProperty("os.name").toLowerCase();
+        String ffmpegPath = "";
 
-        if (os.contains("win")) {
-            return projectRoot + "\\bin\\ffmpeg.exe";  // Windows용 경로
-        } else if (os.contains("mac") || os.contains("nix") || os.contains("nux")) {
-            return projectRoot + "/bin/ffmpeg";  // macOS/Linux용 경로
-        } else {
-            throw new UnsupportedOperationException("운영체제를 지원하지 않습니다.");
+
+        String resource = extractFfmpegFromClasspath();
+        System.out.println("프로젝트 루트 경로: " + resource);
+
+        return resource;
+    }
+    private static String extractFfmpegFromClasspath() {
+        InputStream inputStream = null;
+        FileOutputStream outputStream = null;
+        try {
+            // 운영체제에 따라 ffmpeg 파일 이름 결정
+            String ffmpegFileName = "ffmpeg";  // 기본적으로 macOS/Linux용
+            String os = System.getProperty("os.name").toLowerCase();
+            if (os.contains("win")) {
+                ffmpegFileName = "ffmpeg.exe";  // Windows용 ffmpeg.exe
+            }
+
+            // 클래스패스에서 ffmpeg 파일을 읽음
+            inputStream = SpeechtoTextController.class.getClassLoader().getResourceAsStream("bin/" + ffmpegFileName);
+
+            if (inputStream == null) {
+                return null;  // 클래스패스에서 ffmpeg 파일을 찾을 수 없으면 null 반환
+            }
+
+            // 임시 파일로 저장
+            File tempFile = File.createTempFile("ffmpeg", os.contains("win") ? ".exe" : "");
+            tempFile.deleteOnExit();  // 종료 시 임시 파일 삭제
+
+            outputStream = new FileOutputStream(tempFile);
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+
+            return tempFile.getAbsolutePath();  // 임시 파일의 절대 경로 반환
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            try {
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+                if (outputStream != null) {
+                    outputStream.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
