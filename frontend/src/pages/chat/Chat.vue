@@ -1,17 +1,86 @@
 <script setup>
 import Header from '@/components/Header.vue';
+import { ref } from 'vue';
+import { sendAudioToServer} from '@/api/SttApi';  // SttApi.js에서 함수 import
+import axios from 'axios';
+const isRecording = ref(false);
+const errorMessage = ref('');
+const transcription = ref('');
+
+// 녹음기 초기화
+let mediaRecorder = null;
+
+
+const startRecording = () => {
+  try {
+    transcription.value = ''; // 녹음 시작 시 기존 텍스트 초기화
+    let audioChunks = [];
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      throw new Error("마이크 권한을 요청할 수 없습니다.");
+    }
+
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then((stream) => {
+        mediaRecorder = new MediaRecorder(stream);
+
+        mediaRecorder.ondataavailable = (event) => {
+          audioChunks.push(event.data);
+        };
+
+        mediaRecorder.onstop = async () => {
+          const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+          const formData = new FormData();
+          formData.append('file', audioBlob, 'audio.wav');
+
+          try {
+            const data = await sendAudioToServer(formData);
+            transcription.value = data.text || "텍스트를 인식할 수 없습니다.";
+          } catch (error) {
+            errorMessage.value = "서버에 전송하는 중 오류가 발생했습니다.";
+          }
+        };
+
+        mediaRecorder.start();
+        isRecording.value = true;
+        errorMessage.value = '';
+      })
+      .catch((err) => {
+        console.error("녹음 시작 오류:", err);
+        errorMessage.value = "마이크 권한을 확인해주세요.";
+      });
+  } catch (error) {
+    console.error("녹음기 초기화 오류:", error);
+    errorMessage.value = "녹음기를 초기화할 수 없습니다.";
+  }
+};
+
+
+// 녹음 중지 함수
+const stopRecording = () => {
+  if (mediaRecorder && mediaRecorder.state === 'recording') {
+    mediaRecorder.stop();
+    isRecording.value = false;
+  } else {
+    errorMessage.value = "녹음이 진행되지 않았습니다.";
+  }
+};
 </script>
 
 <template>
   <Header />
   <div class="main-container">
+    <p v-if="errorMessage" style="color: red;">{{ errorMessage }}</p>
+    <p v-if="transcription">인식된 텍스트: {{ transcription }}</p>
     <div class="sub-container">
       <div id="main-character">
         <img src="@/assets/images/sooni.png" alt="" />
       </div>
     </div>
+    
     <div class="button-section">
-      <button class="chat-button">말하기</button>
+      <button class="chat-button" @click="startRecording" v-if="!isRecording">말하기</button>
+      <button class="chat-button" @click="stopRecording" v-if="isRecording">중지</button>
     </div>
   </div>
 </template>
