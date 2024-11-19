@@ -1,13 +1,12 @@
 <script setup>
-// 메뉴 상태를 관리하는 변수 (토글을 위한 상태)
-import { ref } from 'vue';
+import { useMenuStore } from '@/stores/close.js';
+import List from '@/pages/list/List.vue';
+import Navbar from '@/components/Navbar.vue';
 
-const isNavShow = ref(false);
+const menuStore = useMenuStore();
 
-// 메뉴 상태를 토글하는 함수
 const toggleNavShow = () => {
-  isNavShow.value = !isNavShow.value;
-  console.log('isNavShow.value:', isNavShow.value);
+  menuStore.toggleNavShow(); // 상태 변경
 };
 </script>
 <template>
@@ -25,28 +24,13 @@ const toggleNavShow = () => {
       <button class="navbar-toggler" type="button" @click="toggleNavShow">
         <span class="navbar-toggler-icon"></span>
       </button>
-      <!-- 메뉴 항목 (Hamburger Menu) -->
-      <div :class="['navbar-collapse', isNavShow ? 'show' : 'collapse']">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item">
-            <router-link class="nav-link" to="/history">
-              계좌 내역 조회
-            </router-link>
-          </li>
-          <li class="nav-item">
-            <router-link class="nav-link" to="/chatbot">
-              챗봇 내역 조회
-            </router-link>
-          </li>
-          <li class="nav-item">
-            <router-link class="nav-link" to="/settings">
-              환경설정
-            </router-link>
-          </li>
-        </ul>
-      </div>
     </div>
   </nav>
+
+  <!-- List 페이지를 슬라이드로 표시 -->
+  <div :class="['list-slide', menuStore.isNavShow ? 'slide-in' : 'slide-out']">
+    <List :is-nav-show="menuStore.isNavShow" @close-nav="menuStore.closeNav" />
+  </div>
 </template>
 <style scoped>
 /* Navbar 관련 스타일 */
@@ -55,16 +39,13 @@ const toggleNavShow = () => {
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
+  z-index: 999;
 }
 
 .navbar-brand {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.navbar-toggler {
-  border: none;
 }
 
 .navbar-toggler-icon {
@@ -86,36 +67,56 @@ const toggleNavShow = () => {
   height: auto; /* 비율 유지 */
 }
 
-.navbar-collapse {
-  flex-basis: auto;
+.list-slide {
+  position: fixed; /* 메뉴를 화면에 고정 */
+  top: 0;
+  right: 0;
+  height: 100vh;
+  width: 92%;
+  background-color: #fff;
   display: flex;
-  flex-direction: column; /* 메뉴 항목들이 세로로 나열되도록 설정 */
-  align-items: center; /* 메뉴 항목들이 중앙 정렬되도록 설정 */
-  transition: max-height 0.5s ease-in-out;
-  overflow: hidden; /* 숨겨진 상태에서 내용이 넘치지 않도록 설정 */
-  max-height: 0; /* 메뉴 항목이 숨겨질 때는 최대 높이를 0으로 설정 */
-  position: absolute; /* 메뉴 항목이 헤더 아래에 위치하도록 설정 */
-  top: 70px; /* 헤더 바로 아래에 위치하도록 설정 (헤더 높이에 맞게 조정) */
-  left: 0;
-  width: 100%; /* 메뉴가 화면 가로 크기에 맞게 펼쳐지도록 설정 */
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  box-shadow: -5px 0 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease-in-out;
+  transform: translateX(100%); /* 기본 상태에서는 오른쪽으로 숨겨져 있음 */
+  z-index: 1000;
+}
+
+.list-slide.slide-in {
+  transform: translateX(0); /* 메뉴가 열릴 때 */
+}
+
+.list-slide.slide-out {
+  transform: translateX(100%); /* 메뉴가 닫힐 때 */
 }
 
 .navbar-toggler {
   display: inline-block;
 }
 
-.navbar-collapse.show {
-  display: flex; /* show 클래스가 있을 때만 display block */
-  max-height: 300px; /* 메뉴 항목이 펼쳐질 때 충분한 최대 높이를 설정 */
+.navbar-nav {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
 }
 
-/* 강제로 collapse 상태에서 display:none을 없앰 */
-.navbar-collapse.collapse {
-  display: none;
+.nav-item {
+  margin: 10px 20px;
 }
 
-/* 각 항목 사이 여백 설정 */
-.navbar-nav .nav-item {
-  margin: 5px 0; /* 항목 간 간격 설정 */
+.nav-link {
+  color: #333;
+  text-decoration: none;
+  font-size: 18px;
+  font-weight: 500;
+  display: block;
+  width: 100%;
+}
+
+.nav-link:hover {
+  color: #007bff;
 }
 </style>
