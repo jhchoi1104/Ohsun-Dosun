@@ -94,6 +94,7 @@ public class TextResponseService {
                         step2_content_message = String.format("%s님에게 송금하시겠습니까?", step2_content_name);
                     } else { //존재하지 않을 경우 003.a.02
                         step2_content_message = "송금하신적 없는 분이네요. 계좌번호를 입력해주세요.";
+
                     }
 
                     // 사용자가 금액에 대한 정보를 미리 말한 경우와 그렇지 않은 경우 구분하기 위함
