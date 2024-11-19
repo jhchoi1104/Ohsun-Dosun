@@ -1,18 +1,19 @@
-import api from '@/api';
+import api from '@/api'; // API 설정 파일
 
-const BASE_URL = '/api/History'; // 기본 경로 설정
-// const headers = { "Content-Type": "multipart/form-data" }; // 기본 헤더
+const BASE_URL = '/api/history'; // 기본 경로 설정
 
 export default {
-    async applyFilters(filters, pageRequest) {
-        const requestBody = {
-            sortOrder: filters.sortOrder,
-        };
-
-        console.log(requestBody);
-
-        const { data } = response;
-        // console.log('data 확인:', JSON.stringify(data, null, 2)); // JSON 형식으로 출력
-        return data; // 필터링된 거래 내역 및 페이지네이션 정보 반환
+    // userId에 해당하는 데이터 가져오기
+    async getHistory(userId) {
+        try {
+            const { data } = await api.get(`${BASE_URL}/get`, {
+                params: { userId }, 
+            });
+            console.log('response:', data);
+            return data;
+        } catch (error) {
+            console.error('요청 중 오류 발생:', error);
+            throw error; 
+        }
     },
 };

@@ -9,17 +9,30 @@
       </div>
 
       <div class="chart-section">
-        <canvas id="pieChart"></canvas>
+        <canvas id="PieChart"></canvas>
       </div>
 
       <div class="balance-section">
+        <div class="balance-title">입출금 현황</div>
         <div class="balance-bar">
-          <div class="deposit" :style="{ width: depositPercentage + '%' }"></div>
+          <div class="depositBar" :style="{ width: depositPercentage + '%' }"></div>
           <div class="withdrawal" :style="{ width: withdrawalPercentage + '%' }"></div>
         </div>
         <div class="balance-info">
-          <span>입금 {{ depositPercentage }}%</span>
-          <span>출금 {{ withdrawalPercentage }}%</span>
+          <div class="balance-row">
+            <div class="balance-item">
+              <span class="dot deposit-dot"></span>
+              <span>입금 {{ depositPercentage }}%</span>
+            </div>
+            <span class="amount">{{ depositTotal.toLocaleString() }}원</span>
+          </div>
+          <div class="balance-row">
+            <div class="balance-item">
+              <span class="dot withdrawal-dot"></span>
+              <span>출금 {{ withdrawalPercentage }}%</span>
+            </div>
+            <span class="amount">{{ withdrawalTotal.toLocaleString() }}원</span>
+          </div>
         </div>
       </div>
 
@@ -27,11 +40,12 @@
         <div class="transaction-item" v-for="(transaction, index) in transactions" :key="index">
           <div class="date">{{ transaction.date }}</div>
           <div class="details">
-            <img :src="transaction.icon" alt="Icon" class="transaction-icon">
-            <span>{{ transaction.description }}</span>
+            <div class="description-container">
+              <span>{{ transaction.description }}</span>
+            </div>
             <span :class="transaction.type">{{ transaction.amount }}원</span>
           </div>
-          <div class="balance">잔액 {{ transaction.balance }}원</div>
+          <div class="balance">{{ transaction.balance }}</div>
         </div>
       </div>
     </div>
@@ -39,42 +53,113 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted, nextTick } from 'vue';
 import { Chart, PieController, ArcElement, Tooltip, Legend } from 'chart.js';
-import Navbar from '@/components/Navbar.vue';
+import Header from '@/components/Header.vue'
+import HistoryApi from '@/api/HistoryApi';
 
 Chart.register(PieController, ArcElement, Tooltip, Legend);
 
-const currentMonth = ref("2024.10");
+// 현재 월을 초기값으로 설정
+const currentMonth = ref(new Date().getFullYear() + "." + String(new Date().getMonth() + 1).padStart(2, "0"));
+const transactions = ref([]);
+const depositPercentage = ref(0);
+const withdrawalPercentage = ref(0);
+const depositTotal = ref(0);
+const withdrawalTotal = ref(0);
+const allTransactions = ref([]); // 전체 거래 데이터 저장
+let chart = null;
 
-const transactions = ref([
-  { date: "2024. 10. 30", icon: "../../assets/계절밥상.png", description: "계절밥상", type: "withdraw", amount: "7,000", balance: "7,000,000" },
-  { date: "2024. 10. 30", icon: "../../assets/홈플러스.png", description: "홈플러스", type: "deposit", amount: "7,000", balance: "7,000,000" },
-]);
+// 날짜 포맷팅 함수
+function formatDate(timestamp) {
+  const date = new Date(timestamp);
+  return `${date.getFullYear()}. ${String(date.getMonth() + 1).padStart(2, '0')}. ${String(date.getDate()).padStart(2, '0')}`;
+}
 
-const depositPercentage = 51;
-const withdrawalPercentage = 49;
+// 월별 데이터 필터링 함수
+function filterTransactionsByMonth(transactions, yearMonth) {
+  const [year, month] = yearMonth.split(".");
+  return transactions.filter(transaction => {
+    const transactionDate = new Date(transaction.transactionDate);
+    return transactionDate.getFullYear() === parseInt(year) && 
+           (transactionDate.getMonth() + 1) === parseInt(month);
+  });
+}
 
+// API 응답 데이터 변환 함수
+function transformTransaction(transaction) {
+  const isWithdrawal = transaction.senderId === 1;
+  return {
+    date: formatDate(transaction.transactionDate),
+    description: isWithdrawal ? "출금" : "입금",
+    type: isWithdrawal ? "withdraw" : "deposit",
+    amount: transaction.amount.toLocaleString(),
+    balance: "잔액 확인 중"
+  };
+}
+
+// 입금/출금 비율 계산 함수
+function calculatePercentages(transactions) {
+  let depositAmount = 0;
+  let withdrawalAmount = 0;
+  
+  transactions.forEach(transaction => {
+    if (transaction.senderId === 1) {
+      withdrawalAmount += transaction.amount;
+    } else {
+      depositAmount += transaction.amount;
+    }
+  });
+
+  const total = depositAmount + withdrawalAmount;
+  if (total === 0) {
+    depositTotal.value = 0;
+    withdrawalTotal.value = 0;
+    return { deposit: 50, withdrawal: 50 };
+  }
+
+  depositTotal.value = depositAmount;
+  withdrawalTotal.value = withdrawalAmount;
+
+  return {
+    deposit: Math.round((depositAmount / total) * 100),
+    withdrawal: Math.round((withdrawalAmount / total) * 100)
+  };
+}
+
+// 월 이동 함수
 function prevMonth() {
   const [year, month] = currentMonth.value.split(".");
-  const newDate = new Date(year, month - 2, 1);
+  const newDate = new Date(year, parseInt(month) - 2, 1);
   currentMonth.value = `${newDate.getFullYear()}.${String(newDate.getMonth() + 1).padStart(2, "0")}`;
+  updateDisplayData();
 }
 
 function nextMonth() {
   const [year, month] = currentMonth.value.split(".");
-  const newDate = new Date(year, month, 1);
+  const newDate = new Date(year, parseInt(month), 1);
   currentMonth.value = `${newDate.getFullYear()}.${String(newDate.getMonth() + 1).padStart(2, "0")}`;
+  updateDisplayData();
 }
 
-onMounted(() => {
-  const ctx = document.getElementById("pieChart").getContext("2d");
-  new Chart(ctx, {
-    type: 'pie',
+// 차트 생성 함수
+function createChart(deposit, withdrawal) {
+  if (chart) {
+    chart.destroy();
+  }
+
+  const ctx = document.getElementById("PieChart");
+  if (!ctx) {
+    console.error('차트 캔버스를 찾을 수 없습니다');
+    return;
+  }
+
+  chart = new Chart(ctx, {
+    type: 'doughnut',
     data: {
       labels: ['입금', '출금'],
       datasets: [{
-        data: [depositPercentage, withdrawalPercentage],
+        data: [deposit, withdrawal],
         backgroundColor: ['#a9c9e3', '#f799c8'],
       }]
     },
@@ -87,6 +172,36 @@ onMounted(() => {
       },
     },
   });
+}
+
+// 화면 데이터 업데이트 함수
+async function updateDisplayData() {
+  const filteredTransactions = filterTransactionsByMonth(allTransactions.value, currentMonth.value);
+  transactions.value = filteredTransactions.map(transformTransaction);
+  
+  const percentages = calculatePercentages(filteredTransactions);
+  depositPercentage.value = percentages.deposit;
+  withdrawalPercentage.value = percentages.withdrawal;
+  
+  await nextTick(() => {
+    createChart(depositPercentage.value, withdrawalPercentage.value);
+  });
+}
+
+onMounted(async () => {
+  try {
+    const response = await HistoryApi.getHistory(1);
+    allTransactions.value = response;
+    updateDisplayData();
+  } catch (error) {
+    console.error('거래 내역을 불러오는데 실패했습니다:', error);
+  }
+});
+
+onUnmounted(() => {
+  if (chart) {
+    chart.destroy();
+  }
 });
 </script>
 
@@ -96,22 +211,27 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  box-sizing: border-box; /* 패딩을 너비에 포함 */
+  box-sizing: border-box;
   background-color: #FFF5F2;
+  padding: 0 20px;
+  width: 400px;
+  margin: 0 auto;
 }
 
 .balance-section, .transaction-list {
   width: 100%;
   padding: 20px;
-  box-sizing: border-box; /* 패딩을 너비에 포함 */
+  box-sizing: border-box;
   background-color: #FFFFFF;
   border-radius: 10px;
+  margin: 10px 0;
 }
+
 .header {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 10px 0;
+  padding: 5px 0;
 }
 
 .header button {
@@ -126,29 +246,72 @@ onMounted(() => {
 .chart-section {
   display: flex;
   justify-content: center;
-  padding: 20px 0;
+  padding: 0 0;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+#PieChart {
+  width: 200px !important;
+  height: 200px !important;
+  margin: 0 auto;
+}
+
+.balance-title {
+  font-size: 15px;
+  margin-bottom: 5px;
+}
+
+.balance-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 5px;
+  font-size: 14px;
+  color: #666;
+}
+
+.balance-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   width: 100%;
 }
 
-.balance-section {
+.balance-item {
   display: flex;
-  flex-direction: column;
-  width: 100%; /* 부모 너비에 맞춰 확장 */
-  background-color: #FFFFFF;
-  border-radius: 10px;
-  padding: 20px;
-  margin: 10px 0;
+  align-items: center;
+  gap: 8px;
+}
+
+.amount {
+  margin-left: auto;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.deposit-dot {
+  background-color: #a9c9e3;
+}
+
+.withdrawal-dot {
+  background-color: #f799c8;
 }
 
 .balance-bar {
   display: flex;
-  width: 100%; /* 부모 너비에 맞춰 확장 */
+  width: 100%;
   height: 10px;
   border-radius: 5px;
   overflow: hidden;
 }
 
-.deposit {
+.depositBar {
   background-color: #a9c9e3;
 }
 
@@ -156,27 +319,20 @@ onMounted(() => {
   background-color: #f799c8;
 }
 
-.balance-info {
-  display: flex;
-  justify-content: space-between;
-  padding-top: 5px;
-  font-size: 14px;
-  color: #666;
-}
-
 .transaction-list {
   background-color: #FFFFFF;
   border-radius: 10px;
   padding: 20px;
-  margin: 20px 0;
+  margin: 10px 0;
   width: 100%;
-  overflow-y: auto; /* 스크롤 추가 */
-  max-height: 40vh; /* 리스트 최대 높이 설정 */
+  overflow-y: auto;
+  max-height: 40vh;
+  scrollbar-width: none;
 }
 
 .transaction-item {
   border-bottom: 1px solid #E5E5E5;
-  padding: 15px 0;
+  padding: 10px 0;
 }
 
 .transaction-item:last-child {
@@ -191,12 +347,20 @@ onMounted(() => {
 .details {
   display: flex;
   align-items: center;
+  justify-content: space-between;
 }
 
-.transaction-icon {
-  width: 24px;
-  height: 24px;
-  margin-right: 10px;
+.description-container {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.balance {
+  font-size: 12px;
+  color: #666;
+  text-align: right;
+  margin-top: 4px;
 }
 
 .withdraw {
@@ -205,10 +369,5 @@ onMounted(() => {
 
 .deposit {
   color: #f799c8;
-}
-
-.balance {
-  font-size: 12px;
-  color: #666;
 }
 </style>
