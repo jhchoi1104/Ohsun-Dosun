@@ -12,9 +12,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Favorites {
-    private long favorite_id;
-    private long user_id;
-    private long friend_id;
+    private int user_id;
+    private int friend_id;
     private String nickname;
-    private String created_at;
 }

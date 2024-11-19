@@ -14,4 +14,9 @@
         ) AS favorite_exists;
     </select>
 
+    <!--별칭 저장-->
+    <insert id="insertNickname">
+        Insert INTO Favorites (user_id, friend_id,nickname)
+        values (#{userId}, #{friendId},#{nickname})
+    </insert>
 </mapper>
