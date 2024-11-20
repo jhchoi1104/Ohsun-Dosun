@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.OhsunDosun.mapper.ConversationRoomMapper">
+    <select id="readConversationRoomByConversationRoomNo" resultType="boolean" parameterType="int">
+        SELECT COUNT(*) > 0
+        FROM chatbot_session
+        WHERE session_id = #{sessionId}
+    </select>
+
+
+    <select id="findLastNByConversationRoomNo" resultType="com.OhsunDosun.dto.Log">
+        SELECT message_text, sender_type
+        FROM chatbot_history
+        WHERE session_id = #{sessionId}
+        ORDER BY timestamp DESC
+        LIMIT #{number} <!-- number 값에 따라 반환되는 개수를 지정 -->
+    </select>
+
+
+</mapper>

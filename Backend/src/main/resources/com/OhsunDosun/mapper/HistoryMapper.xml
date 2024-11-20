@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.OhsunDosun.mapper.HistoryMapper">
+    <select id="getTransfer" resultType="com.OhsunDosun.dto.HistoryDTO">
+        SELECT *
+        FROM 
+            transfer_history
+        WHERE 
+            sender_id = #{userId} OR receiver_id = #{userId}
+        ORDER BY 
+            transaction_date DESC
+    </select>
+</mapper>

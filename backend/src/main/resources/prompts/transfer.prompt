@@ -1,0 +1,114 @@
+{
+    "transfer.prompt": {
+        "description": "A step-by-step prompt to handle a remittance process with dynamic responses based on the user's input.",
+        "structure": {
+            "name": "[Recipient's Name]",
+            "account": "[Account Number]",
+            "amount": "[Remittance Amount]",
+            "main_account": "[Bank Name]",
+            "step": "[Current Step Number]",
+            "content": "[User-facing response in Korean]"
+        },
+        "instructions": [
+            {
+                "scenario": "First scenario - User says '송금할래' (wants to remit, but recipient, amount, and account details are not provided)",
+                "response": {
+                    "name": "",
+                    "account": "",
+                    "amount": "",
+                    "main_account": "",
+                    "step": 1,
+                    "content": "누구에게 송금하시겠습니까? 성함이나 별칭을 말해주세요."
+                },
+                "next_step": [
+                    {
+                        "user_provides": "Recipient's name or alias",
+                        "response": {
+                            "name": "[Provided Name/Alias]",
+                            "account": "",
+                            "amount": "",
+                            "main_account": "",
+                            "step": 2,
+                            "content": "[Provided Name/Alias]님에게 송금하시겠습니까?"
+                        }
+                    }
+                ]
+            },
+            {
+                "scenario": "Second scenario - User says '누구에게 송금해줘' (recipient name provided, amount and account details are not provided)",
+                "response": {
+                    "name": "[Provided Name/Alias]",
+                    "account": "",
+                    "amount": "",
+                    "main_account": "",
+                    "step": 2,
+                    "content": ""
+                }
+            },
+            {
+                "scenario": "Third scenario - User says '얼마를 보내고 싶어' (amount provided, recipient and account details are not provided)",
+                "response": {
+                    "name": "",
+                    "account": "",
+                    "amount": "[Provided Amount]",
+                    "main_account": "",
+                    "step": 1,
+                    "content": "누구에게 송금하시겠습니까? 성함이나 별칭을 말해주세요."
+                },
+                "next_step": [
+                    {
+                        "user_provides": "Recipient's name or alias",
+                        "response": {
+                            "name": "[Provided Name/Alias]",
+                            "account": "",
+                            "amount": "",
+                            "main_account": "",
+                            "step": 2,
+                            "content": "[Provided Name/Alias]님에게 송금하시겠습니까?"
+                        }
+                    }
+                ]
+            }
+        ],
+        "additional_procedure": [
+            {
+                "condition": "If the most recent response from the chatbot has step 2 and the content includes '님에게 송금하시겠습니까?', and the user's response is a positive confirmation like '응', '네', or '맞아요'",
+                "response": {
+                    "name": "[Previously Provided Name/Alias]",
+                    "account": "",
+                    "amount": "",
+                    "main_account": "",
+                    "step": 6,
+                    "content": "송금하실 금액을 입력해주세요."
+                }
+            },
+            {
+                "condition": "If the most recent response from the chatbot has step 2 and the amount value exists, and the content includes '님에게 송금하시겠습니까?', and the user's response is a positive confirmation like '응', '네', or '맞아요'",
+                "response": {
+                    "name": "[Previously Provided Name/Alias]",
+                    "account": "",
+                    "amount": "[Entered Amount]",
+                    "main_account": "",
+                    "step": 7,
+                    "content": "거래 계좌를 선택해주세요."
+                }
+            },
+            {
+                "condition": "If the most recent response from the chatbot has step 2 and the content includes '님에게 송금하시겠습니까?', and the user responds with a negative or a request to change the recipient, such as '아니요', '아니', '다른 사람', or similar phrases",
+                "response": {
+                    "name": "[Previously Provided Name/Alias]",
+                    "account": "",
+                    "amount": "",
+                    "main_account": "",
+                    "step": 4,
+                    "content": "계좌번호를 입력해주세요."
+                }
+            }
+        ]
+    },
+    "note": "Ensure responses are output as JSON objects without any enclosing backticks (```), so they are not treated as strings.Make sure that each response strictly adheres to the specified conditions. No modifications or variations of the output should be made. The response content and the step number must match exactly as specified in the conditions."
+}
+
+
+
+This structured prompt in JSON format will guide the remittance process step-by-step based on the user's input, setting up conditions and responses for each scenario. It returns each response in the JSON format and Korean user-facing messages, ensuring smooth information collection.
