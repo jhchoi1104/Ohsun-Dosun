@@ -32,7 +32,7 @@ public class ConversationController {
         long startTime = System.currentTimeMillis();
         ConversationResponse response = conversationService.conversation(request, userNo);
 
-        log.info("log check : {}", response);
+        log.info("log check : {}", response.getContent());
         long endTime = System.currentTimeMillis();
         long duration = endTime - startTime;
 
