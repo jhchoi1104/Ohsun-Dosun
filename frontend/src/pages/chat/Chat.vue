@@ -45,7 +45,7 @@ const startRecording = () => {
 
               // ChatBot API 호출
               const response = await sendTextToServer(userId, transcription.value, conversationRoomNo);
-              chatbotMessage.value = response; // Chatbot 응답 저장
+              chatbotMessage.value = response.content; // Chatbot 응답 저장
 
             }
 
@@ -91,8 +91,8 @@ const stopRecording = () => {
         <img src="@/assets/images/sooni.png" alt="" />
       </div>
     </div>
-    <div class="speech-bubble">
-    <!-- <div class="speech-bubble" v-if="transcription"> -->
+    <!-- <div class="speech-bubble"> -->
+    <div class="speech-bubble" v-if="transcription">
       인식된 텍스트: {{ transcription }}
     </div>
     <div class="button-section">
@@ -122,6 +122,8 @@ const stopRecording = () => {
 }
 
 .button-section {
+  position: absolute;
+  bottom: 1px;
   margin-bottom: 30px; /* 하단에서 30px 간격 설정 */
   width: 100%; /* 버튼 섹션의 너비를 100%로 설정 */
   padding: 0 20px; /* 좌우 패딩 20px 추가 */
@@ -206,7 +208,7 @@ const stopRecording = () => {
   margin: 10px auto; /* 위아래 여백 및 중앙 정렬 */
   z-index: 1; /* 레이어 우선 순위 설정 */
   position: relative; /* 박스의 위치를 일반 흐름에 맞춤 */
-  top: -60px; /* Y축 위치 조정 (이미지 위로 이동) */
+  top: -100px; /* Y축 위치 조정 (이미지 위로 이동) */
   margin-top: 450px;
   
 }
