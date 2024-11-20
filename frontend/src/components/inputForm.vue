@@ -3,7 +3,7 @@
       <div class="inputform-container">
         <span class="close-button" @click="$emit('close')">&times;</span>
         <div class="input-section">
-          <div v-for="(input, index) in dynamicInputs" :key="index" class="input-group" v-if="props.step !== 3">
+          <div v-for="(input, index) in dynamicInputs" :key="index" class="input-group" v-if="props.step !== 3 && props.step !== 5">
             <label :for="'input-' + index" class="input-label">{{ input.label }}</label>
             <input
               :id="'input-' + index"
@@ -20,6 +20,14 @@
               <li class="option-item" @click="selectOption('등기 우편 수령')">등기 우편 수령</li>
             </ul>
           </div>
+          <div v-if="props.step === 5" class="input-group">
+            <label for="account-select" class="input-label">계좌 번호 선택</label>
+            <select id="account-select" v-model="selectedAccount" class="input-field">
+              <option v-for="(account, index) in accountOptions" :key="index" :value="account">
+                {{ account }}
+              </option>
+            </select>
+          </div>
         </div>
         <div class="button-section">
           <router-link class="chat-button" to="/chat">확인</router-link>
@@ -29,7 +37,7 @@
   </template>
   
   <script setup>
-  import { defineProps, defineEmits, computed } from 'vue';
+  import { defineProps, defineEmits, computed, ref } from 'vue';
   
   const props = defineProps({
     show: {
@@ -38,12 +46,16 @@
     },
     step: {
       type: Number,
-      default: 3,
+      default: 5,
       required: true,
     },
   });
   
   const emit = defineEmits(['close']);
+  
+  const selectedAccount = ref('');
+  
+  const accountOptions = ['계좌 1', '계좌 2', '계좌 3'];
   
   const dynamicInputs = computed(() => {
     if (props.step === 1) {
@@ -59,10 +71,18 @@
       ];
     } else if (props.step === 3) {
       return [];
-    } else {
+    } else if(props.step === 4) {
       return [
-        { type: 'text', placeholder: '기본 입력 1', value: '', label: '기본 입력 1' },
-        { type: 'text', placeholder: '기본 입력 2', value: '', label: '기본 입력 2' },
+        { type: 'text', placeholder: '계좌 번호 선택', value: '', label: '계좌 번호 선택' },
+        { type: 'text', placeholder: '이름', value: '', label: '수령인 이름 입력' },
+      ];
+    } else if(props.step === 5) {
+      return [];
+    } else if(props.step === 6) {
+      return [
+        { type: 'text', placeholder: '계좌 번호 선택', value: '', label: '계좌 번호' },
+        { type: 'text', placeholder: '주소', value: '', label: '주소 입력' },
+        { type: 'text', placeholder: '전화 번호', value: '', label: '전화번호 입력' },
       ];
     }
   });
@@ -80,23 +100,23 @@
     right: 0;
     display: flex;
     justify-content: center;
-    align-items: flex-end; /* 하단에서 시작 */
+    align-items: flex-end;
     z-index: 1000;
-    transition: transform 0.3s ease; /* 부드러운 애니메이션 */
-    transform: translateY(100%); /* 초기 위치: 화면 아래 */
+    transition: transform 0.3s ease;
+    transform: translateY(100%);
   }
   
   .inputform-modal:not(.hidden) {
-    transform: translateY(0); /* 화면에 표시 */
+    transform: translateY(0);
   }
   
   .inputform-container {
     background-color: white;
     padding: 10px;
-    border-radius: 10px 10px 0 0; /* 상단 모서리만 둥글게 */
+    border-radius: 10px 10px 0 0;
     width: 100%;
-    max-width: 500px; /* 최대 너비 설정 */
-    height: 60vh; /* 높이 늘리기 */
+    max-width: 500px;
+    height: 60vh;
   }
   
   .close-button {
@@ -110,7 +130,7 @@
   .input-section {
     display: flex;
     flex-direction: column;
-    gap: 15px; /* 입력 필드 간 간격 */
+    gap: 15px;
   }
   
   .input-group {
@@ -146,17 +166,17 @@
   }
   
   .chat-button {
-    background-color: #ef5554; /* 색상 변경 */
+    background-color: #ef5554;
     color: white;
     border: none;
-    border-radius: 10px; /* 모서리 둥글게 */
-    padding: 10px 20px; /* 패딩 조정 */
+    border-radius: 10px;
+    padding: 10px 20px;
     text-align: center;
-    font-size: 1.5rem; /* 글자 크기 */
+    font-size: 1.5rem;
     cursor: pointer;
-    width: 100%; /* 너비를 자동으로 설정 */
-    max-width: 300px; /* 최대 너비를 설정하여 버튼 길이를 제한 */
-    height: 55px; /* 높이를 55px로 설정 */
+    width: 100%;
+    max-width: 300px;
+    height: 55px;
   }
   
   .chat-button:hover {
