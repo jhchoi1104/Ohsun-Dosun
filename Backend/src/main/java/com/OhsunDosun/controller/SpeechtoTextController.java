@@ -75,7 +75,20 @@ public class SpeechtoTextController {
         String command = String.format("%s -i %s -acodec pcm_s16le -ar 16000 %s",
                 ffmpegPath, inputFilePath, outputFilePath);
 
+
         try {
+            String os = System.getProperty("os.name").toLowerCase();
+            if(!os.contains("win")){
+                Process chmodProcess = new ProcessBuilder("chmod", "+x", ffmpegPath)
+                        .inheritIO()
+                        .start();
+                int chmodExitCode = chmodProcess.waitFor();
+                if (chmodExitCode != 0) {
+                    System.err.println("Failed to set execute permission for ffmpeg at " + ffmpegPath);
+                    return false;
+                }
+            }
+
             Process process = new ProcessBuilder(command.split(" "))
                     .inheritIO()
                     .start();

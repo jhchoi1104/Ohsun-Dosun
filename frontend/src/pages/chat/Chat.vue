@@ -2,10 +2,12 @@
 import Header from '@/components/Header.vue';
 import { ref } from 'vue';
 import { sendAudioToServer} from '@/api/SttApi';  // SttApi.js에서 함수 import
+import { sendTextToServer} from '@/api/ChatBotApi.js';
 import axios from 'axios';
 const isRecording = ref(false);
 const errorMessage = ref('');
 const transcription = ref('');
+const chatbotMessage = ref(''); // Chatbot 응답 메시지
 
 // 녹음기 초기화
 let mediaRecorder = null;
@@ -36,6 +38,17 @@ const startRecording = () => {
           try {
             const data = await sendAudioToServer(formData);
             transcription.value = data.text || "텍스트를 인식할 수 없습니다.";
+            if(transcription.value !== "텍스트를 인식할 수 없습니다"){
+              // conversationRoomNo와 userId는 임의의 값으로 지정
+              const conversationRoomNo = 3; // 임의로 지정한 대화방 번호
+              const userId = 3; // 임의로 지정한 사용자 ID
+
+              // ChatBot API 호출
+              const response = await sendTextToServer(userId, transcription.value, conversationRoomNo);
+              chatbotMessage.value = response; // Chatbot 응답 저장
+
+            }
+
           } catch (error) {
             errorMessage.value = "서버에 전송하는 중 오류가 발생했습니다.";
           }
@@ -72,6 +85,8 @@ const stopRecording = () => {
   <div class="main-container">
     <p v-if="errorMessage" style="color: red;">{{ errorMessage }}</p>
     <p v-if="transcription">인식된 텍스트: {{ transcription }}</p>
+    <p v-if="chatbotMessage" style="color: blue;">Chatbot 응답: {{ chatbotMessage }}</p> <!-- Chatbot 응답 표시 -->
+    
     <div class="sub-container">
       <div id="main-character">
         <img src="@/assets/images/sooni.png" alt="" />
