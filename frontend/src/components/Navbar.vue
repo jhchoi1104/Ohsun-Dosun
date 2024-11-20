@@ -52,6 +52,10 @@ const toggleMenu = () => {
 </script>
 
 <style>
+.navbar {
+  width: 100%;
+}
+
 /* 네비게이션 바 스타일 */
 .nav-container {
   display: flex; /* flexbox 활성화 */
@@ -74,6 +78,6 @@ const toggleMenu = () => {
   background-color: #ffffff;
   border-style: none;
   color: black;
-  padding: 8px 20px;
+  padding: 8px 8px;
 }
 </style>
