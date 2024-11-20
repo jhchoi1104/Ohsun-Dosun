@@ -1,17 +1,17 @@
 <script setup>
 import Header from '@/components/Header.vue';
 import { ref } from 'vue';
-import { sendAudioToServer} from '@/api/SttApi';  // SttApi.js에서 함수 import
-import { sendTextToServer} from '@/api/ChatBotApi.js';
+import { sendAudioToServer } from '@/api/SttApi'; // SttApi.js에서 함수 import
+import { sendTextToServer } from '@/api/ChatBotApi.js';
 import axios from 'axios';
 const isRecording = ref(false);
 const errorMessage = ref('');
 const transcription = ref('');
 const chatbotMessage = ref(''); // Chatbot 응답 메시지
+const audio = ref(''); // 오디오
 
 // 녹음기 초기화
 let mediaRecorder = null;
-
 
 const startRecording = () => {
   try {
@@ -19,10 +19,11 @@ const startRecording = () => {
     let audioChunks = [];
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      throw new Error("마이크 권한을 요청할 수 없습니다.");
+      throw new Error('마이크 권한을 요청할 수 없습니다.');
     }
 
-    navigator.mediaDevices.getUserMedia({ audio: true })
+    navigator.mediaDevices
+      .getUserMedia({ audio: true })
       .then((stream) => {
         mediaRecorder = new MediaRecorder(stream);
 
@@ -37,20 +38,25 @@ const startRecording = () => {
 
           try {
             const data = await sendAudioToServer(formData);
-            transcription.value = data.text || "텍스트를 인식할 수 없습니다.";
-            if(transcription.value !== "텍스트를 인식할 수 없습니다"){
+            console.log(data);
+            transcription.value = data.text || '텍스트를 인식할 수 없습니다.';
+            if (transcription.value !== '텍스트를 인식할 수 없습니다') {
               // conversationRoomNo와 userId는 임의의 값으로 지정
               const conversationRoomNo = 3; // 임의로 지정한 대화방 번호
               const userId = 3; // 임의로 지정한 사용자 ID
 
               // ChatBot API 호출
-              const response = await sendTextToServer(userId, transcription.value, conversationRoomNo);
+              const response = await sendTextToServer(
+                userId,
+                transcription.value,
+                conversationRoomNo
+              );
               chatbotMessage.value = response.content; // Chatbot 응답 저장
-
+              audio.value = response.audioData;
+              console.log(audio.value);
             }
-
           } catch (error) {
-            errorMessage.value = "서버에 전송하는 중 오류가 발생했습니다.";
+            errorMessage.value = '서버에 전송하는 중 오류가 발생했습니다.';
           }
         };
 
@@ -59,15 +65,14 @@ const startRecording = () => {
         errorMessage.value = '';
       })
       .catch((err) => {
-        console.error("녹음 시작 오류:", err);
-        errorMessage.value = "마이크 권한을 확인해주세요.";
+        console.error('녹음 시작 오류:', err);
+        errorMessage.value = '마이크 권한을 확인해주세요.';
       });
   } catch (error) {
-    console.error("녹음기 초기화 오류:", error);
-    errorMessage.value = "녹음기를 초기화할 수 없습니다.";
+    console.error('녹음기 초기화 오류:', error);
+    errorMessage.value = '녹음기를 초기화할 수 없습니다.';
   }
 };
-
 
 // 녹음 중지 함수
 const stopRecording = () => {
@@ -75,7 +80,7 @@ const stopRecording = () => {
     mediaRecorder.stop();
     isRecording.value = false;
   } else {
-    errorMessage.value = "녹음이 진행되지 않았습니다.";
+    errorMessage.value = '녹음이 진행되지 않았습니다.';
   }
 };
 </script>
@@ -83,9 +88,12 @@ const stopRecording = () => {
 <template>
   <Header />
   <div class="main-container">
-    <p v-if="errorMessage" style="color: red;">{{ errorMessage }}</p>
-    <p class="additional-bubble" v-if="chatbotMessage" style="color: blue;">Chatbot 응답: {{ chatbotMessage }}</p> <!-- Chatbot 응답 표시 -->
-    
+    <p v-if="errorMessage" style="color: red">{{ errorMessage }}</p>
+    <p class="additional-bubble" v-if="chatbotMessage" style="color: blue">
+      Chatbot 응답: {{ chatbotMessage }}
+    </p>
+    <!-- Chatbot 응답 표시 -->
+
     <div class="sub-container">
       <div id="main-character">
         <img src="@/assets/images/sooni.png" alt="" />
@@ -96,8 +104,12 @@ const stopRecording = () => {
       인식된 텍스트: {{ transcription }}
     </div>
     <div class="button-section">
-      <button class="chat-button" @click="startRecording" v-if="!isRecording">말하기</button>
-      <button class="chat-button" @click="stopRecording" v-if="isRecording">중지</button>
+      <button class="chat-button" @click="startRecording" v-if="!isRecording">
+        말하기
+      </button>
+      <button class="chat-button" @click="stopRecording" v-if="isRecording">
+        중지
+      </button>
     </div>
   </div>
 </template>
@@ -210,6 +222,5 @@ const stopRecording = () => {
   position: relative; /* 박스의 위치를 일반 흐름에 맞춤 */
   top: -100px; /* Y축 위치 조정 (이미지 위로 이동) */
   margin-top: 450px;
-  
 }
 </style>
