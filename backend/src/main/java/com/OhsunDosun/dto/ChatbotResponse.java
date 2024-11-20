@@ -14,4 +14,6 @@ public class ChatbotResponse {
     private int promptTokens;
     private int completionTokens;
     private int totalTokens;
+    private String subTaskNo;
+    private int step;
 }
