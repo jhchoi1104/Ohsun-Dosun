@@ -9,12 +9,10 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
-public class OpenAIClientService {
-
+public class OpenAISttService {
     private String API_URL = "https://api.openai.com/v1/audio/transcriptions";
 
     @Value("${OPENAI_API_KEY}")
