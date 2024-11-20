@@ -35,6 +35,7 @@ public class TextResponseService {
     private final NewissuanceService newissuanceService;
     private final ReissuanceService reissuanceService;
     private final FavoritesService favoritesService;
+
     public ChatbotResponse TextResponse(ConversationRequest request, int userNo) throws JsonProcessingException {
         ChatbotResponse response;
         String input = request.getInput();
