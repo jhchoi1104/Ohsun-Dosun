@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 public class ConversationResponse {
     private String content;
     private int totalTokens;
+    private String audioData;
 }

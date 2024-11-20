@@ -1,5 +1,6 @@
 package com.OhsunDosun.service;
 
+import java.util.Base64;
 import java.util.concurrent.TimeoutException;
 
 import com.OhsunDosun.dto.ConversationLogRequest;
@@ -8,6 +9,7 @@ import com.OhsunDosun.dto.ConversationResponse;
 import com.OhsunDosun.exception.ConversationRoomNotFoundException;
 import com.OhsunDosun.dto.ChatbotResponse;
 import com.OhsunDosun.service.conversation.TextResponseService;
+import com.OhsunDosun.service.conversation.TextToSpeechService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,7 @@ public class ConversationService {
     private final ConversationLogService conversationLogService;
     private final ConversationRoomService conversationRoomService;
     private final TextResponseService textResponseService;
+    private final TextToSpeechService textToSpeechService;
 
     public ConversationResponse conversation(ConversationRequest request, int userNo) {
         // 방 존재 여부 검사
@@ -71,9 +74,16 @@ public class ConversationService {
                 JsonNode jsonNode = objectMapper.readTree(jsonString);
                 String extractedContent = jsonNode.get("content").asText();
 
+                // 음성 데이터 생성
+                byte[] audioData = textToSpeechService.convertTextToSpeech(extractedContent);
+
+                // 오디오 데이터를 Base64로 인코딩
+                String audioBase64 = Base64.getEncoder().encodeToString(audioData);
+
                 return ConversationResponse.builder()
                         .content(extractedContent)
                         .totalTokens(response.getTotalTokens())
+                        .audioData(audioBase64)
                         .build();
             } catch (IOException e) {
                 log.error("JSON 파싱 오류: content 필드에서 값을 추출할 수 없습니다.", e);
@@ -83,10 +93,18 @@ public class ConversationService {
                         .build();
             }
         } else {
+
+            // 음성 데이터 생성
+            byte[] audioData = textToSpeechService.convertTextToSpeech(content);
+
+            // 오디오 데이터를 Base64로 인코딩
+            String audioBase64 = Base64.getEncoder().encodeToString(audioData);
+
             // JSON이 아닌 경우는 단순 메시지로 처리
             return ConversationResponse.builder()
                     .content(content)
                     .totalTokens(response.getTotalTokens())
+                    .audioData(audioBase64)
                     .build();
         }
 
