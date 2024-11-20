@@ -79,11 +79,14 @@ public class ConversationService {
 
                 // 오디오 데이터를 Base64로 인코딩
                 String audioBase64 = Base64.getEncoder().encodeToString(audioData);
+                int extractedstep = jsonNode.get("step").asInt();
 
                 return ConversationResponse.builder()
                         .content(extractedContent)
                         .totalTokens(response.getTotalTokens())
                         .audioData(audioBase64)
+                        .step(extractedstep)
+                        .subTask(response.getSubTaskNo())
                         .build();
             } catch (IOException e) {
                 log.error("JSON 파싱 오류: content 필드에서 값을 추출할 수 없습니다.", e);
@@ -105,6 +108,7 @@ public class ConversationService {
                     .content(content)
                     .totalTokens(response.getTotalTokens())
                     .audioData(audioBase64)
+                    .subTask(response.getSubTaskNo())
                     .build();
         }
 
