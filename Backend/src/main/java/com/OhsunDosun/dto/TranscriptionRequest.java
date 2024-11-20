@@ -4,15 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ConversationResponse {
-    private String content;
-    private int totalTokens;
-    private String audioData;
-    private int step;
-    private String subTask;
+public class TranscriptionRequest {
+    private MultipartFile file;
+
 }
