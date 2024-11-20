@@ -1,6 +1,5 @@
 package com.OhsunDosun.service.conversation.task;
 
-import com.OhsunDosun.dto.ChatbotResponse;
 import com.OhsunDosun.dto.Favorites;
 import com.OhsunDosun.mapper.FavoritesMapper;
 import lombok.RequiredArgsConstructor;
