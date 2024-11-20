@@ -4,7 +4,9 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
-
+Backend/src/main/resources/bin/ffmpeg
+Backend/src/main/resources/bin/ffmpeg.exe
+.DS_Store
 ### IntelliJ IDEA ###
 /application.properties
 /.idea/
