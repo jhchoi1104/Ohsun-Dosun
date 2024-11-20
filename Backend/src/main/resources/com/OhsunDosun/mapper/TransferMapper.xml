@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.OhsunDosun.mapper.TransferMapper">
+
+    <!-- 송금 내역 추가 -->
+    <insert id="insertTransferHistory" parameterType="com.OhsunDosun.dto.TransferRequest">
+        INSERT INTO transfer_history
+        (
+        sender_id,
+        receiver_id,
+        amount,
+        transaction_date,
+        status,
+        created_at,
+        receiver_account_bank
+        )
+        VALUES (
+        #{senderId},
+        #{receiverId},
+        #{amount},
+        NOW(),
+        'Completed',
+        NOW(),
+        #{receiverAccountBank}
+        );
+    </insert>
+
+    <!-- 송금한 사람 계좌 잔액 업데이트(-) -->
+    <update id="updateAccountBalances">
+        UPDATE account_list
+        SET balance = balance - #{amount}
+        WHERE user_id = #{senderId};
+    </update>
+
+    <!-- 송금받는 사람 계좌 잔액 업데이트(+) -->
+    <update id="updateReceiverBalance">
+        UPDATE account_list
+        SET balance = balance + #{amount}
+        WHERE user_id = #{receiverId};
+    </update>
+
+</mapper>

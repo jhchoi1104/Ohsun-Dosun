@@ -18,4 +18,5 @@ public class HistoryDTO {
     private Date transactionDate;
     private String status;
     private Date createdAt;
+    private String receiverAccountBank;
 }
