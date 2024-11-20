@@ -72,7 +72,7 @@
         ],
         "additional_procedure": [
             {
-                "condition": "If the most recent response from the chatbot has step 2 and the content includes '님에게 송금하시겠습니까?', and the user's response is a positive confirmation like '응', '네', or '맞아요'",
+                "condition": "If the most recent response from the chatbot has step 2 and the content includes '님에게 송금하시겠습니까?', and the user's response is a positive confirmation ",
                 "response": {
                     "name": "[Previously Provided Name/Alias]",
                     "account": "",
@@ -83,7 +83,7 @@
                 }
             },
             {
-                "condition": "If the most recent response from the chatbot has step 2 and the amount value exists, and the content includes '님에게 송금하시겠습니까?', and the user's response is a positive confirmation like '응', '네', or '맞아요'",
+                "condition": "If the most recent response from the chatbot has step 2 and the amount value exists, and the content includes '님에게 송금하시겠습니까?', and the user's response is a positive confirmation ",
                 "response": {
                     "name": "[Previously Provided Name/Alias]",
                     "account": "",

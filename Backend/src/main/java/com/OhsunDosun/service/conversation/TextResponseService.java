@@ -41,7 +41,7 @@ public class TextResponseService {
         String input = request.getInput();
 
         // 이전 대화내용 조회
-        List<Log> conversationLogs = conversationRoomService.findLastNByConversationRoomNo(10, request.getConversationRoomNo());
+        List<Log> conversationLogs = conversationRoomService.findLastNByConversationRoomNo(1, request.getConversationRoomNo());
 
         // 첫 인사 생성
         if (conversationLogs.isEmpty() && request.getInput().equals("Greeting")) {
@@ -74,6 +74,8 @@ public class TextResponseService {
             case "003" -> {
 
                 response = transferService.generateTransferConversation(input, conversationLogs);
+                response.setSubTaskNo(subTaskNo);
+                log.info("response json 객체 확인 : {}" , response);
                 ObjectMapper objectMapper = new ObjectMapper();
                 String jsonString = response.getContent()
                         .replaceAll("```json", "")
@@ -113,7 +115,6 @@ public class TextResponseService {
                         step2_content_json.put("amount", amount);
                     }
                     String step2_content_string = step2_content_json.toString();
-                    response = new ChatbotResponse();
                     response.setContent(step2_content_string);
 
                 }
