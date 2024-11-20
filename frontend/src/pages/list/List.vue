@@ -273,7 +273,7 @@ watch(() => menuStore.isNavShow,
   padding: 5px;
   border-radius: 10px;
   text-align: center;
-  width: 100%;
+  width: 95%;
   max-width: 400px;
   margin-bottom: 10px; /* 아래 content와 간격 */
 }

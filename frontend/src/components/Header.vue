@@ -15,7 +15,7 @@ const toggleNavShow = () => {
     <div class="container-fluid" style="padding: 1%">
       <router-link class="navbar-brand" to="/">
         <img
-          src="@/assets/images/logo.png"
+          src="@/assets/images/ohsundosunlogo.png"
           alt="Logo"
           style="height: 100%; max-height: 40px"
         />
