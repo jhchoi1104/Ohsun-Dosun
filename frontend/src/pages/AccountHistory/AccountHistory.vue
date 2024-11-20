@@ -1,7 +1,7 @@
 <template>
   <div>
     <Header />
-    <div class="container">
+    <div class="main-container">
       <div class="header">
         <button @click="prevMonth">＜</button>
         <span>{{ currentMonth }}</span>
@@ -15,8 +15,14 @@
       <div class="balance-section">
         <div class="balance-title">입출금 현황</div>
         <div class="balance-bar">
-          <div class="depositBar" :style="{ width: depositPercentage + '%' }"></div>
-          <div class="withdrawal" :style="{ width: withdrawalPercentage + '%' }"></div>
+          <div
+            class="depositBar"
+            :style="{ width: depositPercentage + '%' }"
+          ></div>
+          <div
+            class="withdrawal"
+            :style="{ width: withdrawalPercentage + '%' }"
+          ></div>
         </div>
         <div class="balance-info">
           <div class="balance-row">
@@ -37,7 +43,11 @@
       </div>
 
       <div class="transaction-list">
-        <div class="transaction-item" v-for="(transaction, index) in transactions" :key="index">
+        <div
+          class="transaction-item"
+          v-for="(transaction, index) in transactions"
+          :key="index"
+        >
           <div class="date">{{ transaction.date }}</div>
           <div class="details">
             <div class="description-container">
@@ -55,13 +65,17 @@
 <script setup>
 import { ref, onMounted, onUnmounted, nextTick } from 'vue';
 import { Chart, PieController, ArcElement, Tooltip, Legend } from 'chart.js';
-import Header from '@/components/Header.vue'
+import Header from '@/components/Header.vue';
 import HistoryApi from '@/api/HistoryApi';
 
 Chart.register(PieController, ArcElement, Tooltip, Legend);
 
 // 현재 월을 초기값으로 설정
-const currentMonth = ref(new Date().getFullYear() + "." + String(new Date().getMonth() + 1).padStart(2, "0"));
+const currentMonth = ref(
+  new Date().getFullYear() +
+    '.' +
+    String(new Date().getMonth() + 1).padStart(2, '0')
+);
 const transactions = ref([]);
 const depositPercentage = ref(0);
 const withdrawalPercentage = ref(0);
@@ -73,16 +87,21 @@ let chart = null;
 // 날짜 포맷팅 함수
 function formatDate(timestamp) {
   const date = new Date(timestamp);
-  return `${date.getFullYear()}. ${String(date.getMonth() + 1).padStart(2, '0')}. ${String(date.getDate()).padStart(2, '0')}`;
+  return `${date.getFullYear()}. ${String(date.getMonth() + 1).padStart(
+    2,
+    '0'
+  )}. ${String(date.getDate()).padStart(2, '0')}`;
 }
 
 // 월별 데이터 필터링 함수
 function filterTransactionsByMonth(transactions, yearMonth) {
-  const [year, month] = yearMonth.split(".");
-  return transactions.filter(transaction => {
+  const [year, month] = yearMonth.split('.');
+  return transactions.filter((transaction) => {
     const transactionDate = new Date(transaction.transactionDate);
-    return transactionDate.getFullYear() === parseInt(year) && 
-           (transactionDate.getMonth() + 1) === parseInt(month);
+    return (
+      transactionDate.getFullYear() === parseInt(year) &&
+      transactionDate.getMonth() + 1 === parseInt(month)
+    );
   });
 }
 
@@ -91,10 +110,10 @@ function transformTransaction(transaction) {
   const isWithdrawal = transaction.senderId === 1;
   return {
     date: formatDate(transaction.transactionDate),
-    description: isWithdrawal ? "출금" : "입금",
-    type: isWithdrawal ? "withdraw" : "deposit",
+    description: isWithdrawal ? '출금' : '입금',
+    type: isWithdrawal ? 'withdraw' : 'deposit',
     amount: transaction.amount.toLocaleString(),
-    balance: "잔액 확인 중"
+    balance: '잔액 확인 중',
   };
 }
 
@@ -102,8 +121,8 @@ function transformTransaction(transaction) {
 function calculatePercentages(transactions) {
   let depositAmount = 0;
   let withdrawalAmount = 0;
-  
-  transactions.forEach(transaction => {
+
+  transactions.forEach((transaction) => {
     if (transaction.senderId === 1) {
       withdrawalAmount += transaction.amount;
     } else {
@@ -123,22 +142,26 @@ function calculatePercentages(transactions) {
 
   return {
     deposit: Math.round((depositAmount / total) * 100),
-    withdrawal: Math.round((withdrawalAmount / total) * 100)
+    withdrawal: Math.round((withdrawalAmount / total) * 100),
   };
 }
 
 // 월 이동 함수
 function prevMonth() {
-  const [year, month] = currentMonth.value.split(".");
+  const [year, month] = currentMonth.value.split('.');
   const newDate = new Date(year, parseInt(month) - 2, 1);
-  currentMonth.value = `${newDate.getFullYear()}.${String(newDate.getMonth() + 1).padStart(2, "0")}`;
+  currentMonth.value = `${newDate.getFullYear()}.${String(
+    newDate.getMonth() + 1
+  ).padStart(2, '0')}`;
   updateDisplayData();
 }
 
 function nextMonth() {
-  const [year, month] = currentMonth.value.split(".");
+  const [year, month] = currentMonth.value.split('.');
   const newDate = new Date(year, parseInt(month), 1);
-  currentMonth.value = `${newDate.getFullYear()}.${String(newDate.getMonth() + 1).padStart(2, "0")}`;
+  currentMonth.value = `${newDate.getFullYear()}.${String(
+    newDate.getMonth() + 1
+  ).padStart(2, '0')}`;
   updateDisplayData();
 }
 
@@ -148,7 +171,7 @@ function createChart(deposit, withdrawal) {
     chart.destroy();
   }
 
-  const ctx = document.getElementById("PieChart");
+  const ctx = document.getElementById('PieChart');
   if (!ctx) {
     console.error('차트 캔버스를 찾을 수 없습니다');
     return;
@@ -158,10 +181,12 @@ function createChart(deposit, withdrawal) {
     type: 'doughnut',
     data: {
       labels: ['입금', '출금'],
-      datasets: [{
-        data: [deposit, withdrawal],
-        backgroundColor: ['#a9c9e3', '#f799c8'],
-      }]
+      datasets: [
+        {
+          data: [deposit, withdrawal],
+          backgroundColor: ['#a9c9e3', '#f799c8'],
+        },
+      ],
     },
     options: {
       responsive: true,
@@ -176,13 +201,16 @@ function createChart(deposit, withdrawal) {
 
 // 화면 데이터 업데이트 함수
 async function updateDisplayData() {
-  const filteredTransactions = filterTransactionsByMonth(allTransactions.value, currentMonth.value);
+  const filteredTransactions = filterTransactionsByMonth(
+    allTransactions.value,
+    currentMonth.value
+  );
   transactions.value = filteredTransactions.map(transformTransaction);
-  
+
   const percentages = calculatePercentages(filteredTransactions);
   depositPercentage.value = percentages.deposit;
   withdrawalPercentage.value = percentages.withdrawal;
-  
+
   await nextTick(() => {
     createChart(depositPercentage.value, withdrawalPercentage.value);
   });
@@ -206,23 +234,23 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.container {
+.main-container {
   height: calc(100vh - 70px);
   display: flex;
   flex-direction: column;
   align-items: stretch;
   box-sizing: border-box;
-  background-color: #FFF5F2;
+  background-color: #fff5f2;
   padding: 0 20px;
-  width: 400px;
   margin: 0 auto;
 }
 
-.balance-section, .transaction-list {
+.balance-section,
+.transaction-list {
   width: 100%;
   padding: 20px;
   box-sizing: border-box;
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   border-radius: 10px;
   margin: 10px 0;
 }
@@ -320,7 +348,7 @@ onUnmounted(() => {
 }
 
 .transaction-list {
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   border-radius: 10px;
   padding: 20px;
   margin: 10px 0;
@@ -331,7 +359,7 @@ onUnmounted(() => {
 }
 
 .transaction-item {
-  border-bottom: 1px solid #E5E5E5;
+  border-bottom: 1px solid #e5e5e5;
   padding: 10px 0;
 }
 
