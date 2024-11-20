@@ -1,17 +1,17 @@
 <script setup>
 import Header from '@/components/Header.vue';
 import { ref } from 'vue';
-import { sendAudioToServer} from '@/api/SttApi';  // SttApi.js에서 함수 import
-import { sendTextToServer} from '@/api/ChatBotApi.js';
+import { sendAudioToServer } from '@/api/SttApi'; // SttApi.js에서 함수 import
+import { sendTextToServer } from '@/api/ChatBotApi.js';
 import axios from 'axios';
 const isRecording = ref(false);
 const errorMessage = ref('');
 const transcription = ref('');
 const chatbotMessage = ref(''); // Chatbot 응답 메시지
+const audio = ref(''); // 오디오
 
 // 녹음기 초기화
 let mediaRecorder = null;
-
 
 const startRecording = () => {
   try {
@@ -19,10 +19,11 @@ const startRecording = () => {
     let audioChunks = [];
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      throw new Error("마이크 권한을 요청할 수 없습니다.");
+      throw new Error('마이크 권한을 요청할 수 없습니다.');
     }
 
-    navigator.mediaDevices.getUserMedia({ audio: true })
+    navigator.mediaDevices
+      .getUserMedia({ audio: true })
       .then((stream) => {
         mediaRecorder = new MediaRecorder(stream);
 
@@ -37,20 +38,36 @@ const startRecording = () => {
 
           try {
             const data = await sendAudioToServer(formData);
-            transcription.value = data.text || "텍스트를 인식할 수 없습니다.";
-            if(transcription.value !== "텍스트를 인식할 수 없습니다"){
+            console.log(data);
+            transcription.value = data.text || '텍스트를 인식할 수 없습니다.';
+            if (transcription.value !== '텍스트를 인식할 수 없습니다') {
               // conversationRoomNo와 userId는 임의의 값으로 지정
-              const conversationRoomNo = 3; // 임의로 지정한 대화방 번호
-              const userId = 3; // 임의로 지정한 사용자 ID
+              const conversationRoomNo = 1; // 임의로 지정한 대화방 번호
+              const userId = 1; // 임의로 지정한 사용자 ID
 
               // ChatBot API 호출
-              const response = await sendTextToServer(userId, transcription.value, conversationRoomNo);
+              const response = await sendTextToServer(
+                userId,
+                transcription.value,
+                conversationRoomNo
+              );
               chatbotMessage.value = response.content; // Chatbot 응답 저장
+              const audioData = response.audioData;
+              const byteCharacters = atob(audioData);
+              const byteNumbers = new Array(byteCharacters.length);
+              for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+              }
+              const byteArray = new Uint8Array(byteNumbers);
+              const audioBlob = new Blob([byteArray], { type: 'audio/wav' });
 
+              const audioUrl = URL.createObjectURL(audioBlob);
+              const audio = new Audio(audioUrl);
+              audio.play();
+              console.log(audio.value);
             }
-
           } catch (error) {
-            errorMessage.value = "서버에 전송하는 중 오류가 발생했습니다.";
+            errorMessage.value = '서버에 전송하는 중 오류가 발생했습니다.';
           }
         };
 
@@ -59,15 +76,14 @@ const startRecording = () => {
         errorMessage.value = '';
       })
       .catch((err) => {
-        console.error("녹음 시작 오류:", err);
-        errorMessage.value = "마이크 권한을 확인해주세요.";
+        console.error('녹음 시작 오류:', err);
+        errorMessage.value = '마이크 권한을 확인해주세요.';
       });
   } catch (error) {
-    console.error("녹음기 초기화 오류:", error);
-    errorMessage.value = "녹음기를 초기화할 수 없습니다.";
+    console.error('녹음기 초기화 오류:', error);
+    errorMessage.value = '녹음기를 초기화할 수 없습니다.';
   }
 };
-
 
 // 녹음 중지 함수
 const stopRecording = () => {
@@ -75,7 +91,7 @@ const stopRecording = () => {
     mediaRecorder.stop();
     isRecording.value = false;
   } else {
-    errorMessage.value = "녹음이 진행되지 않았습니다.";
+    errorMessage.value = '녹음이 진행되지 않았습니다.';
   }
 };
 </script>
@@ -83,12 +99,19 @@ const stopRecording = () => {
 <template>
   <Header />
   <div class="main-container">
-    <p v-if="errorMessage" style="color: red;">{{ errorMessage }}</p>
-    <p class="additional-bubble" v-if="chatbotMessage" style="color: blue;">Chatbot 응답: {{ chatbotMessage }}</p> <!-- Chatbot 응답 표시 -->
-    
+    <p v-if="errorMessage" style="color: red">{{ errorMessage }}</p>
+    <p class="additional-bubble" v-if="chatbotMessage">
+      Chatbot 응답: {{ chatbotMessage }}
+    </p>
+    <!-- Chatbot 응답 표시 -->
+
     <div class="sub-container">
       <div id="main-character">
-        <img src="@/assets/images/sooni.png" alt="" />
+        <img v-if="!isRecording" src="@/assets/images/sooni.png" alt="" />
+        <div v-else="isRecording" class="listenimg">
+          듣는 중...
+          <img src="@/assets/images/listen.png" alt="" />
+        </div>
       </div>
     </div>
     <!-- <div class="speech-bubble"> -->
@@ -96,8 +119,12 @@ const stopRecording = () => {
       인식된 텍스트: {{ transcription }}
     </div>
     <div class="button-section">
-      <button class="chat-button" @click="startRecording" v-if="!isRecording">말하기</button>
-      <button class="chat-button" @click="stopRecording" v-if="isRecording">중지</button>
+      <button class="chat-button" @click="startRecording" v-if="!isRecording">
+        말하기
+      </button>
+      <button class="chat-button" @click="stopRecording" v-if="isRecording">
+        중지
+      </button>
     </div>
   </div>
 </template>
@@ -179,27 +206,19 @@ const stopRecording = () => {
   border-radius: 10px; /* 모서리 둥글게 */
   padding: 10px 15px; /* 패딩 추가 */
   position: absolute; /* 절대 위치 설정 */
-  max-width: 80%; /* 최대 너비 설정 */
+  max-width: 100%; /* 최대 너비 설정 */
+  width: 300px;
+  max-height: 150px;
   text-align: center; /* 텍스트 중앙 정렬 */
   top: calc(50% - 150px); /* 이미지 바로 위로 위치 조정 */
   left: 50%; /* 수평 중앙 정렬 */
   transform: translate(-50%, -100%); /* 정확히 이미지 위에 배치 */
   z-index: 2; /* 이미지 위에 표시 */
-}
-
-.additional-bubble::after {
-  content: '';
-  position: absolute;
-  top: 100%; /* 말풍선 아래쪽에 위치 */
-  left: 50%; /* 중앙 정렬 */
-  transform: translateX(-50%);
-  border-width: 10px; /* 삼각형 크기 */
-  border-style: solid;
-  border-color: #efefef transparent transparent transparent; /* 삼각형 색상 */
+  overflow: scroll;
 }
 
 .speech-bubble {
-  width: 80%; /* 박스 너비 */
+  width: 90%; /* 박스 너비 */
   background-color: #f9f9f9; /* 박스 배경색 */
   border: 1px solid #ddd; /* 박스 테두리 */
   border-radius: 10px; /* 박스 모서리 둥글게 */
@@ -210,6 +229,5 @@ const stopRecording = () => {
   position: relative; /* 박스의 위치를 일반 흐름에 맞춤 */
   top: -100px; /* Y축 위치 조정 (이미지 위로 이동) */
   margin-top: 450px;
-  
 }
 </style>
