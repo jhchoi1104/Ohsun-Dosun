@@ -34,6 +34,7 @@ const menuStore = useMenuStore();
 const closeNav = menuStore.closeNav;
 
 const isMenuOpen = ref(false); // 메뉴의 열림/닫힘 상태를 저장하는 변수
+console.log(isMenuOpen.value);
 
 // 페이지 이동 함수
 const goToPage = (path) => {

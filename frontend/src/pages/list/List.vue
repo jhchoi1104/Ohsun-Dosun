@@ -23,6 +23,7 @@
       </div>
     </div>
     <div class="d-flex flex-column" id="middle">
+    <div class="list-container" :class="{ 'list-container-active':menuStore.isNavShow}"> 
       <div
         class="middle-item"
         @click="navigateToHistory"
@@ -50,6 +51,7 @@
         환경 설정
         <span class="arrow">></span>
       </div>
+    </div>
     </div>
     <div class="d-flex" id="bottom">
       <div class="ars">
@@ -86,7 +88,8 @@
 import Navbar from '@/components/Navbar.vue';
 import Header from '@/components/Header.vue';
 import { useRouter } from 'vue-router';
-import { ref } from 'vue';
+import { useMenuStore } from '@/stores/close.js';
+import { ref, watch } from 'vue';
 import '@fortawesome/fontawesome-free/css/all.css';
 
 const props = defineProps({
@@ -97,11 +100,13 @@ const router = useRouter();
 
 //계좌 내역 조회로 이동
 function navigateToHistory() {
+  closeMenu();
   router.push('/history');
 }
 
 //챗봇 내역 조회로 이동
 function navigateToChatRoom() {
+  closeMenu();
   router.push('/chatbotList');
 }
 
@@ -115,6 +120,21 @@ function openModal() {
 function closeModal() {
   showModal.value = false;
 }
+
+const menuStore = useMenuStore();
+
+const closeMenu = () => {
+  menuStore.closeNav(); //메뉴 닫기
+};
+
+watch(() => menuStore.isNavShow,
+(newValue) => {
+  if(!newValue){
+    console.log('메뉴가 닫혔습니다.');
+  }
+}
+);
+
 </script>
 
 <style>
@@ -276,5 +296,9 @@ function closeModal() {
 
 .phone-number:hover {
   text-decoration: underline;
+}
+
+.list-container-active {
+  transform: translateX(0);
 }
 </style>

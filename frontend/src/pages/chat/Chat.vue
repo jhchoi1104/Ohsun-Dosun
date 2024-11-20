@@ -84,21 +84,24 @@ const stopRecording = () => {
   <Header />
   <div class="main-container">
     <p v-if="errorMessage" style="color: red;">{{ errorMessage }}</p>
-    <p v-if="transcription">인식된 텍스트: {{ transcription }}</p>
-    <p v-if="chatbotMessage" style="color: blue;">Chatbot 응답: {{ chatbotMessage }}</p> <!-- Chatbot 응답 표시 -->
+    <p class="additional-bubble" v-if="chatbotMessage" style="color: blue;">Chatbot 응답: {{ chatbotMessage }}</p> <!-- Chatbot 응답 표시 -->
     
     <div class="sub-container">
       <div id="main-character">
         <img src="@/assets/images/sooni.png" alt="" />
       </div>
     </div>
-    
+    <div class="speech-bubble">
+    <!-- <div class="speech-bubble" v-if="transcription"> -->
+      인식된 텍스트: {{ transcription }}
+    </div>
     <div class="button-section">
       <button class="chat-button" @click="startRecording" v-if="!isRecording">말하기</button>
       <button class="chat-button" @click="stopRecording" v-if="isRecording">중지</button>
     </div>
   </div>
 </template>
+
 <style>
 .main-container {
   display: flex;
@@ -167,5 +170,44 @@ const stopRecording = () => {
 #main-logo > img {
   width: 250px; /* 로고 이미지의 너비 설정 */
   height: auto; /* 비율 유지 */
+}
+
+.additional-bubble {
+  background-color: #efefef; /* 말풍선 배경색 */
+  border-radius: 10px; /* 모서리 둥글게 */
+  padding: 10px 15px; /* 패딩 추가 */
+  position: absolute; /* 절대 위치 설정 */
+  max-width: 80%; /* 최대 너비 설정 */
+  text-align: center; /* 텍스트 중앙 정렬 */
+  top: calc(50% - 150px); /* 이미지 바로 위로 위치 조정 */
+  left: 50%; /* 수평 중앙 정렬 */
+  transform: translate(-50%, -100%); /* 정확히 이미지 위에 배치 */
+  z-index: 2; /* 이미지 위에 표시 */
+}
+
+.additional-bubble::after {
+  content: '';
+  position: absolute;
+  top: 100%; /* 말풍선 아래쪽에 위치 */
+  left: 50%; /* 중앙 정렬 */
+  transform: translateX(-50%);
+  border-width: 10px; /* 삼각형 크기 */
+  border-style: solid;
+  border-color: #efefef transparent transparent transparent; /* 삼각형 색상 */
+}
+
+.speech-bubble {
+  width: 80%; /* 박스 너비 */
+  background-color: #f9f9f9; /* 박스 배경색 */
+  border: 1px solid #ddd; /* 박스 테두리 */
+  border-radius: 10px; /* 박스 모서리 둥글게 */
+  padding: 15px; /* 안쪽 여백 */
+  text-align: center; /* 텍스트 중앙 정렬 */
+  margin: 10px auto; /* 위아래 여백 및 중앙 정렬 */
+  z-index: 1; /* 레이어 우선 순위 설정 */
+  position: relative; /* 박스의 위치를 일반 흐름에 맞춤 */
+  top: -60px; /* Y축 위치 조정 (이미지 위로 이동) */
+  margin-top: 450px;
+  
 }
 </style>
