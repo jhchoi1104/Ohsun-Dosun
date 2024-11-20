@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import com.OhsunDosun.service.stt.OpenAIClientService;
 
 @Slf4j
 @RestController
