@@ -52,7 +52,18 @@ const startRecording = () => {
                 conversationRoomNo
               );
               chatbotMessage.value = response.content; // Chatbot 응답 저장
-              audio.value = response.audioData;
+              const audioData = response.audioData;
+              const byteCharacters = atob(audioData);
+              const byteNumbers = new Array(byteCharacters.length);
+              for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+              }
+              const byteArray = new Uint8Array(byteNumbers);
+              const audioBlob = new Blob([byteArray], { type: 'audio/wav' });
+
+              const audioUrl = URL.createObjectURL(audioBlob);
+              const audio = new Audio(audioUrl);
+              audio.play();
               console.log(audio.value);
             }
           } catch (error) {
