@@ -191,7 +191,11 @@ const stopRecording = () => {
   border-radius: 10px; /* 박스 모서리 둥글게 */
   padding: 15px; /* 안쪽 여백 */
   text-align: center; /* 텍스트 중앙 정렬 */
-  margin: 20px 0; /* 위아래 여백 */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* 박스 그림자 */
+  margin: 10px auto; /* 위아래 여백 및 중앙 정렬 */
+  z-index: 1; /* 레이어 우선 순위 설정 */
+  position: relative; /* 박스의 위치를 일반 흐름에 맞춤 */
+  top: -60px; /* Y축 위치 조정 (이미지 위로 이동) */
+  margin-top: 450px;
+  
 }
 </style>
