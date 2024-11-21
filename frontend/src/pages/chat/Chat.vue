@@ -249,7 +249,7 @@ const closeTransferForm = () => {
   <div class="main-container">
     <p v-if="errorMessage" style="color: red">{{ errorMessage }}</p>
     <p class="additional-bubble" v-if="chatbotMessage">
-      Chatbot 응답: {{ chatbotMessage }}
+      {{ chatbotMessage }}
     </p>
     <!-- Chatbot 응답 표시 -->
 
@@ -268,7 +268,7 @@ const closeTransferForm = () => {
       />
     </div>
     <div class="speech-bubble" v-if="transcription">
-      인식된 텍스트: {{ transcription }}
+      {{ transcription }}
     </div>
     <div class="button-section">
       <button class="chat-button" @click="startRecording" v-if="!isRecording">
@@ -383,7 +383,7 @@ const closeTransferForm = () => {
 }
 
 .additional-bubble {
-  background-color: #efefef; /* 말풍선 배경색 */
+  background-color: #f7c8bd; /* 말풍선 배경색 */
   border-radius: 10px; /* 모서리 둥글게 */
   padding: 10px 15px; /* 패딩 추가 */
   position: absolute; /* 절대 위치 설정 */
