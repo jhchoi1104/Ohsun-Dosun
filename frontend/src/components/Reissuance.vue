@@ -4,16 +4,14 @@
       <span class="close-button" @click="$emit('close')">&times;</span>
       <div class="sss">
         <div class="additional-bubble" v-if="chatbotMessage">
-          <!-- {{ chatbotMessage }} -->
           <p v-html="chatbotMessage"></p>
         </div>
       </div>
-      <div class="input-section" v-if="currentStep !== 4">
+      <div class="input-section" v-if="currentStep !== 2 && currentStep !== 3">
         <div
           v-for="(input, index) in dynamicInputs"
           :key="index"
           class="input-group"
-          v-if="currentStep !== 3 && currentStep !== 5"
         >
           <label :for="'input-' + index" class="input-label">{{
             input.label
@@ -26,30 +24,30 @@
             class="input-field"
           />
         </div>
-        <div v-if="currentStep === 3" class="list-section">
-          <ul class="option-list">
-            <li class="option-item" @click="selectOption('1')">
-              국민은행 계좌 인증
-            </li>
-            <li class="option-item" @click="selectOption('2')">
-              1원 입금 인증
-            </li>
-            <li class="option-item" @click="selectOption('3')">화상 통화</li>
-          </ul>
-        </div>
       </div>
-      <!-- Step 4일 때 Camera 컴포넌트 표시 -->
-      <Camera v-if="currentStep === 4" :show="currentStep === 4" />
-
-      <!-- Step 5: 약관 동의 -->
-      <div v-if="currentStep === 5" class="terms-section">
-        <input type="checkbox" id="terms-agree" v-model="termsAgreed" />
-        <label for="terms-agree">
-          <a href="#" @click.prevent="openTermsPopup">약관 및 상품 설명서</a>에
-          동의합니다.
-        </label>
+      <div v-if="currentStep === 2" class="list-section">
+        <ul class="option-list">
+          <li class="option-item" @click="selectOption('1')">지점 수령</li>
+          <li class="option-item" @click="selectOption('2')">STM 수령</li>
+          <li class="option-item" @click="selectOption('3')">등기 우편 수령</li>
+        </ul>
       </div>
-
+      <div v-if="currentStep === 3" class="input-group">
+        <label for="account-select" class="input-label">계좌 번호 선택</label>
+        <select
+          id="account-select"
+          v-model="selectedAccount"
+          class="input-field"
+        >
+          <option
+            v-for="(account, index) in accountOptions"
+            :key="index"
+            :value="account"
+          >
+            {{ account }}
+          </option>
+        </select>
+      </div>
       <div class="button-section">
         <button class="chat-button" @click="nextStep">확인</button>
       </div>
@@ -59,7 +57,6 @@
 
 <script setup>
 import { defineProps, defineEmits, computed, ref, watch } from 'vue';
-import Camera from './Camera.vue'; // Camera 컴포넌트 임포트
 
 const props = defineProps({
   show: {
@@ -76,8 +73,13 @@ const props = defineProps({
 // update:step 이벤트를 추가
 const emit = defineEmits(['close', 'update:step']);
 
+const accountOptions = [
+  'KB나라사랑우대통장 947402-00-094829',
+  'KB종합통장-보통예금 535901-01-129583',
+  '계좌 3',
+];
+
 const currentStep = ref(props.step);
-const termsAgreed = ref(false); // 약관 동의 상태
 
 // props의 step이 변경되면 currentStep도 업데이트
 watch(
@@ -89,12 +91,11 @@ watch(
 
 // 스텝별로 chatbotMessage 설정
 const chatbotMessages = {
-  1: '입출금 계좌 개설을 위해 본인 인증이 필요합니다.<br>이름과 주민등록번호를 입력해주세요.',
-  2: '입출금 계좌 개설을 위해 다음 단계로 이동합니다.<br>휴대폰 인증, 신분증 확인이 필요합니다.',
-  3: '계좌 개설을 위해 추가 본인 인증이 필요합니다.<br>원하는 인증 방법 하나를 고르세요.',
-  4: '신분증과 얼굴이 잘 나오게 화면을 봐주세요.',
-  5: '마지막 입력입니다!<br>고객 확인 정보를 입력해주세요.',
-  6: '축하합니다! 입출금 계좌 개설이 완료되었습니다. 이제 통장을 사용할 수 있습니다.',
+  1: '통장 재발행 신청을 도와드리겠습니다.<br>먼저 고객님의 성함, 생년월일을 입력해주세요.',
+  2: '통장 재발급 신청을 도와드리겠습니다. 원하시는 통장 재발급 수령 방법을 선택해 주세요.',
+  3: '지점 수령을 선택하셨군요! <br> 수령할 계좌와 수령하실 분의 성함을 입력해주세요.',
+  4: "지점 수령은 KB 국민은행 지점에서 받을 수 있습니다. 신청후 5일 이내에 받을 수 있습니다. <br> 발행 수수료가 발생할 수 있습니다.<br>동의하시면 '확인'을 눌러주세요.",
+  5: '통장 재발행 신청이 완료되었습니다!<br> 고객님께서 선택하신 방식으로 통장 수령이 가능합니다. 추가 문의사항이 있으시면 언제든지 말씀해 주세요. 감사합니다',
 };
 
 const chatbotMessage = ref(chatbotMessages[currentStep.value] || '');
@@ -110,12 +111,14 @@ const dynamicInputs = computed(() => {
       { type: 'text', placeholder: '이름', value: '', label: '이름' },
       {
         type: 'number',
-        placeholder: '주민등록번호 13자리를 입력해주세요.',
+        placeholder: '생년월일 8자리를 입력해주세요.',
         value: '',
-        label: '주민등록번호',
+        label: '생년월일',
       },
     ];
   } else if (currentStep.value === 2) {
+    return [];
+  } else if (currentStep.value === 3) {
     return [
       { type: 'text', placeholder: '이름', value: '', label: '이름' },
       { type: 'text', placeholder: '생년월일', value: '', label: '생년월일' },
@@ -126,13 +129,9 @@ const dynamicInputs = computed(() => {
         label: '휴대폰 번호',
       },
     ];
-  } else if (currentStep.value === 3) {
-    return [];
   } else if (currentStep.value === 4) {
     return [];
   } else if (currentStep.value === 5) {
-    return [];
-  } else if (currentStep.value === 6) {
     return [];
   }
   return [];
@@ -140,26 +139,16 @@ const dynamicInputs = computed(() => {
 
 // 스텝을 증가시키는 함수
 const nextStep = () => {
-  if (currentStep.value < 6) {
+  if (currentStep.value < 5) {
     currentStep.value += 1; // 로컬 상태 업데이트
     emit('update:step', currentStep.value); // 부모 컴포넌트에 업데이트 알림
   } else {
     emit('close'); // Emit close event when reaching step 6
   }
 };
-
 const selectOption = (option) => {
   console.log(`${option} 선택됨`);
   nextStep(); // 옵션 선택 후 스텝 증가
-};
-
-// 팝업으로 PDF 열기 함수
-const openTermsPopup = () => {
-  window.open(
-    'http://localhost:5173/Perms.pdf',
-    '약관 및 상품 설명서',
-    'width=800,height=600'
-  );
 };
 </script>
 
@@ -201,7 +190,7 @@ const openTermsPopup = () => {
 }
 
 .sss {
-  height: 100px; /* 고정된 높이 설정 */
+  height: 150px; /* 고정된 높이 설정 */
   overflow-y: auto; /* 텍스트 넘칠 때 스크롤 */
 }
 
@@ -209,7 +198,7 @@ const openTermsPopup = () => {
   background-color: #efefef; /* 말풍선 배경색 */
   border-radius: 10px; /* 모서리 둥글게 */
   padding: 10px 15px; /* 패딩 추가 */
-  max-width: 100%; /* 최대 너비 설정 */
+  /* max-width: 100%; */ /* Remove or comment out this line */
   text-align: center; /* 텍스트 중앙 정렬 */
   margin: 5px auto; /* 위아래 간격을 줄임 */
 }

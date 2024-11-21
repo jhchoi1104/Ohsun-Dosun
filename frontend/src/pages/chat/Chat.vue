@@ -8,7 +8,9 @@ import { bringAudioFromServer } from '@/api/TtsApi.js';
 import axios from 'axios';
 import Consultant from '@/components/Consultant.vue';
 import NewIssuanceForm from '@/components/NewIssuanceForm.vue';
+import NewReissuanceForm from '@/components/Reissuance.vue';
 const NewIssuanceFormVisible = ref(false);
+const NewReissunaceFormVisible = ref(false);
 const isConsultantModalVisible = ref(false);
 const isRecording = ref(false);
 const errorMessage = ref('');
@@ -104,6 +106,9 @@ const startRecording = () => {
                     openConsultantModal();
                   }, 3000); //3초 지연
                   break;
+                case '004':
+                  openNewReissuanceForm();
+                  break;
                 case '005':
                   openNewIssuanceForm();
 
@@ -167,6 +172,14 @@ const openNewIssuanceForm = () => {
 const closeNewIssuanceForm = () => {
   NewIssuanceFormVisible.value = false;
 };
+
+const openNewReissuanceForm = () => {
+  NewReissunaceFormVisible.value = true;
+};
+
+const closeReissunaceForm = () => {
+  NewReissunaceFormVisible.value = false;
+};
 </script>
 
 <template>
@@ -209,6 +222,11 @@ const closeNewIssuanceForm = () => {
       v-if="NewIssuanceFormVisible"
       :show="NewIssuanceFormVisible"
       @close="closeNewIssuanceForm"
+    />
+    <NewReissuanceForm
+      v-if="NewReissunaceFormVisible"
+      :show="NewReissunaceFormVisible"
+      @close="closeReissunaceForm"
     />
   </div>
 </template>
