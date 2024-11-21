@@ -248,7 +248,11 @@ const closeTransferForm = () => {
   <Header />
   <div class="main-container">
     <p v-if="errorMessage" style="color: red">{{ errorMessage }}</p>
-    <p class="additional-bubble" v-if="chatbotMessage">
+    <p
+      class="additional-bubble"
+      v-if="chatbotMessage"
+      :style="{ whiteSpace: 'pre-line' }"
+    >
       {{ chatbotMessage }}
     </p>
     <!-- Chatbot 응답 표시 -->
@@ -304,6 +308,9 @@ const closeTransferForm = () => {
 </template>
 
 <style>
+.additional-bubble {
+  white-space: pre-line;
+}
 .main-container {
   display: flex;
   flex-direction: column;
