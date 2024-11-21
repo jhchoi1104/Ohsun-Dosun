@@ -6,7 +6,6 @@ import { useRoute } from 'vue-router';
 
 const route = useRoute();
 const id = route.params.id; // 동적 경로의 id 가져오기
-console.log('id: ', id);
 
 // 메시지를 저장할 변수
 const messages = ref([]);
@@ -18,7 +17,6 @@ const fetchMessages = async () => {
       `http://localhost:8080/api/chatbotRoom/${id}`
     );
     messages.value = response.data; // 서버 응답 데이터를 messages에 저장
-    console.log(messages.value);
   } catch (error) {
     console.error('Error fetching messages:', error);
   }
@@ -59,10 +57,6 @@ onMounted(() => {
             message.timestamp
           }}</span>
         </div>
-        <p class="m-0">
-          {{ message.messageText }}
-        </p>
-
         <p class="m-0">
           {{ message.messageText }}
         </p>

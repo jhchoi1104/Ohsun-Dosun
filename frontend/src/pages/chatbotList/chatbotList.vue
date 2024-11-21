@@ -12,7 +12,6 @@ const fetchChatRoomList = async () => {
     // GET 요청을 통해 데이터 가져오기
     const response = await axios.get('http://localhost:8080/api/chatbotRoom');
     chatRoomList.value = response.data; // 서버 응답 데이터를 messages에 저장
-    console.log(chatRoomList.value); // 콘솔에 응답 데이터 출력
   } catch (error) {
     console.error('Error fetching messages:', error); // 오류 처리
   }

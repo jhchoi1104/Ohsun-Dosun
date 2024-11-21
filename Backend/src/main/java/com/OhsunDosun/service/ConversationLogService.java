@@ -17,5 +17,6 @@ public class ConversationLogService {
     public void createConversationLog(ConversationLogRequest request) {
         createConversationLogMapper.createConversationLogUser(request);
         createConversationLogMapper.createConversationLogBot(request);
+        createConversationLogMapper.updateTimestamp(request.getConversationRoomNo());
     }
 }
