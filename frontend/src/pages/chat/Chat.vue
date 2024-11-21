@@ -10,11 +10,14 @@ import Consultant from '@/components/Consultant.vue';
 import NewIssuanceForm from '@/components/NewIssuanceForm.vue';
 import NewReissuanceForm from '@/components/Reissuance.vue';
 import TransferForm from '@/components/TransferForm.vue';
+import LoanDetail from '@/components/LoanDetail.vue';
+
 const NewIssuanceFormVisible = ref(false);
 const NewReissunaceFormVisible = ref(false);
 const isConsultantModalVisible = ref(false);
 const TransferFormVisible = ref(false);
 const isRecording = ref(false);
+const isLoanDetailVisible = ref(false); //추가
 const errorMessage = ref('');
 const transcription = ref('');
 const chatbotMessage = ref(''); // Chatbot 응답 메시지
@@ -26,31 +29,31 @@ import { useInputStore } from '@/stores/inputStore';
 const inputStore = useInputStore();
 // 버튼을 눌러서 아래 이벤트를 실행해야 됨.
 // const exampleString = '안녕하세요. tts가 잘되는지 테스트해봅니다.';
-// const playAudio = async () => {
-//   try {
-//     // 서버에서 오디오 데이터 가져오기
-//     const base64Audio = await bringAudioFromServer(exampleString);
+const playAudio = async (input) => {
+  try {
+    // 서버에서 오디오 데이터 가져오기
+    const base64Audio = await bringAudioFromServer(input);
 
-//     // Base64 디코딩 및 오디오 재생
-//     const byteCharacters = atob(base64Audio);
-//     const byteNumbers = new Array(byteCharacters.length);
-//     for (let i = 0; i < byteCharacters.length; i++) {
-//       byteNumbers[i] = byteCharacters.charCodeAt(i);
-//     }
-//     const byteArray = new Uint8Array(byteNumbers);
-//     const audioBlob = new Blob([byteArray], { type: 'audio/wav' });
+    // Base64 디코딩 및 오디오 재생
+    const byteCharacters = atob(base64Audio);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    const audioBlob = new Blob([byteArray], { type: 'audio/wav' });
 
-//     // Blob URL 생성 후 오디오 재생
-//     const audioUrl = URL.createObjectURL(audioBlob);
+    // Blob URL 생성 후 오디오 재생
+    const audioUrl = URL.createObjectURL(audioBlob);
 
-//     console.log(audioUrl);
-//     const audio = new Audio(audioUrl);
-//     audio.play();
-//   } catch (error) {
-//     console.error('TTS 처리 중 오류:', error);
-//     alert('오류가 발생했습니다. 콘솔을 확인하세요.');
-//   }
-// };
+    console.log(audioUrl);
+    audio = new Audio(audioUrl);
+    audio.play();
+  } catch (error) {
+    console.error('TTS 처리 중 오류:', error);
+    alert('오류가 발생했습니다. 콘솔을 확인하세요.');
+  }
+};
 
 // 녹음기 초기화
 let mediaRecorder = null;
@@ -90,7 +93,7 @@ const startRecording = () => {
             transcription.value = data.text || '텍스트를 인식할 수 없습니다.';
             if (transcription.value !== '텍스트를 인식할 수 없습니다') {
               // conversationRoomNo와 userId는 임의의 값으로 지정
-              const conversationRoomNo = 1; // 임의로 지정한 대화방 번호
+              const conversationRoomNo = 3; // 임의로 지정한 대화방 번호
               const userId = 1; // 임의로 지정한 사용자 ID
 
               // ChatBot API 호출
@@ -133,6 +136,18 @@ const startRecording = () => {
                   break;
                 case '005':
                   openNewIssuanceForm();
+                  break;
+                case '001-02': //새로운 case
+                  openLoanDetail();
+                  break;
+                case '01-02': //새로운 case
+                  openLoanDetail();
+                  break;
+                case '001.02': //새로운 case
+                  openLoanDetail();
+                  break;
+                case '001-03':
+                  closeLoanDetail();
 
                 default:
                   break;
@@ -179,6 +194,19 @@ const stopRecording = () => {
   }
 };
 
+// 처음 인사말 생성 함수
+const createGreet = async () => {
+  try {
+    chatbotMessage.value = '안녕하세요. 무엇을 도와드릴까요?'; // 인사말 설정
+
+    const response = playAudio(chatbotMessage.value); // 음성 재생
+    console.log(response); // 응답 확인 (필요 시 로그)
+  } catch (error) {
+    console.error('Error during createGreet execution:', error); // 에러 로그
+    errorMessage.value = '서버에 전송하는 중 오류가 발생했습니다.'; // 에러 메시지 설정
+  }
+};
+
 const openConsultantModal = () => {
   isConsultantModalVisible.value = true;
 };
@@ -194,13 +222,18 @@ const openNewIssuanceForm = () => {
 const closeNewIssuanceForm = () => {
   NewIssuanceFormVisible.value = false;
 };
-
 const openNewReissuanceForm = () => {
   NewReissunaceFormVisible.value = true;
 };
-
 const closeReissunaceForm = () => {
   NewReissunaceFormVisible.value = false;
+};
+const openLoanDetail = () => {
+  isLoanDetailVisible.value = true;
+};
+
+const closeLoanDetail = () => {
+  isLoanDetailVisible.value = false;
 };
 
 const openTransferForm = () => {
@@ -215,21 +248,25 @@ const closeTransferForm = () => {
   <Header />
   <div class="main-container">
     <p v-if="errorMessage" style="color: red">{{ errorMessage }}</p>
-    <p class="additional-bubble" v-if="chatbotMessage" style="color: blue">
+    <p class="additional-bubble" v-if="chatbotMessage">
       Chatbot 응답: {{ chatbotMessage }}
     </p>
     <!-- Chatbot 응답 표시 -->
 
     <div class="sub-container">
-      <div id="main-character">
+      <div id="main-character" v-if="!isLoanDetailVisible" @click="createGreet">
         <img v-if="!isRecording" src="@/assets/images/sooni.png" alt="" />
-        <div v-else="isRecording" class="listenimg">
+        <div v-else class="listenimg">
           듣는 중...
           <img src="@/assets/images/listen.png" alt="" />
         </div>
       </div>
+      <LoanDetail
+        v-if="isLoanDetailVisible"
+        @close="closeLoanDetail"
+        class="loan-detail-component"
+      />
     </div>
-    <!-- <div class="speech-bubble"> -->
     <div class="speech-bubble" v-if="transcription">
       인식된 텍스트: {{ transcription }}
     </div>
@@ -242,6 +279,7 @@ const closeTransferForm = () => {
       </button>
       <!-- <button class="test" @click="openTransferForm">송금</button> -->
     </div>
+
     <Consultant
       v-if="isConsultantModalVisible"
       :isModalVisible="isConsultantModalVisible"
@@ -321,6 +359,13 @@ const closeTransferForm = () => {
 #main-character {
   position: absolute;
   bottom: 190px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+}
+.loan-detail-component {
+  position: absolute;
+  bottom: 180px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 1;

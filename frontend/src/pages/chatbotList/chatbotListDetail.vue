@@ -30,7 +30,7 @@ onMounted(() => {
 <template>
   <Header />
   <div class="main-container chat-container mt-5">
-    <div>
+    <div class="ms-3 me-3">
       <div
         v-for="message in messages"
         :key="message.messageId"

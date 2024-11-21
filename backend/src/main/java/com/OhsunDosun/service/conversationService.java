@@ -65,6 +65,8 @@ public class ConversationService {
 
         String content = response.getContent();
 
+        System.out.println(content);
+
         if (content.trim().startsWith("{") || content.trim().startsWith("```"))  {
             // JSON 형식일 경우
             try {
@@ -111,7 +113,6 @@ public class ConversationService {
                         .build();
             }
         } else {
-
 
             byte[] audioData;
 

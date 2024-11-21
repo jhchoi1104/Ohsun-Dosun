@@ -38,6 +38,7 @@ public class TextToSpeechService {
      */
     public byte[] convertTextToSpeech(String input) {
         try {
+            System.out.println("Input 텍스트: " + input);
             // ObjectMapper를 사용하여 JSON 본문 생성
             ObjectMapper objectMapper = new ObjectMapper();
             Map<String, String> requestBodyMap = new HashMap<>();
@@ -45,6 +46,21 @@ public class TextToSpeechService {
             requestBodyMap.put("input", input);
             requestBodyMap.put("voice", voice);
             String requestBody = objectMapper.writeValueAsString(requestBodyMap);
+
+
+            // requestBody의 "input" 값이 중첩된 형태인 경우 수정
+            if (requestBody.contains("\"input\":\"{\\\"input\\\":")) {
+                // 중첩된 "input" 제거 로직
+                String modifiedInput = input;
+                if (modifiedInput.startsWith("{\"input\":")) {
+                    // 중첩된 "input" 제거하고 실제 텍스트만 추출
+                    modifiedInput = modifiedInput.substring(modifiedInput.indexOf(":") + 2, modifiedInput.lastIndexOf("\""));
+                }
+                // 수정된 "input" 값을 다시 설정
+                requestBodyMap.put("input", modifiedInput);
+                // 다시 직렬화하여 수정된 requestBody 생성
+                requestBody = objectMapper.writeValueAsString(requestBodyMap);
+            }
 
             // RestTemplate 객체 생성
             RestTemplate restTemplate = new RestTemplate();

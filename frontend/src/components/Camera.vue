@@ -1,7 +1,7 @@
 <template>
     <div :class="['camera-modal', { hidden: !show }]">
       <div class="camera-modal-content">
-        <span class="camera-close" @click="close">&times;</span>
+        <!-- <span class="camera-close" @click="close">&times;</span> --> <!-- 닫기 버튼 제거 -->
         <p class="camera-instruction">신분증과 얼굴이 모두 나오게 해주세요.</p>
         <div class="camera-container">
           <video ref="cameraView" autoplay></video>

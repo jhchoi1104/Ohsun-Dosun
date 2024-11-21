@@ -9,45 +9,38 @@
         </div>
       </div>
       <div class="input-section" v-if="currentStep !== 4">
-        <div
-          v-for="(input, index) in dynamicInputs"
-          :key="index"
-          class="input-group"
-          v-if="currentStep !== 3 && currentStep !== 5"
-        >
-          <label :for="'input-' + index" class="input-label">{{
-            input.label
-          }}</label>
+        <div v-for="(input, index) in dynamicInputs" :key="index" class="input-group" v-if="currentStep !== 3 && currentStep !== 5">
+          <label :for="'input-' + index" class="input-label">{{ input.label }}</label>
           <input
             :id="'input-' + index"
             :type="input.type"
             :placeholder="input.placeholder"
             v-model="input.value"
             class="input-field"
+
           />
         </div>
         <div v-if="currentStep === 3" class="list-section">
           <ul class="option-list">
-            <li class="option-item" @click="selectOption('1')">
-              국민은행 계좌 인증
-            </li>
-            <li class="option-item" @click="selectOption('2')">
-              1원 입금 인증
-            </li>
+            <li class="option-item" @click="selectOption('1')">국민은행 계좌 인증</li>
+            <li class="option-item" @click="selectOption('2')">1원 입금 인증</li>
             <li class="option-item" @click="selectOption('3')">화상 통화</li>
           </ul>
         </div>
       </div>
       <!-- Step 4일 때 Camera 컴포넌트 표시 -->
       <Camera v-if="currentStep === 4" :show="currentStep === 4" />
-
+      
       <!-- Step 5: 약관 동의 -->
       <div v-if="currentStep === 5" class="terms-section">
         <input type="checkbox" id="terms-agree" v-model="termsAgreed" />
         <label for="terms-agree">
-          <a href="#" @click.prevent="openTermsPopup">약관 및 상품 설명서</a>에
-          동의합니다.
+          <a href="#" @click.prevent="openTermsPopup">약관 및 상품 설명서</a>에 동의합니다.
         </label>
+      </div>
+
+      <div v-if="currentStep === 6" class="additional-image-section">
+        <img src="@/assets/images/sooni.png" alt="Step 6 Image" class="step-image" />
       </div>
 
       <div class="button-section">
@@ -60,6 +53,53 @@
 <script setup>
 import { defineProps, defineEmits, computed, ref, watch } from 'vue';
 import Camera from './Camera.vue'; // Camera 컴포넌트 임포트
+import { bringAudioFromServer } from '@/api/TtsApi.js';
+
+let audio;
+// 버튼을 눌러서 아래 이벤트를 실행해야 됨.
+const exampleString = {
+  1: "입출금 계좌 개설을 위해 본인 인증이 필요합니다.이름과 주민등록번호를 입력해주세요.",
+  2: "다음으로 휴대폰 인증, 신분증 확인이 필요합니다.",
+  3: "계좌 개설을 위해 추가 본인 인증이 필요합니다.원하는 인증 방법 하나를 고르세요.",
+  4: "신분증과 얼굴이 잘 나오게 화면을 봐주세요.",
+  5: "고객 확인 정보를 입력해주세요.",
+  6: "입출금 계좌 개설이 완료되었습니다. 이제 통장을 사용할 수 있습니다."
+};
+
+// Modify playAudio to accept a step parameter
+const playAudio = async (step) => {
+  try {
+              // 음성 출력이 진행 중이라면 멈추기
+              if (audio && !audio.paused) {
+          audio.pause(); // 이전 오디오 중지
+          audio.currentTime = 0; // 오디오를 처음으로 되돌리기
+      }
+      // Get the audio message for the current step
+      const audioMessage = exampleString[step];
+      console.log(audioMessage);  
+      // 서버에서 오디오 데이터 가져오기
+      const base64Audio = await bringAudioFromServer(audioMessage);
+
+      // Base64 디코딩 및 오디오 재생
+      const byteCharacters = atob(base64Audio);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const audioBlob = new Blob([byteArray], { type: 'audio/wav' });
+
+      // Blob URL 생성 후 오디오 재생
+      const audioUrl = URL.createObjectURL(audioBlob);
+      console.log(audioUrl);
+      audio = new Audio(audioUrl);
+      audio.play();
+  } catch (error) {
+      console.error('TTS 처리 중 오류:', error);
+      alert('오류가 발생했습니다. 콘솔을 확인하세요.');
+  }
+};
+
 
 const props = defineProps({
   show: {
@@ -80,21 +120,18 @@ const currentStep = ref(props.step);
 const termsAgreed = ref(false); // 약관 동의 상태
 
 // props의 step이 변경되면 currentStep도 업데이트
-watch(
-  () => props.step,
-  (newStep) => {
-    currentStep.value = newStep;
-  }
-);
+watch(() => props.step, (newStep) => {
+  currentStep.value = newStep;
+});
 
 // 스텝별로 chatbotMessage 설정
 const chatbotMessages = {
-  1: '입출금 계좌 개설을 위해 본인 인증이 필요합니다.<br>이름과 주민등록번호를 입력해주세요.',
-  2: '입출금 계좌 개설을 위해 다음 단계로 이동합니다.<br>휴대폰 인증, 신분증 확인이 필요합니다.',
-  3: '계좌 개설을 위해 추가 본인 인증이 필요합니다.<br>원하는 인증 방법 하나를 고르세요.',
-  4: '신분증과 얼굴이 잘 나오게 화면을 봐주세요.',
-  5: '마지막 입력입니다!<br>고객 확인 정보를 입력해주세요.',
-  6: '축하합니다! 입출금 계좌 개설이 완료되었습니다. 이제 통장을 사용할 수 있습니다.',
+  1: "입출금 계좌 개설을 위해 본인 인증이 필요합니다.<br>이름과 주민등록번호를 입력해주세요.",
+  2: "입출금 계좌 개설을 위해 다음 단계로 이동합니다.<br>휴대폰 인증, 신분증 확인이 필요합니다.",
+  3: "계좌 개설을 위해 추가 본인 인증이 필요합니다.<br>원하는 인증 방법 하나를 고르세요.",
+  4: "신분증과 얼굴이 잘 나오게 화면을 봐주세요.",
+  5: "마지막 입력입니다!<br>고객 확인 정보를 입력해주세요.",
+  6: "축하합니다! 입출금 계좌 개설이 완료되었습니다. 이제 통장을 사용할 수 있습니다."
 };
 
 const chatbotMessage = ref(chatbotMessages[currentStep.value] || '');
@@ -102,53 +139,46 @@ const chatbotMessage = ref(chatbotMessages[currentStep.value] || '');
 // currentStep이 변경될 때마다 chatbotMessage를 업데이트
 watch(currentStep, (newStep) => {
   chatbotMessage.value = chatbotMessages[newStep] || '';
+  
 });
 
 const dynamicInputs = computed(() => {
   if (currentStep.value === 1) {
     return [
       { type: 'text', placeholder: '이름', value: '', label: '이름' },
-      {
-        type: 'number',
-        placeholder: '주민등록번호 13자리를 입력해주세요.',
-        value: '',
-        label: '주민등록번호',
-      },
+      { type: 'number', placeholder: '주민등록번호 13자리를 입력해주세요.', value: '', label: '주민등록번호' },
     ];
   } else if (currentStep.value === 2) {
     return [
       { type: 'text', placeholder: '이름', value: '', label: '이름' },
       { type: 'text', placeholder: '생년월일', value: '', label: '생년월일' },
-      {
-        type: 'text',
-        placeholder: '휴대폰 번호',
-        value: '',
-        label: '휴대폰 번호',
-      },
+      { type: 'text', placeholder: '휴대폰 번호', value: '', label: '휴대폰 번호' },
     ];
   } else if (currentStep.value === 3) {
     return [];
-  } else if (currentStep.value === 4) {
+  } else if(currentStep.value === 4) {
     return [];
-  } else if (currentStep.value === 5) {
+  } else if(currentStep.value === 5) {
     return [];
-  } else if (currentStep.value === 6) {
+  } else if(currentStep.value === 6) {
     return [];
   }
   return [];
 });
 
+
 // 스텝을 증가시키는 함수
 const nextStep = () => {
-  if (currentStep.value < 6) {
-    currentStep.value += 1; // 로컬 상태 업데이트
-    emit('update:step', currentStep.value); // 부모 컴포넌트에 업데이트 알림
-  } else {
-    emit('close'); // 모달 닫기
-    location.reload(); // 페이지 새로고침
-  }
+if (currentStep.value < 6) {
+  currentStep.value += 1; // 로컬 상태 업데이트
+  emit('update:step', currentStep.value); // 부모 컴포넌트에 업데이트 알림
+  playAudio(currentStep.value);
+} else {
+  emit('close'); // Emit close event when reaching step 6
+  location.reload(); // 페이지 새로고침 추가
+  
+}
 };
-
 
 const selectOption = (option) => {
   console.log(`${option} 선택됨`);
@@ -157,12 +187,9 @@ const selectOption = (option) => {
 
 // 팝업으로 PDF 열기 함수
 const openTermsPopup = () => {
-  window.open(
-    'http://localhost:5173/Perms.pdf',
-    '약관 및 상품 설명서',
-    'width=800,height=600'
-  );
+window.open('/assets/Perms.pdf', '약관 및 상품 설명서', 'width=800,height=600');
 };
+
 </script>
 
 <style scoped>
@@ -189,7 +216,7 @@ const openTermsPopup = () => {
   border-radius: 10px 10px 0 0;
   width: 100%;
   max-width: 500px;
-  height: 80vh; /* 최대 높이를 80vh로 증가시킴 */
+  height: 85vh; /* 최대 높이를 80vh로 증가시킴 */
   display: flex;
   flex-direction: column;
 }
@@ -269,8 +296,9 @@ const openTermsPopup = () => {
   height: 55px;
 }
 
-.chat-button:hover {
-  background-color: #0056b3;
+
+.chat-button:active {
+  background-color: #d9534f;
 }
 
 .option-list {
@@ -290,4 +318,16 @@ const openTermsPopup = () => {
 .option-item:hover {
   background-color: #e0e0e0;
 }
+.step-image {
+  justify-content: center; /* Center the image horizontally */
+  align-items: center; /* Center the image vertically */
+  max-width: 80%; /* Ensure the image does not exceed the width of its container */
+  height: auto; /* Maintain aspect ratio */
+  margin: 10px 0; /* Add some margin for spacing */
+  position: absolute; /* Positioning to allow for absolute placement */
+  left: 50%; /* Center the image horizontally */
+  transform: translateX(-50%); /* Adjust for centering */
+  z-index: 1; /* Ensure it appears above other elements */
+}
+
 </style>

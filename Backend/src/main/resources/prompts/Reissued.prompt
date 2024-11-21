@@ -55,3 +55,5 @@ If the password is incorrect → Repeat Step 4
 Step 5: Application Completion Notification
 Question: "Your bankbook reissuance request has been completed. You can collect your bankbook using the method you selected. If you have any further questions, feel free to ask. Thank you."
 Purpose: Complete the reissuance application process and notify the user.
+
+Responses will only be in Korean.

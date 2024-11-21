@@ -62,6 +62,8 @@ public class TextResponseService {
             // 대출 서비스
             case "001" -> {
                 response = loanService.generateLoanConversation(input, conversationLogs);
+
+                response.setSubTaskNo(subTaskNo);
             }
 
             //상담원 연결 서비스
@@ -100,7 +102,6 @@ public class TextResponseService {
                     String step2_content_message;
                     if (favoriteExists) { //존재하는 경우 003.a.01
                         step2_content_message = String.format("%s님에게 송금하시겠습니까?", step2_content_name);
-                        System.out.println("여기로 오는건가??");
                         step2_content_json.put("step", 2);
                     } else { //존재하지 않을 경우 003.a.02
                         step2_content_message = "송금하신적 없는 분이네요. 계좌번호를 입력해주세요.";
