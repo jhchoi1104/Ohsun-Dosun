@@ -7,6 +7,8 @@ import { bringAudioFromServer } from '@/api/TtsApi.js';
 
 import axios from 'axios';
 import Consultant from '@/components/Consultant.vue';
+import NewIssuanceForm from '@/components/NewIssuanceForm.vue';
+const NewIssuanceFormVisible = ref(false);
 const isConsultantModalVisible = ref(false);
 const isRecording = ref(false);
 const errorMessage = ref('');
@@ -89,10 +91,18 @@ const startRecording = () => {
               chatbotMessage.value = response.content; // Chatbot 응답 저장
               chatbotMessagesub.value = response.subTask; //subTask 저장
 
-              if (chatbotMessagesub.value === '002-01') {
-                setTimeout(() => {
-                  openConsultantModal();
-                }, 3000); //3초 지연
+              switch (chatbotMessagesub.value) {
+                case '002-01':
+                case '002-02':
+                  setTimeout(() => {
+                    openConsultantModal();
+                  }, 3000); //3초 지연
+                  break;
+                case '005':
+                  openNewIssuanceForm();
+
+                default:
+                  break;
               }
               const audioData = response.audioData;
               const byteCharacters = atob(audioData);
@@ -143,6 +153,14 @@ const openConsultantModal = () => {
 const closeConsultantModal = () => {
   isConsultantModalVisible.value = false;
 };
+
+const openNewIssuanceForm = () => {
+  NewIssuanceFormVisible.value = true;
+};
+
+const closeNewIssuanceForm = () => {
+  NewIssuanceFormVisible.value = false;
+};
 </script>
 
 <template>
@@ -156,7 +174,11 @@ const closeConsultantModal = () => {
 
     <div class="sub-container">
       <div id="main-character">
-        <img src="@/assets/images/sooni.png" alt="" />
+        <img v-if="!isRecording" src="@/assets/images/sooni.png" alt="" />
+        <div v-else="isRecording" class="listenimg">
+          듣는 중...
+          <img src="@/assets/images/listen.png" alt="" />
+        </div>
       </div>
     </div>
     <!-- <div class="speech-bubble"> -->
@@ -170,12 +192,17 @@ const closeConsultantModal = () => {
       <button class="chat-button" @click="stopRecording" v-if="isRecording">
         중지
       </button>
-      <!-- <button class="test" @click="openConsultantModal">상담원</button> -->
+      <!-- <button class="test" @click="openNewIssuanceForm">상담원</button> -->
     </div>
     <Consultant
       v-if="isConsultantModalVisible"
       :isModalVisible="isConsultantModalVisible"
       @close="closeConsultantModal"
+    />
+    <NewIssuanceForm
+      v-if="NewIssuanceFormVisible"
+      :show="NewIssuanceFormVisible"
+      @close="closeNewIssuanceForm"
     />
   </div>
 </template>
@@ -258,23 +285,26 @@ const closeConsultantModal = () => {
   padding: 10px 15px; /* 패딩 추가 */
   position: absolute; /* 절대 위치 설정 */
   max-width: 80%; /* 최대 너비 설정 */
+  width: 300px;
+  max-height: 150px;
   text-align: center; /* 텍스트 중앙 정렬 */
   top: calc(50% - 150px); /* 이미지 바로 위로 위치 조정 */
   left: 50%; /* 수평 중앙 정렬 */
   transform: translate(-50%, -100%); /* 정확히 이미지 위에 배치 */
   z-index: 2; /* 이미지 위에 표시 */
+  overflow: scroll;
 }
 
-.additional-bubble::after {
+/*.additional-bubble::after {
   content: '';
   position: absolute;
-  top: 100%; /* 말풍선 아래쪽에 위치 */
-  left: 50%; /* 중앙 정렬 */
+  top: 100%; 말풍선 아래쪽에 위치 
+  left: 50%; 중앙 정렬
   transform: translateX(-50%);
-  border-width: 10px; /* 삼각형 크기 */
+  border-width: 10px; 삼각형 크기 
   border-style: solid;
-  border-color: #efefef transparent transparent transparent; /* 삼각형 색상 */
-}
+  border-color: #efefef transparent transparent transparent;  삼각형 색상 
+} */
 
 .speech-bubble {
   width: 80%; /* 박스 너비 */

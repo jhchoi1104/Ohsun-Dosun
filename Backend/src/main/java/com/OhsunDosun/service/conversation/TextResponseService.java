@@ -124,13 +124,14 @@ public class TextResponseService {
             // 통장 재발행 서비스
             case "004" -> {
                 response = reissuanceService.generateReissuanceConversation(input, conversationLogs);
-                response.setSubTaskNo(subTaskNo);
+                response.setSubTaskNo(mainTaskNo);
 
             }
 
             // 통장 신규 생성 서비스
             case "005" -> {
                 response = newissuanceService.generateNewissuanceConversation(input, conversationLogs);
+                response.setSubTaskNo(mainTaskNo);
             }
 
 
