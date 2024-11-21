@@ -141,9 +141,9 @@ const handleKeyPress = (key) => {
   box-sizing: border-box; /* 패딩과 경계선을 포함하여 크기 계산 */
   cursor: pointer;
   text-align: center;
-  line-height: 84px; /* 키의 높이를 적절하게 조정 */
+  line-height: 92px; /* 키의 높이를 적절하게 조정 */
   width: 100%;
-  height: 84px; /* 키 높이를 조정하여 너무 크지 않게 함 */
+  height: 92px; /* 키 높이를 조정하여 너무 크지 않게 함 */
 }
 /* '전체 삭제' 텍스트의 폰트 크기 줄이기 */
 .key.delete-all {
