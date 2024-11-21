@@ -3,18 +3,62 @@ import Header from '@/components/Header.vue';
 import { ref } from 'vue';
 import { sendAudioToServer } from '@/api/SttApi'; // SttApi.js에서 함수 import
 import { sendTextToServer } from '@/api/ChatBotApi.js';
+import { bringAudioFromServer } from '@/api/TtsApi.js';
+
 import axios from 'axios';
+import Consultant from '@/components/Consultant.vue';
+import NewIssuanceForm from '@/components/NewIssuanceForm.vue';
+import NewReissuanceForm from '@/components/Reissuance.vue';
+const NewIssuanceFormVisible = ref(false);
+const NewReissunaceFormVisible = ref(false);
+const isConsultantModalVisible = ref(false);
 const isRecording = ref(false);
 const errorMessage = ref('');
 const transcription = ref('');
 const chatbotMessage = ref(''); // Chatbot 응답 메시지
-const audio = ref(''); // 오디오
+const chatbotMessagesub = ref(''); //subTask 저장
+let audio = null;
+const call = ref(''); //상담원
+
+// 버튼을 눌러서 아래 이벤트를 실행해야 됨.
+// const exampleString = '안녕하세요. tts가 잘되는지 테스트해봅니다.';
+// const playAudio = async () => {
+//   try {
+//     // 서버에서 오디오 데이터 가져오기
+//     const base64Audio = await bringAudioFromServer(exampleString);
+
+//     // Base64 디코딩 및 오디오 재생
+//     const byteCharacters = atob(base64Audio);
+//     const byteNumbers = new Array(byteCharacters.length);
+//     for (let i = 0; i < byteCharacters.length; i++) {
+//       byteNumbers[i] = byteCharacters.charCodeAt(i);
+//     }
+//     const byteArray = new Uint8Array(byteNumbers);
+//     const audioBlob = new Blob([byteArray], { type: 'audio/wav' });
+
+//     // Blob URL 생성 후 오디오 재생
+//     const audioUrl = URL.createObjectURL(audioBlob);
+
+//     console.log(audioUrl);
+//     const audio = new Audio(audioUrl);
+//     audio.play();
+//   } catch (error) {
+//     console.error('TTS 처리 중 오류:', error);
+//     alert('오류가 발생했습니다. 콘솔을 확인하세요.');
+//   }
+// };
 
 // 녹음기 초기화
 let mediaRecorder = null;
 
 const startRecording = () => {
   try {
+    // 음성 출력이 진행 중이라면 멈추기
+    if (audio && !audio.paused) {
+      audio.pause(); // 이전 오디오 중지
+      audio.currentTime = 0; // 오디오를 처음으로 되돌리기
+    }
+
     transcription.value = ''; // 녹음 시작 시 기존 텍스트 초기화
     let audioChunks = [];
 
@@ -51,9 +95,38 @@ const startRecording = () => {
                 transcription.value,
                 conversationRoomNo
               );
+              console.log(response);
               chatbotMessage.value = response.content; // Chatbot 응답 저장
-              audio.value = response.audioData;
-              console.log(audio.value);
+              chatbotMessagesub.value = response.subTask; //subTask 저장
+
+              switch (chatbotMessagesub.value) {
+                case '002-01':
+                case '002-02':
+                  setTimeout(() => {
+                    openConsultantModal();
+                  }, 3000); //3초 지연
+                  break;
+                case '004':
+                  openNewReissuanceForm();
+                  break;
+                case '005':
+                  openNewIssuanceForm();
+
+                default:
+                  break;
+              }
+              const audioData = response.audioData;
+              const byteCharacters = atob(audioData);
+              const byteNumbers = new Array(byteCharacters.length);
+              for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+              }
+              const byteArray = new Uint8Array(byteNumbers);
+              const audioBlob = new Blob([byteArray], { type: 'audio/wav' });
+
+              const audioUrl = URL.createObjectURL(audioBlob);
+              audio = new Audio(audioUrl);
+              audio.play();
             }
           } catch (error) {
             errorMessage.value = '서버에 전송하는 중 오류가 발생했습니다.';
@@ -83,13 +156,37 @@ const stopRecording = () => {
     errorMessage.value = '녹음이 진행되지 않았습니다.';
   }
 };
+
+const openConsultantModal = () => {
+  isConsultantModalVisible.value = true;
+};
+
+const closeConsultantModal = () => {
+  isConsultantModalVisible.value = false;
+};
+
+const openNewIssuanceForm = () => {
+  NewIssuanceFormVisible.value = true;
+};
+
+const closeNewIssuanceForm = () => {
+  NewIssuanceFormVisible.value = false;
+};
+
+const openNewReissuanceForm = () => {
+  NewReissunaceFormVisible.value = true;
+};
+
+const closeReissunaceForm = () => {
+  NewReissunaceFormVisible.value = false;
+};
 </script>
 
 <template>
   <Header />
   <div class="main-container">
     <p v-if="errorMessage" style="color: red">{{ errorMessage }}</p>
-    <p class="additional-bubble" v-if="chatbotMessage">
+    <p class="additional-bubble" v-if="chatbotMessage" style="color: blue">
       Chatbot 응답: {{ chatbotMessage }}
     </p>
     <!-- Chatbot 응답 표시 -->
@@ -114,7 +211,23 @@ const stopRecording = () => {
       <button class="chat-button" @click="stopRecording" v-if="isRecording">
         중지
       </button>
+      <!-- <button class="test" @click="openNewIssuanceForm">상담원</button> -->
     </div>
+    <Consultant
+      v-if="isConsultantModalVisible"
+      :isModalVisible="isConsultantModalVisible"
+      @close="closeConsultantModal"
+    />
+    <NewIssuanceForm
+      v-if="NewIssuanceFormVisible"
+      :show="NewIssuanceFormVisible"
+      @close="closeNewIssuanceForm"
+    />
+    <NewReissuanceForm
+      v-if="NewReissunaceFormVisible"
+      :show="NewReissunaceFormVisible"
+      @close="closeReissunaceForm"
+    />
   </div>
 </template>
 
@@ -195,7 +308,7 @@ const stopRecording = () => {
   border-radius: 10px; /* 모서리 둥글게 */
   padding: 10px 15px; /* 패딩 추가 */
   position: absolute; /* 절대 위치 설정 */
-  max-width: 100%; /* 최대 너비 설정 */
+  max-width: 80%; /* 최대 너비 설정 */
   width: 300px;
   max-height: 150px;
   text-align: center; /* 텍스트 중앙 정렬 */
@@ -206,8 +319,19 @@ const stopRecording = () => {
   overflow: scroll;
 }
 
+/*.additional-bubble::after {
+  content: '';
+  position: absolute;
+  top: 100%; 말풍선 아래쪽에 위치 
+  left: 50%; 중앙 정렬
+  transform: translateX(-50%);
+  border-width: 10px; 삼각형 크기 
+  border-style: solid;
+  border-color: #efefef transparent transparent transparent;  삼각형 색상 
+} */
+
 .speech-bubble {
-  width: 90%; /* 박스 너비 */
+  width: 80%; /* 박스 너비 */
   background-color: #f9f9f9; /* 박스 배경색 */
   border: 1px solid #ddd; /* 박스 테두리 */
   border-radius: 10px; /* 박스 모서리 둥글게 */

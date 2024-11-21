@@ -10,6 +10,7 @@ import com.OhsunDosun.exception.ConversationRoomNotFoundException;
 import com.OhsunDosun.dto.ChatbotResponse;
 import com.OhsunDosun.service.conversation.TextResponseService;
 import com.OhsunDosun.service.conversation.TextToSpeechService;
+import com.OhsunDosun.service.conversation.task.SummaryTextService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,7 @@ public class ConversationService {
     private final ConversationRoomService conversationRoomService;
     private final TextResponseService textResponseService;
     private final TextToSpeechService textToSpeechService;
+    private final SummaryTextService summaryTextService;
 
     public ConversationResponse conversation(ConversationRequest request, int userNo) {
         // 방 존재 여부 검사
@@ -74,6 +76,11 @@ public class ConversationService {
                 JsonNode jsonNode = objectMapper.readTree(jsonString);
                 String extractedContent = jsonNode.get("content").asText();
 
+                if (extractedContent.length() > 120) {
+                    ChatbotResponse summaryResponse = summaryTextService.generateSummary(extractedContent);
+                    extractedContent = summaryResponse.getContent();
+                }
+
                 // 음성 데이터 생성
                 byte[] audioData = textToSpeechService.convertTextToSpeech(extractedContent);
 
@@ -97,8 +104,20 @@ public class ConversationService {
             }
         } else {
 
-            // 음성 데이터 생성
-            byte[] audioData = textToSpeechService.convertTextToSpeech(content);
+
+            byte[] audioData;
+
+            if (content.length() > 120) {
+                ChatbotResponse summaryResponse = summaryTextService.generateSummary(content);
+                String summaryContent = summaryResponse.getContent();
+
+                System.out.println(summaryContent);
+                // 음성 데이터 생성
+                audioData = textToSpeechService.convertTextToSpeech(summaryContent);
+            } else {
+                // 음성 데이터 생성
+                audioData = textToSpeechService.convertTextToSpeech(content);
+            }
 
             // 오디오 데이터를 Base64로 인코딩
             String audioBase64 = Base64.getEncoder().encodeToString(audioData);
@@ -111,45 +130,6 @@ public class ConversationService {
                     .subTask(response.getSubTaskNo())
                     .build();
         }
-
-
-
-
-//        // 음성 데이터 생성
-//        byte[] audioData = textToSpeechService.convertTextToSpeech(conversationLog.getConversationLogResponse());
-//
-//        // 오디오 데이터를 Base64로 인코딩
-//        String audioBase64 = Base64.getEncoder().encodeToString(audioData);
-//
-//        ConversationResponse.RedirectionResult redirectionResult = null;
-//        if (response.getRedirectionResult() != null){
-//            redirectionResult = ConversationResponse.RedirectionResult.builder()
-//                    .serviceName(response.getRedirectionResult().getServiceName())
-//                    .serviceNumber(response.getRedirectionResult().getServiceNumber())
-//                    .serviceUrl(response.getRedirectionResult().getServiceUrl())
-//                    .build();
-//        }
-//
-//        ConversationResponse.ReservationResult reservationResult = null;
-//        if (response.getReservationResult() != null) {
-//            reservationResult = ConversationResponse.ReservationResult.builder()
-//                    .welfareNo(response.getReservationResult().getServiceTypeNumber())
-//                    .welfareBookStartDate(response.getReservationResult().getReservationDate())
-//                    .welfareBookEndDate(response.getReservationResult().getReservationDate())
-//                    .welfareBookUseTime(response.getReservationResult().getReservationTimeNumber())
-//                    .build();
-//        }
-
-
-
-//        return ConversationResponse.builder()
-//                .content(response.getContent())
-//                .audioData(audioBase64)
-//                .actionRequired(response.isActionRequired())
-//                .totalTokens(response.getTotalTokens())
-//                .redirectionResult(redirectionResult)
-//                .reservationResult(reservationResult)
-//                .build();
     }
 
     private ConversationLogRequest makeConversationLogRequest(ConversationRequest request, ChatbotResponse response) {
