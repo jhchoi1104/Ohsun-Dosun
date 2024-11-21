@@ -111,9 +111,18 @@ public class TextResponseService {
 
                     step2_content_json.put("content", step2_content_message);
 
+                    String name = jsonNode.get("name").asText();
+                    if(!name.isEmpty()){
+                        step2_content_json.put("name", name);
+                    } else{
+                        step2_content_json.put("name","");
+                    }
+
                     String amount = jsonNode.get("amount").asText();
-                    if(!amount.equals("")){
+                    if(!amount.isEmpty()){
                         step2_content_json.put("amount", amount);
+                    } else{
+                        step2_content_json.put("amount","");
                     }
                     String step2_content_string = step2_content_json.toString();
                     response.setContent(step2_content_string);

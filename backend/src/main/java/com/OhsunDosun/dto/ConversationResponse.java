@@ -15,4 +15,6 @@ public class ConversationResponse {
     private String audioData;
     private int step;
     private String subTask;
+    private String name;
+    private String amount;
 }

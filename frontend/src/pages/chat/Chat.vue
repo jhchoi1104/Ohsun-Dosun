@@ -9,20 +9,24 @@ import axios from 'axios';
 import Consultant from '@/components/Consultant.vue';
 import NewIssuanceForm from '@/components/NewIssuanceForm.vue';
 import NewReissuanceForm from '@/components/Reissuance.vue';
+import TransferForm from '@/components/TransferForm.vue';
 import LoanDetail from '@/components/LoanDetail.vue';
 
 const NewIssuanceFormVisible = ref(false);
 const NewReissunaceFormVisible = ref(false);
 const isConsultantModalVisible = ref(false);
+const TransferFormVisible = ref(false);
 const isRecording = ref(false);
 const isLoanDetailVisible = ref(false); //추가
 const errorMessage = ref('');
 const transcription = ref('');
 const chatbotMessage = ref(''); // Chatbot 응답 메시지
 const chatbotMessagesub = ref(''); //subTask 저장
+const transferstep = ref('');
 let audio = null;
 const call = ref(''); //상담원
-
+import { useInputStore } from '@/stores/inputStore';
+const inputStore = useInputStore();
 // 버튼을 눌러서 아래 이벤트를 실행해야 됨.
 // const exampleString = '안녕하세요. tts가 잘되는지 테스트해봅니다.';
 const playAudio = async (input) => {
@@ -101,13 +105,31 @@ const startRecording = () => {
               console.log(response);
               chatbotMessage.value = response.content; // Chatbot 응답 저장
               chatbotMessagesub.value = response.subTask; //subTask 저장
-
+              transferstep.value = response.step;
+              inputStore.updateInput('step', transferstep.value);
+              inputStore.updateInput('name', response.name);
+              inputStore.updateInput('amount', response.amount);
               switch (chatbotMessagesub.value) {
                 case '002-01':
                 case '002-02':
                   setTimeout(() => {
                     openConsultantModal();
                   }, 3000); //3초 지연
+                  break;
+                case '003-01':
+                  if (transferstep.value >= 3) {
+                    openTransferForm();
+                  }
+                  break;
+                case '003-02':
+                  if (transferstep.value >= 3) {
+                    openTransferForm();
+                  }
+                  break;
+                case '003-03':
+                  if (transferstep.value >= 3) {
+                    openTransferForm();
+                  }
                   break;
                 case '004':
                   openNewReissuanceForm();
@@ -213,6 +235,13 @@ const openLoanDetail = () => {
 const closeLoanDetail = () => {
   isLoanDetailVisible.value = false;
 };
+
+const openTransferForm = () => {
+  TransferFormVisible.value = true;
+};
+const closeTransferForm = () => {
+  TransferFormVisible.value = false;
+};
 </script>
 
 <template>
@@ -220,7 +249,7 @@ const closeLoanDetail = () => {
   <div class="main-container">
     <p v-if="errorMessage" style="color: red">{{ errorMessage }}</p>
     <p class="additional-bubble" v-if="chatbotMessage">
-      Chatbot 응답: {{ chatbotMessage }}
+      {{ chatbotMessage }}
     </p>
     <!-- Chatbot 응답 표시 -->
 
@@ -239,7 +268,7 @@ const closeLoanDetail = () => {
       />
     </div>
     <div class="speech-bubble" v-if="transcription">
-      인식된 텍스트: {{ transcription }}
+      {{ transcription }}
     </div>
     <div class="button-section">
       <button class="chat-button" @click="startRecording" v-if="!isRecording">
@@ -248,7 +277,7 @@ const closeLoanDetail = () => {
       <button class="chat-button" @click="stopRecording" v-if="isRecording">
         중지
       </button>
-      <!-- <button class="test" @click="openNewIssuanceForm">상담원</button> -->
+      <!-- <button class="test" @click="openTransferForm">송금</button> -->
     </div>
 
     <Consultant
@@ -265,6 +294,11 @@ const closeLoanDetail = () => {
       v-if="NewReissunaceFormVisible"
       :show="NewReissunaceFormVisible"
       @close="closeReissunaceForm"
+    />
+    <TransferForm
+      v-if="TransferFormVisible"
+      :show="TransferFormVisible"
+      @close="closeTransferForm"
     />
   </div>
 </template>
@@ -291,7 +325,7 @@ const closeLoanDetail = () => {
 .button-section {
   position: absolute;
   bottom: 1px;
-  margin-bottom: 30px; /* 하단에서 30px 간격 설정 */
+  margin-bottom: 30px;
   width: 100%; /* 버튼 섹션의 너비를 100%로 설정 */
   padding: 0 20px; /* 좌우 패딩 20px 추가 */
 }
@@ -349,7 +383,7 @@ const closeLoanDetail = () => {
 }
 
 .additional-bubble {
-  background-color: #efefef; /* 말풍선 배경색 */
+  background-color: #f7c8bd; /* 말풍선 배경색 */
   border-radius: 10px; /* 모서리 둥글게 */
   padding: 10px 15px; /* 패딩 추가 */
   position: absolute; /* 절대 위치 설정 */
