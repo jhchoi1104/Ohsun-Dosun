@@ -173,7 +173,7 @@ const dynamicInputs = computed(() => {
 
 // 스텝을 증가시키는 함수
 const nextStep = () => {
-    if (currentStep.value < 6) {
+    if (currentStep.value < 5) {
         currentStep.value += 1; // 로컬 상태 업데이트
         emit('update:step', currentStep.value); // 부모 컴포넌트에 업데이트 알림
         playAudio(currentStep.value); // 현재 단계를 playAudio에 전달
@@ -292,8 +292,8 @@ const selectOption = (option) => {
   height: 55px;
 }
 
-.chat-button:hover {
-  background-color: #0056b3;
+.chat-button:active {
+    background-color: #d9534f;
 }
 
 .option-list {
