@@ -5,6 +5,7 @@ import Chat from '@/pages/chat/Chat.vue'; // 말하기페이지
 import ChatbotList from '@/pages/chatbotList/chatbotList.vue'; // 챗봇목록페이지
 import ChatbotListDetail from '@/pages/chatbotList/chatbotListDetail.vue';
 import History from '@/pages/AccountHistory/AccountHistory.vue'; // 계좌 이용내역 조회 페이지
+import Password from '@/pages/bankTransfer/password.vue';
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -43,6 +44,12 @@ const router = createRouter({
       path: '/History',
       name: 'History',
       component: History,
+    },
+    {
+      // 조회페이지
+      path: '/password',
+      name: 'Password',
+      component: Password,
     },
   ],
 });
