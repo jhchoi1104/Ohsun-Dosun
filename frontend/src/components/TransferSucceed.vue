@@ -60,7 +60,7 @@ const inputStore = useInputStore(); // 스토어 인스턴스 생성
   align-items: center;
   justify-content: center;
   /* border: 1px solid blue; */
-  height: 100vh;
+  height: 90vh;
   position: relative;
 }
 .confirm-form-container {
@@ -69,7 +69,6 @@ const inputStore = useInputStore(); // 스토어 인스턴스 생성
   justify-content: center;
   /* border: 1px solid green; */
   width: 100%;
-  height: 50%;
   line-height: normal;
   position: absolute;
   top: 50%;
@@ -122,7 +121,7 @@ const inputStore = useInputStore(); // 스토어 인스턴스 생성
 
 .button-section {
   position: absolute;
-  bottom: 30px;
+  /* bottom: 30px; */
   width: 100%;
   padding: 0 20px;
 }
