@@ -4,11 +4,15 @@ import { ref } from 'vue';
 import { sendAudioToServer } from '@/api/SttApi'; // SttApi.js에서 함수 import
 import { sendTextToServer } from '@/api/ChatBotApi.js';
 import axios from 'axios';
+import Consultant from '@/components/Consultant.vue';
+const isConsultantModalVisible = ref(false);
 const isRecording = ref(false);
 const errorMessage = ref('');
 const transcription = ref('');
 const chatbotMessage = ref(''); // Chatbot 응답 메시지
+const chatbotMessagesub = ref(''); //subTask 저장
 const audio = ref(''); // 오디오
+const call = ref(''); //상담원
 
 // 녹음기 초기화
 let mediaRecorder = null;
@@ -51,7 +55,15 @@ const startRecording = () => {
                 transcription.value,
                 conversationRoomNo
               );
+              console.log(response);
               chatbotMessage.value = response.content; // Chatbot 응답 저장
+              chatbotMessagesub.value = response.subTask; //subTask 저장
+
+              if (chatbotMessagesub.value === '002-01') {
+                setTimeout(() => {
+                  openConsultantModal();
+                }, 3000); //3초 지연
+              }
               const audioData = response.audioData;
               const byteCharacters = atob(audioData);
               const byteNumbers = new Array(byteCharacters.length);
@@ -94,6 +106,14 @@ const stopRecording = () => {
     errorMessage.value = '녹음이 진행되지 않았습니다.';
   }
 };
+
+const openConsultantModal = () => {
+  isConsultantModalVisible.value = true;
+};
+
+const closeConsultantModal = () => {
+  isConsultantModalVisible.value = false;
+};
 </script>
 
 <template>
@@ -125,7 +145,13 @@ const stopRecording = () => {
       <button class="chat-button" @click="stopRecording" v-if="isRecording">
         중지
       </button>
+      <!-- <button class="test" @click="openConsultantModal">상담원</button> -->
     </div>
+    <Consultant
+      v-if="isConsultantModalVisible"
+      :isModalVisible="isConsultantModalVisible"
+      @close="closeConsultantModal"
+    />
   </div>
 </template>
 
