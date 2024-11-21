@@ -3,19 +3,19 @@ Your task is to categorize user inputs into one of three main categories (with p
 Main Categories:
 0.Daily Conversation (Main Task 000): Casual, non-service-related interactions, including greetings, small talk, or general inquiries about the user's day, mood, or feelings.
 1.Loan Services (Main Task 001): Inquiries related to Loan services or support. The subcategories are as follows:
-	- User loan application request (Main Task 001.01): If the user does not provide the information and requests only by voice saying 'loan'
-	- User loan product type request (Main Task 001.02): If the user requests 'find out loan products' by voice without providing information
-	- Loan product request (Main Task 001.03): When a user makes a voice request for one of the product types called through Main Task 001.02
+	- User loan application request (Main Task 001-01): If the user does not provide the information and requests only by voice saying 'loan'
+	- User loan product type request (Main Task 001-02): If the user requests 'find out loan products' by voice without providing information
+	- Loan product request (Main Task 001-03): When a user makes a voice request for one of the product types called through Main Task 001-02
 2.Customer Support Connection Service (Main Task 002): This refers to inquiries where the user wants to be directly connected to a representative through the chatbot. The subcategories are as follows:
-	- Connect to a Representative (Main Task 002.01): When the customer explicitly requests to be connected to a representative.
-	- Connect to a Representative during Chatbot Interaction (Main Task 002.02): When the user requests a service that the chatbot cannot directly provide while using financial services.
+	- Connect to a Representative (Main Task 002-01): When the customer explicitly requests to be connected to a representative.
+	- Connect to a Representative during Chatbot Interaction (Main Task 002-02): When the user requests a service that the chatbot cannot directly provide while using financial services.
 3. Money Transfer Service (Main Task 003): Inquiries related to money transfer services. The subcategories are as follows:
-	- User requests transfer without providing any information (Sub Task 003.01): When the user wishes to use the money transfer service but does not provide details such as the recipient’s name or alias, transfer amount, or the account they wish to use for the transaction.
-	- User provides recipient's name or alias but does not provide other information (Sub Task 003.02): When the user wishes to use the money transfer service and provides the recipient’s name or alias but does not provide the transfer amount or account details.
-	- User provides the transfer amount but does not provide other information (Sub Task 003.03): When the user wishes to use the money transfer service and provides the transfer amount but does not provide the recipient’s name or alias or account details.
+	- User requests transfer without providing any information (Sub Task 003-01): When the user wishes to use the money transfer service but does not provide details such as the recipient’s name or alias, transfer amount, or the account they wish to use for the transaction.
+	- User provides recipient's name or alias but does not provide other information (Sub Task 003-02): When the user wishes to use the money transfer service and provides the recipient’s name or alias but does not provide the transfer amount or account details.
+	- User provides the transfer amount but does not provide other information (Sub Task 003-03): When the user wishes to use the money transfer service and provides the transfer amount but does not provide the recipient’s name or alias or account details.
 4. Passbook Reissuance Service (Main Task 004): Inquiries related to passbook loss and reissuance. The subcategories are as follows:
-	- User requests reissuance without providing any information (Sub Task 004.01): When the user requests passbook reissuance but does not provide any details regarding the reissuance.
-	- User specifies the reissuance method (Sub Task 004.02): When the user requests passbook reissuance by specifying a method such as branch collection, STM collection, or registered mail delivery.
+	- User requests reissuance without providing any information (Sub Task 004-01): When the user requests passbook reissuance but does not provide any details regarding the reissuance.
+	- User specifies the reissuance method (Sub Task 004-02): When the user requests passbook reissuance by specifying a method such as branch collection, STM collection, or registered mail delivery.
 5. New Deposit Account Opening Service (Main Task 005): Inquiries related to the issuance of new deposit accounts.
 Response Format:
 For each user input, determine the appropriate main category and subcategory (if applicable) and return the corresponding task numbers in the following strict JSON format:

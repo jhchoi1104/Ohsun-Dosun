@@ -89,7 +89,7 @@ const startRecording = () => {
             transcription.value = data.text || '텍스트를 인식할 수 없습니다.';
             if (transcription.value !== '텍스트를 인식할 수 없습니다') {
               // conversationRoomNo와 userId는 임의의 값으로 지정
-              const conversationRoomNo = 1; // 임의로 지정한 대화방 번호
+              const conversationRoomNo = 3; // 임의로 지정한 대화방 번호
               const userId = 1; // 임의로 지정한 사용자 ID
 
               // ChatBot API 호출
@@ -116,6 +116,12 @@ const startRecording = () => {
                   openNewIssuanceForm();
                   break;
                 case '001-02': //새로운 case
+                  openLoanDetail();
+                  break;
+                case '01-02': //새로운 case
+                  openLoanDetail();
+                  break;
+                case '001.02': //새로운 case
                   openLoanDetail();
                   break;
                 case '001-03':
