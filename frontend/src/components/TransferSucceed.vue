@@ -1,4 +1,5 @@
 <template>
+  <Header />
   <div class="main-container">
     <div class="confirm-form-container">
       <div class="confirm-form">
@@ -8,28 +9,29 @@
               src="https://giphy.com/embed/grQgrKjbnzo7s29qGj"
               width="80"
               height="80"
-              style=""
               frameBorder="0"
               class="giphy-embed"
               allowFullScreen
             ></iframe>
           </div>
           <div class="p-2">
-            <!-- XX님께 -->
-            <div id="transfer-to">XX님께</div>
-            <!-- XX원-->
-            <div id="transfer-amount">XX원</div>
-            <!-- 이체가 완료되었습니다. -->
+            <!-- 송금받는 사람 이름 -->
+            <div id="transfer-to">{{ inputStore.inputs.name }}님께</div>
+            <!-- 송금액 -->
+            <div id="transfer-amount">{{ inputStore.inputs.amount }}원</div>
+            <!-- 성공 메시지 -->
             <div id="success-msg">이체가 완료되었습니다.</div>
           </div>
           <div class="p-2">
             <!-- 송금한 계좌 -->
             <div id="account-number">
               <div class="d-flex">
-                <div class="flex-grow-1">국민 618701-04-192595</div>
+                <div class="flex-grow-1">
+                  {{ inputStore.inputs.recieveraccountbank }}
+                  {{ inputStore.inputs.recieveraccountnumber }}
+                </div>
                 <div id="star-btn" class="justify-content-end">
                   <img src="@/assets/images/emptystar.png" alt="" />
-                  <!-- <img src="@/assets/images/fullstar.png" alt="" /> -->
                 </div>
               </div>
             </div>
@@ -38,13 +40,17 @@
       </div>
     </div>
     <div class="button-section">
-      <router-link class="chat-button" to="/chat">시작하기</router-link>
+      <router-link class="chat-button" to="/chat">확인</router-link>
     </div>
   </div>
 </template>
 
-<script>
+<script setup>
 import '@/assets/main.css';
+import Header from '@/components/Header.vue';
+import { useInputStore } from '@/stores/inputStore'; // 스토어 임포트
+
+const inputStore = useInputStore(); // 스토어 인스턴스 생성
 </script>
 
 <style scoped>
@@ -67,7 +73,7 @@ import '@/assets/main.css';
   line-height: normal;
   position: absolute;
   top: 50%;
-  transform: translateY(-50%);
+  transform: translateY(-60%);
 }
 
 .confirm-form {
