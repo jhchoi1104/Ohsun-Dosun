@@ -3,8 +3,14 @@
   <div class="container">
     <div class="d-flex" id="top">
       <div class="chatbot">
-        <img src="../../assets/챗봇.png" alt="챗봇 아이콘" class="icon" />
-        챗봇
+        <div
+          class="middle-item"
+          @click="navigateToChat"
+          :style="{ cursor: 'pointer' }"
+        >
+          <img src="../../assets/챗봇.png" alt="챗봇 아이콘" class="icon" />
+          챗봇
+        </div>
       </div>
 
       <div class="call" @click="openModal">
@@ -23,35 +29,38 @@
       </div>
     </div>
     <div class="d-flex flex-column" id="middle">
-    <div class="list-container" :class="{ 'list-container-active':menuStore.isNavShow}"> 
       <div
-        class="middle-item"
-        @click="navigateToHistory"
-        :style="{ cursor: 'pointer' }"
+        class="list-container"
+        :class="{ 'list-container-active': menuStore.isNavShow }"
       >
-        <img src="../../assets/계좌내역.png" alt="계좌 아이콘" class="icon" />
-        계좌 내역 조회
-        <span class="arrow">></span>
+        <div
+          class="middle-item"
+          @click="navigateToHistory"
+          :style="{ cursor: 'pointer' }"
+        >
+          <img src="../../assets/계좌내역.png" alt="계좌 아이콘" class="icon" />
+          계좌 내역 조회
+          <span class="arrow">></span>
+        </div>
+        <div
+          class="middle-item"
+          @click="navigateToChatRoom"
+          :style="{ cursor: 'pointer' }"
+        >
+          <img src="../../assets/챗봇.png" alt="챗봇 아이콘" class="icon" />
+          챗봇 내역 조회
+          <span class="arrow">></span>
+        </div>
+        <div class="middle-item">
+          <img
+            src="../../assets/환경설정.png"
+            alt="환경 설정 아이콘"
+            class="icon"
+          />
+          환경 설정
+          <span class="arrow">></span>
+        </div>
       </div>
-      <div
-        class="middle-item"
-        @click="navigateToChatRoom"
-        :style="{ cursor: 'pointer' }"
-      >
-        <img src="../../assets/챗봇.png" alt="챗봇 아이콘" class="icon" />
-        챗봇 내역 조회
-        <span class="arrow">></span>
-      </div>
-      <div class="middle-item">
-        <img
-          src="../../assets/환경설정.png"
-          alt="환경 설정 아이콘"
-          class="icon"
-        />
-        환경 설정
-        <span class="arrow">></span>
-      </div>
-    </div>
     </div>
     <div class="d-flex" id="bottom">
       <div class="ars">
@@ -98,6 +107,12 @@ const props = defineProps({
 
 const router = useRouter();
 
+//챗봇 말하기 이동
+function navigateToChat() {
+  closeMenu();
+  router.push('/chat');
+}
+
 //계좌 내역 조회로 이동
 function navigateToHistory() {
   closeMenu();
@@ -127,14 +142,14 @@ const closeMenu = () => {
   menuStore.closeNav(); //메뉴 닫기
 };
 
-watch(() => menuStore.isNavShow,
-(newValue) => {
-  if(!newValue){
-    console.log('메뉴가 닫혔습니다.');
+watch(
+  () => menuStore.isNavShow,
+  (newValue) => {
+    if (!newValue) {
+      console.log('메뉴가 닫혔습니다.');
+    }
   }
-}
 );
-
 </script>
 
 <style>

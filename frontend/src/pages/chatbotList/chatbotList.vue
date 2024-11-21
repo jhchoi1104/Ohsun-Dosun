@@ -19,10 +19,19 @@ const fetchChatRoomList = async () => {
 
 const formatDate = (dateString) => {
   const now = new Date();
-  const date = new Date(dateString);
+  let date = new Date(dateString);
 
+  // Safari 호환성을 위해 날짜 형식 변환
+  if (/\d{4}-\d{2}-\d{2}/.test(dateString)) {
+    // YYYY-MM-DD 형식을 YYYY/MM/DD로 변환
+    date = new Date(dateString.replace(/-/g, '/'));
+  } else {
+    // 다른 형식은 그대로 처리
+    date = new Date(dateString);
+  }
   // 날짜 차이를 계산 (밀리초 단위)
   const diffTime = now - date;
+
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)); // 밀리초를 일 단위로 변환
 
   const year = date.getFullYear();
@@ -60,7 +69,7 @@ function navigateTo(id) {
       <div
         v-for="(chatRoom, index) in chatRoomList"
         :key="index"
-        class="card mt-4 mb-3 py-3"
+        class="card mt-4 mb-3 py-3 ms-3 me-3"
         @click="navigateTo(chatRoom.sessionId)"
       >
         <div class="card-body d-flex align-items-center py-0">
