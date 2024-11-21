@@ -1,6 +1,9 @@
 <script setup>
 import Header from '@/components/Header.vue';
 import { ref } from 'vue';
+import { useRouter } from 'vue-router'; // Vue Router 가져오기
+
+const router = useRouter(); // 라우터 인스턴스 생성
 
 // 입력된 비밀번호 상태 관리
 const pin = ref('');
@@ -27,8 +30,13 @@ const handleKeyPress = (key) => {
     pin.value = ''; // 전체 삭제
   } else if (key.action === 'backspace') {
     pin.value = pin.value.slice(0, -1); // 마지막 문자 삭제
-  } else if (pin.value.length < 6) {
+  } else if (pin.value.length < 4) {
     pin.value += key.label; // 숫자 추가
+  }
+
+  // 비밀번호가 4자리인 경우 라우팅
+  if (pin.value.length === 4) {
+    router.push('/transfersucceed'); // 라우팅
   }
 };
 </script>

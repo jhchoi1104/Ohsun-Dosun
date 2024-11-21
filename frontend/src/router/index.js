@@ -7,6 +7,7 @@ import ChatbotListDetail from '@/pages/chatbotList/chatbotListDetail.vue';
 import History from '@/pages/AccountHistory/AccountHistory.vue'; // 계좌 이용내역 조회 페이지
 import TransferConfirmation from '@/components/TransferConfirmation.vue'; // 계좌 이용내역 조회 페이지
 import Password from '@/pages/bankTransfer/password.vue';
+import TransferSucceed from '@/components/TransferSucceed.vue';
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -51,10 +52,18 @@ const router = createRouter({
       path: '/transferConfirm',
       name: 'TransferConfirmation',
       component: TransferConfirmation,
+    },
+    {
       // 조회페이지
       path: '/password',
       name: 'Password',
       component: Password,
+    },
+    {
+      // 조회페이지
+      path: '/transfersucceed',
+      name: 'TransferSucceed',
+      component: TransferSucceed,
     },
   ],
 });
