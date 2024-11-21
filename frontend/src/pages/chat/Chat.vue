@@ -21,32 +21,32 @@ let audio = null;
 const call = ref(''); //상담원
 
 // 버튼을 눌러서 아래 이벤트를 실행해야 됨.
-const exampleString = '안녕하세요. tts가 잘되는지 테스트해봅니다.';
-const playAudio = async () => {
-  try {
-    // 서버에서 오디오 데이터 가져오기
-    const base64Audio = await bringAudioFromServer(exampleString);
+// const exampleString = '안녕하세요. tts가 잘되는지 테스트해봅니다.';
+// const playAudio = async () => {
+//   try {
+//     // 서버에서 오디오 데이터 가져오기
+//     const base64Audio = await bringAudioFromServer(exampleString);
 
-    // Base64 디코딩 및 오디오 재생
-    const byteCharacters = atob(base64Audio);
-    const byteNumbers = new Array(byteCharacters.length);
-    for (let i = 0; i < byteCharacters.length; i++) {
-      byteNumbers[i] = byteCharacters.charCodeAt(i);
-    }
-    const byteArray = new Uint8Array(byteNumbers);
-    const audioBlob = new Blob([byteArray], { type: 'audio/wav' });
+//     // Base64 디코딩 및 오디오 재생
+//     const byteCharacters = atob(base64Audio);
+//     const byteNumbers = new Array(byteCharacters.length);
+//     for (let i = 0; i < byteCharacters.length; i++) {
+//       byteNumbers[i] = byteCharacters.charCodeAt(i);
+//     }
+//     const byteArray = new Uint8Array(byteNumbers);
+//     const audioBlob = new Blob([byteArray], { type: 'audio/wav' });
 
-    // Blob URL 생성 후 오디오 재생
-    const audioUrl = URL.createObjectURL(audioBlob);
+//     // Blob URL 생성 후 오디오 재생
+//     const audioUrl = URL.createObjectURL(audioBlob);
 
-    console.log(audioUrl);
-    audio = new Audio(audioUrl);
-    audio.play();
-  } catch (error) {
-    console.error('TTS 처리 중 오류:', error);
-    alert('오류가 발생했습니다. 콘솔을 확인하세요.');
-  }
-};
+//     console.log(audioUrl);
+//     audio = new Audio(audioUrl);
+//     audio.play();
+//   } catch (error) {
+//     console.error('TTS 처리 중 오류:', error);
+//     alert('오류가 발생했습니다. 콘솔을 확인하세요.');
+//   }
+// };
 
 // 녹음기 초기화
 let mediaRecorder = null;
@@ -205,7 +205,6 @@ const closeReissunaceForm = () => {
       인식된 텍스트: {{ transcription }}
     </div>
     <div class="button-section">
-      <button class="chat-button" @click="playAudio">예시 코드 음성</button>
       <button class="chat-button" @click="startRecording" v-if="!isRecording">
         말하기
       </button>
