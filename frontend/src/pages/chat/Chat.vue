@@ -81,6 +81,7 @@ const startRecording = () => {
                 conversationRoomNo
               );
               chatbotMessage.value = response.content; // Chatbot 응답 저장
+              console.log(chatbotMessage.value);
               const audioData = response.audioData;
               const byteCharacters = atob(audioData);
               const byteNumbers = new Array(byteCharacters.length);
