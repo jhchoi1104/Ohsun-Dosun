@@ -39,6 +39,10 @@
         </label>
       </div>
 
+      <div v-if="currentStep === 6" class="additional-image-section">
+        <img src="@/assets/images/sooni.png" alt="Step 6 Image" class="step-image" />
+      </div>
+
       <div class="button-section">
         <button class="chat-button" @click="nextStep">확인</button>
       </div>
@@ -314,4 +318,16 @@ window.open('/assets/Perms.pdf', '약관 및 상품 설명서', 'width=800,heigh
 .option-item:hover {
   background-color: #e0e0e0;
 }
+.step-image {
+  justify-content: center; /* Center the image horizontally */
+  align-items: center; /* Center the image vertically */
+  max-width: 80%; /* Ensure the image does not exceed the width of its container */
+  height: auto; /* Maintain aspect ratio */
+  margin: 10px 0; /* Add some margin for spacing */
+  position: absolute; /* Positioning to allow for absolute placement */
+  left: 50%; /* Center the image horizontally */
+  transform: translateX(-50%); /* Adjust for centering */
+  z-index: 1; /* Ensure it appears above other elements */
+}
+
 </style>
