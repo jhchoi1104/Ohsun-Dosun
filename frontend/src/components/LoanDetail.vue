@@ -1,32 +1,34 @@
 <template>
-    <div class="d-flex justify-content-between" alt="1">
-        <div class="flex-item">
-            <button class="btn"@click="playAudio('주택 담보 대출')">주택 담보 대출🎙️</button>
-            <audio ref="audio1" src="../../src/assets/대출음성/주택담보.mp3"></audio>
+    <div class="container">
+        <div class="d-flex justify-content-between" alt="1">
+            <div class="flex-item">
+                <button class="btn"@click="playAudio('주택 담보 대출')">주택 담보 대출🎙️</button>
+                <audio ref="audio1" src="../../src/assets/대출음성/주택담보.mp3"></audio>
+            </div>
+            <div class="flex-item">
+                <button class="btn" @click="playAudio('전세자금 대출')">전세 자금 대출🎙️</button>
+                <audio ref="audio2" src="../../src/assets/대출음성/전세자금.mp3"></audio>
+            </div>
         </div>
-        <div class="flex-item">
-            <button class="btn" @click="playAudio('전세자금 대출')">전세 자금 대출🎙️</button>
-            <audio ref="audio2" src="../../src/assets/대출음성/전세자금.mp3"></audio>
+        <div class="d-flex justify-content-between" alt="2">
+            <div class="flex-item">
+                <button class="btn" @click="playAudio('자동차 구입 대출')">자동차 구입 대출🎙️</button>
+                <audio ref="audio3" src="../../src/assets/대출음성/자동차.mp3"></audio>
+            </div>
+            <div class="flex-item">
+                <button class="btn" @click="playAudio('신용 대출')">신용 대출🎙️</button>
+                <audio ref="audio4" src="../../src/assets/대출음성/신용.mp3"></audio>
+            </div>
         </div>
-    </div>
-    <div class="d-flex justify-content-between" alt="2">
-        <div class="flex-item">
-            <button class="btn" @click="playAudio('자동차 구입 대출')">자동차 구입 대출🎙️</button>
-            <audio ref="audio3" src="../../src/assets/대출음성/자동차.mp3"></audio>
-        </div>
-        <div class="flex-item">
-            <button class="btn" @click="playAudio('신용 대출')">신용 대출🎙️</button>
-            <audio ref="audio4" src="../../src/assets/대출음성/신용.mp3"></audio>
-        </div>
-    </div>
-    <div class="d-flex justify-content-between" alt="3">
-        <div class="flex-item">
-            <button class="btn" @click="playAudio('예치금 담보 대출')">예금 담보 대출🎙️</button>
-            <audio ref="audio5" src="../../src/assets/대출음성/예금담보.mp3"></audio>
-        </div>
-        <div class="flex-item">
-            <button class="btn" @click="playAudio('KB 비상금 대출')">KB 비상금 대출🎙️</button>
-            <audio ref="audio6" src="../../src/assets/대출음성/비상금.mp3"></audio>
+        <div class="d-flex justify-content-between" alt="3">
+            <div class="flex-item">
+                <button class="btn" @click="playAudio('예치금 담보 대출')">예금 담보 대출🎙️</button>
+                <audio ref="audio5" src="../../src/assets/대출음성/예금담보.mp3"></audio>
+            </div>
+            <div class="flex-item">
+                <button class="btn" @click="playAudio('KB 비상금 대출')">KB 비상금 대출🎙️</button>
+                <audio ref="audio6" src="../../src/assets/대출음성/비상금.mp3"></audio>
+            </div>
         </div>
     </div>
 </template>
@@ -78,14 +80,30 @@ const playAudio = (type) => {
 </script>
 
 <style scoped>
+.container {
+  padding: 20px;
+  width: 100%;
+  height: 250px;
+  text-align: center;
+  gap: 15px; /* 행 간 너비 줄이기 */
+  background-color: white;
+}
 .btn {
     border: none;
     background-color:rgba(244, 160, 139, 0.486);
     border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
 }
+.btn:hover {
+    background-color: rgba(244, 160, 139, 0.7);
+}
+/* 한 행 */
 .d-flex {
     display: flex;
-    width: 100%;
+    gap: 15px; 
+    justify-content: center; 
+    align-items: center;
 }
 
 .flex-item {
@@ -94,9 +112,8 @@ const playAudio = (type) => {
 }
 
 button {
-    font-size: 13px;
-    width: 130px; /* 버튼이 div의 너비를 가득 채우도록 설정 */
-    height: 30px; /* 버튼의 높이를 고정 */
+    font-size: 14px;
+    width: 135px; /* 버튼이 div의 너비를 가득 채우도록 설정 */
+    height: 35px; /* 버튼의 높이를 고정 */
 }
 </style>
-

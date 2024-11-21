@@ -62,6 +62,8 @@ public class TextResponseService {
             // 대출 서비스
             case "001" -> {
                 response = loanService.generateLoanConversation(input, conversationLogs);
+
+                response.setSubTaskNo(subTaskNo);
             }
 
             //상담원 연결 서비스

@@ -9,10 +9,13 @@ import axios from 'axios';
 import Consultant from '@/components/Consultant.vue';
 import NewIssuanceForm from '@/components/NewIssuanceForm.vue';
 import NewReissuanceForm from '@/components/Reissuance.vue';
+import LoanDetail from '@/components/LoanDetail.vue';
+
 const NewIssuanceFormVisible = ref(false);
 const NewReissunaceFormVisible = ref(false);
 const isConsultantModalVisible = ref(false);
 const isRecording = ref(false);
+const isLoanDetailVisible = ref(false); //추가
 const errorMessage = ref('');
 const transcription = ref('');
 const chatbotMessage = ref(''); // Chatbot 응답 메시지
@@ -111,6 +114,12 @@ const startRecording = () => {
                   break;
                 case '005':
                   openNewIssuanceForm();
+                  break;
+                case '001-02': //새로운 case
+                  openLoanDetail();
+                  break;
+                case '001-03':
+                  closeLoanDetail();
 
                 default:
                   break;
@@ -185,13 +194,18 @@ const openNewIssuanceForm = () => {
 const closeNewIssuanceForm = () => {
   NewIssuanceFormVisible.value = false;
 };
-
 const openNewReissuanceForm = () => {
   NewReissunaceFormVisible.value = true;
 };
-
 const closeReissunaceForm = () => {
   NewReissunaceFormVisible.value = false;
+};
+const openLoanDetail = () => {
+  isLoanDetailVisible.value = true;
+};
+
+const closeLoanDetail = () => {
+  isLoanDetailVisible.value = false;
 };
 </script>
 
@@ -199,21 +213,25 @@ const closeReissunaceForm = () => {
   <Header />
   <div class="main-container">
     <p v-if="errorMessage" style="color: red">{{ errorMessage }}</p>
-    <p class="additional-bubble" v-if="chatbotMessage" style="color: blue">
+    <p class="additional-bubble" v-if="chatbotMessage">
       Chatbot 응답: {{ chatbotMessage }}
     </p>
     <!-- Chatbot 응답 표시 -->
 
     <div class="sub-container">
-      <div id="main-character" @click="createGreet">
+      <div id="main-character" v-if="!isLoanDetailVisible" @click="createGreet">
         <img v-if="!isRecording" src="@/assets/images/sooni.png" alt="" />
-        <div v-else="isRecording" class="listenimg">
+        <div v-else class="listenimg">
           듣는 중...
           <img src="@/assets/images/listen.png" alt="" />
         </div>
       </div>
+      <LoanDetail
+        v-if="isLoanDetailVisible"
+        @close="closeLoanDetail"
+        class="loan-detail-component"
+      />
     </div>
-    <!-- <div class="speech-bubble"> -->
     <div class="speech-bubble" v-if="transcription">
       인식된 텍스트: {{ transcription }}
     </div>
@@ -226,6 +244,7 @@ const closeReissunaceForm = () => {
       </button>
       <!-- <button class="test" @click="openNewIssuanceForm">상담원</button> -->
     </div>
+
     <Consultant
       v-if="isConsultantModalVisible"
       :isModalVisible="isConsultantModalVisible"
@@ -300,6 +319,13 @@ const closeReissunaceForm = () => {
 #main-character {
   position: absolute;
   bottom: 190px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+}
+.loan-detail-component {
+  position: absolute;
+  bottom: 180px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 1;
