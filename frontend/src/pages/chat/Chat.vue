@@ -1,6 +1,6 @@
 <script setup>
 import Header from '@/components/Header.vue';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { sendAudioToServer } from '@/api/SttApi'; // SttApi.js에서 함수 import
 import { sendTextToServer } from '@/api/ChatBotApi.js';
 import { bringAudioFromServer } from '@/api/TtsApi.js';
@@ -9,17 +9,21 @@ import axios from 'axios';
 import Consultant from '@/components/Consultant.vue';
 import NewIssuanceForm from '@/components/NewIssuanceForm.vue';
 import NewReissuanceForm from '@/components/Reissuance.vue';
+import TransferForm from '@/components/TransferForm.vue';
 const NewIssuanceFormVisible = ref(false);
 const NewReissunaceFormVisible = ref(false);
 const isConsultantModalVisible = ref(false);
+const TransferFormVisible = ref(false);
 const isRecording = ref(false);
 const errorMessage = ref('');
 const transcription = ref('');
 const chatbotMessage = ref(''); // Chatbot 응답 메시지
 const chatbotMessagesub = ref(''); //subTask 저장
+const transferstep = ref('');
 let audio = null;
 const call = ref(''); //상담원
-
+import { useInputStore } from '@/stores/inputStore';
+const inputStore = useInputStore();
 // 버튼을 눌러서 아래 이벤트를 실행해야 됨.
 // const exampleString = '안녕하세요. tts가 잘되는지 테스트해봅니다.';
 // const playAudio = async () => {
@@ -98,13 +102,31 @@ const startRecording = () => {
               console.log(response);
               chatbotMessage.value = response.content; // Chatbot 응답 저장
               chatbotMessagesub.value = response.subTask; //subTask 저장
-
+              transferstep.value = response.step;
+              inputStore.updateInput('step', transferstep.value);
+              inputStore.updateInput('name', response.name);
+              inputStore.updateInput('amount', response.amount);
               switch (chatbotMessagesub.value) {
                 case '002-01':
                 case '002-02':
                   setTimeout(() => {
                     openConsultantModal();
                   }, 3000); //3초 지연
+                  break;
+                case '003-01':
+                  if (transferstep.value >= 3) {
+                    openTransferForm();
+                  }
+                  break;
+                case '003-02':
+                  if (transferstep.value >= 3) {
+                    openTransferForm();
+                  }
+                  break;
+                case '003-03':
+                  if (transferstep.value >= 3) {
+                    openTransferForm();
+                  }
                   break;
                 case '004':
                   openNewReissuanceForm();
@@ -180,6 +202,13 @@ const openNewReissuanceForm = () => {
 const closeReissunaceForm = () => {
   NewReissunaceFormVisible.value = false;
 };
+
+const openTransferForm = () => {
+  TransferFormVisible.value = true;
+};
+const closeTransferForm = () => {
+  TransferFormVisible.value = false;
+};
 </script>
 
 <template>
@@ -211,7 +240,7 @@ const closeReissunaceForm = () => {
       <button class="chat-button" @click="stopRecording" v-if="isRecording">
         중지
       </button>
-      <!-- <button class="test" @click="openNewIssuanceForm">상담원</button> -->
+      <!-- <button class="test" @click="openTransferForm">송금</button> -->
     </div>
     <Consultant
       v-if="isConsultantModalVisible"
@@ -227,6 +256,11 @@ const closeReissunaceForm = () => {
       v-if="NewReissunaceFormVisible"
       :show="NewReissunaceFormVisible"
       @close="closeReissunaceForm"
+    />
+    <TransferForm
+      v-if="TransferFormVisible"
+      :show="TransferFormVisible"
+      @close="closeTransferForm"
     />
   </div>
 </template>
@@ -253,7 +287,7 @@ const closeReissunaceForm = () => {
 .button-section {
   position: absolute;
   bottom: 1px;
-  margin-bottom: 30px; /* 하단에서 30px 간격 설정 */
+  margin-bottom: 30px;
   width: 100%; /* 버튼 섹션의 너비를 100%로 설정 */
   padding: 0 20px; /* 좌우 패딩 20px 추가 */
 }

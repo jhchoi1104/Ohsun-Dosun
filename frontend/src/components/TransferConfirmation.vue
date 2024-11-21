@@ -49,7 +49,7 @@
       <!-- 계좌 상세 내역(할말?) -->
     </div>
     <div class="button-section">
-      <router-link class="chat-button" to="/chat">시작하기</router-link>
+      <router-link class="chat-button" to="/password">송금하기</router-link>
     </div>
   </div>
 </template>
