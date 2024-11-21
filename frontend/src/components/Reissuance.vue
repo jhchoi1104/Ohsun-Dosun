@@ -143,7 +143,8 @@ const nextStep = () => {
     currentStep.value += 1; // 로컬 상태 업데이트
     emit('update:step', currentStep.value); // 부모 컴포넌트에 업데이트 알림
   } else {
-    emit('close'); // Emit close event when reaching step 6
+    emit('close'); // 모달 닫기
+    location.reload(); // 페이지 새로고침
   }
 };
 const selectOption = (option) => {
