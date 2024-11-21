@@ -29,7 +29,6 @@ public class FavoritesController {
         //별칭 존재 여부 체크
         System.out.println("test : " + nickname.getNickname());
         if (favoritesService.isFavoriteExists(userId, nickname.getNickname())) {
-            System.out.println("is it possible???");
             return ResponseEntity.status(HttpStatus.CREATED).body("별칭이 이미 존재합니다.");
         }
         //별칭 저장

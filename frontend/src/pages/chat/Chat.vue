@@ -1,6 +1,6 @@
 <script setup>
 import Header from '@/components/Header.vue';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { sendAudioToServer } from '@/api/SttApi'; // SttApi.js에서 함수 import
 import { sendTextToServer } from '@/api/ChatBotApi.js';
 import { bringAudioFromServer } from '@/api/TtsApi.js';
@@ -22,31 +22,31 @@ const call = ref(''); //상담원
 
 // 버튼을 눌러서 아래 이벤트를 실행해야 됨.
 // const exampleString = '안녕하세요. tts가 잘되는지 테스트해봅니다.';
-// const playAudio = async () => {
-//   try {
-//     // 서버에서 오디오 데이터 가져오기
-//     const base64Audio = await bringAudioFromServer(exampleString);
+const playAudio = async (input) => {
+  try {
+    // 서버에서 오디오 데이터 가져오기
+    const base64Audio = await bringAudioFromServer(input);
 
-//     // Base64 디코딩 및 오디오 재생
-//     const byteCharacters = atob(base64Audio);
-//     const byteNumbers = new Array(byteCharacters.length);
-//     for (let i = 0; i < byteCharacters.length; i++) {
-//       byteNumbers[i] = byteCharacters.charCodeAt(i);
-//     }
-//     const byteArray = new Uint8Array(byteNumbers);
-//     const audioBlob = new Blob([byteArray], { type: 'audio/wav' });
+    // Base64 디코딩 및 오디오 재생
+    const byteCharacters = atob(base64Audio);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    const audioBlob = new Blob([byteArray], { type: 'audio/wav' });
 
-//     // Blob URL 생성 후 오디오 재생
-//     const audioUrl = URL.createObjectURL(audioBlob);
+    // Blob URL 생성 후 오디오 재생
+    const audioUrl = URL.createObjectURL(audioBlob);
 
-//     console.log(audioUrl);
-//     audio = new Audio(audioUrl);
-//     audio.play();
-//   } catch (error) {
-//     console.error('TTS 처리 중 오류:', error);
-//     alert('오류가 발생했습니다. 콘솔을 확인하세요.');
-//   }
-// };
+    console.log(audioUrl);
+    audio = new Audio(audioUrl);
+    audio.play();
+  } catch (error) {
+    console.error('TTS 처리 중 오류:', error);
+    alert('오류가 발생했습니다. 콘솔을 확인하세요.');
+  }
+};
 
 // 녹음기 초기화
 let mediaRecorder = null;
@@ -157,6 +157,19 @@ const stopRecording = () => {
   }
 };
 
+// 처음 인사말 생성 함수
+const createGreet = async () => {
+  try {
+    chatbotMessage.value = '안녕하세요. 무엇을 도와드릴까요?'; // 인사말 설정
+
+    const response = playAudio(chatbotMessage.value); // 음성 재생
+    console.log(response); // 응답 확인 (필요 시 로그)
+  } catch (error) {
+    console.error('Error during createGreet execution:', error); // 에러 로그
+    errorMessage.value = '서버에 전송하는 중 오류가 발생했습니다.'; // 에러 메시지 설정
+  }
+};
+
 const openConsultantModal = () => {
   isConsultantModalVisible.value = true;
 };
@@ -192,7 +205,7 @@ const closeReissunaceForm = () => {
     <!-- Chatbot 응답 표시 -->
 
     <div class="sub-container">
-      <div id="main-character">
+      <div id="main-character" @click="createGreet">
         <img v-if="!isRecording" src="@/assets/images/sooni.png" alt="" />
         <div v-else="isRecording" class="listenimg">
           듣는 중...

@@ -46,8 +46,7 @@ public class TextToSpeechService {
             requestBodyMap.put("input", input);
             requestBodyMap.put("voice", voice);
             String requestBody = objectMapper.writeValueAsString(requestBodyMap);
-            
-            System.out.println("디버깅: 생성된 JSON 본문: " + requestBody);
+
 
             // requestBody의 "input" 값이 중첩된 형태인 경우 수정
             if (requestBody.contains("\"input\":\"{\\\"input\\\":")) {
@@ -62,9 +61,6 @@ public class TextToSpeechService {
                 // 다시 직렬화하여 수정된 requestBody 생성
                 requestBody = objectMapper.writeValueAsString(requestBodyMap);
             }
-
-
-            System.out.println("디버깅: 생성된 JSON 본문: " + requestBody);
 
             // RestTemplate 객체 생성
             RestTemplate restTemplate = new RestTemplate();
