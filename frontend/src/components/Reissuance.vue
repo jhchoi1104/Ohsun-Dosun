@@ -52,6 +52,10 @@
       <div class="button-section">
         <button class="chat-button" @click="nextStep">확인</button>
       </div>
+
+      <div v-if="currentStep === 4 || currentStep === 5" class="additional-image-section">
+        <img src="@/assets/images/sooni.png" alt="" class="step-image" />
+      </div>
     </div>
   </div>
 </template>
@@ -313,4 +317,15 @@ const selectOption = (option) => {
 .option-item:hover {
   background-color: #e0e0e0;
 }
+.step-image {
+  /* justify-content: center; Center the image horizontally */
+  align-items: center; /* Center the image vertically */
+  max-width: 70%; /* Ensure the image does not exceed the width of its container */
+  margin: 10px 0; /* Add some margin for spacing */
+  position: absolute; /* Positioning to allow for absolute placement */
+  left: 50%; /* Center the image horizontally */
+  transform: translateX(-50%); /* Adjust for centering */
+  z-index: 1; /* Ensure it appears above other elements */
+}
+
 </style>
