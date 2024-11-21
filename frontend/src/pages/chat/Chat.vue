@@ -15,7 +15,7 @@ const errorMessage = ref('');
 const transcription = ref('');
 const chatbotMessage = ref(''); // Chatbot 응답 메시지
 const chatbotMessagesub = ref(''); //subTask 저장
-const audio = ref(''); // 오디오
+let audio = null;
 const call = ref(''); //상담원
 
 // 버튼을 눌러서 아래 이벤트를 실행해야 됨.
@@ -51,6 +51,12 @@ let mediaRecorder = null;
 
 const startRecording = () => {
   try {
+    // 음성 출력이 진행 중이라면 멈추기
+    if (audio && !audio.paused) {
+      audio.pause(); // 이전 오디오 중지
+      audio.currentTime = 0; // 오디오를 처음으로 되돌리기
+    }
+
     transcription.value = ''; // 녹음 시작 시 기존 텍스트 초기화
     let audioChunks = [];
 
@@ -114,7 +120,7 @@ const startRecording = () => {
               const audioBlob = new Blob([byteArray], { type: 'audio/wav' });
 
               const audioUrl = URL.createObjectURL(audioBlob);
-              const audio = new Audio(audioUrl);
+              audio = new Audio(audioUrl);
               audio.play();
             }
           } catch (error) {
