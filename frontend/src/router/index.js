@@ -8,6 +8,8 @@ import History from '@/pages/AccountHistory/AccountHistory.vue'; // 계좌 이�
 import TransferConfirmation from '@/components/TransferConfirmation.vue'; // 계좌 이용내역 조회 페이지
 import Password from '@/pages/bankTransfer/password.vue';
 import TransferSucceed from '@/components/TransferSucceed.vue';
+import login from './login.js';
+import join from './join.js';
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -65,6 +67,8 @@ const router = createRouter({
       name: 'TransferSucceed',
       component: TransferSucceed,
     },
+    ...login,
+    ...join,
   ],
 });
 
