@@ -17,6 +17,7 @@ const NewReissunaceFormVisible = ref(false);
 const isConsultantModalVisible = ref(false);
 const TransferFormVisible = ref(false);
 const isRecording = ref(false);
+const isAnswering = ref(false);
 const isLoanDetailVisible = ref(false); //추가
 const errorMessage = ref('');
 const transcription = ref('');
@@ -60,6 +61,7 @@ let mediaRecorder = null;
 
 const startRecording = () => {
   try {
+    chatbotMessage.value= '';
     // 음성 출력이 진행 중이라면 멈추기
     if (audio && !audio.paused) {
       audio.pause(); // 이전 오디오 중지
@@ -163,6 +165,11 @@ const startRecording = () => {
 
               const audioUrl = URL.createObjectURL(audioBlob);
               audio = new Audio(audioUrl);
+              // 오디오 종료 시점에 답변 중 상태 비활성화
+              audio.addEventListener('ended', () => {
+                isAnswering.value = false;
+                isRecording.value = false;
+              });
               audio.play();
             }
           } catch (error) {
@@ -189,6 +196,7 @@ const stopRecording = () => {
   if (mediaRecorder && mediaRecorder.state === 'recording') {
     mediaRecorder.stop();
     isRecording.value = false;
+    isAnswering.value = true;
   } else {
     errorMessage.value = '녹음이 진행되지 않았습니다.';
   }
@@ -275,13 +283,20 @@ const closeTransferForm = () => {
       {{ transcription }}
     </div>
     <div class="button-section">
-      <button class="chat-button" @click="startRecording" v-if="!isRecording">
+      <button class="chat-button" @click="startRecording" v-if="!isRecording && !isAnswering">
         말하기
       </button>
-      <button class="chat-button" @click="stopRecording" v-if="isRecording">
+      <button class="chat-button" @click="stopRecording" v-if="isRecording && !isAnswering">
         중지
       </button>
-      <!-- <button class="test" @click="openTransferForm">송금</button> -->
+      <div class="answer-section" v-if="isAnswering">
+        <button class="chat-button answer-button" disabled>
+          답변 중입니다 ...
+        </button>
+        <button class="chat-button close-button" @click="stopAnswering">
+          X
+        </button>
+      </div>
     </div>
 
     <Consultant
@@ -428,5 +443,26 @@ const closeTransferForm = () => {
   position: relative; /* 박스의 위치를 일반 흐름에 맞춤 */
   top: -100px; /* Y축 위치 조정 (이미지 위로 이동) */
   margin-top: 450px;
+}
+.chat-button[disabled] {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.answer-section {
+  display: flex;
+  justify-content: center;
+  gap: 10px; /* 버튼 사이 간격 */
+}
+
+.answer-button {
+  flex: 2; /* 답변 버튼이 더 넓게 차지하도록 설정 */
+  max-width: 70%; /* 버튼의 최대 너비 제한 */
+}
+
+.close-button {
+  flex: 1; /* X 버튼이 좁게 차지하도록 설정 */
+  max-width: 20%; /* 버튼의 최대 너비 제한 */
+  background-color: #ccc; /* X 버튼 배경색 */
+  color: black; /* X 버튼 텍스트 색상 */
 }
 </style>
