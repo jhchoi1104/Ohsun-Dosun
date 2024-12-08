@@ -10,6 +10,13 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+
 @Service
 @RequiredArgsConstructor
 public class OpenAISttService {
@@ -29,6 +36,11 @@ public class OpenAISttService {
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
             body.add("model", model);
             body.add("file", transcriptionRequest.getFile().getResource()); // MultipartFile을 Resource로 변환하여 추가
+
+            // prompt 추가
+            String promptFilePath = "prompts/stt.prompt"; // 파일 경로
+            String prompt = readPromptFromFile(promptFilePath); // 파일 내용 읽기
+            body.add("prompt", prompt);
 
             // HTTP 헤더 설정
             HttpHeaders headers = new HttpHeaders();
@@ -56,5 +68,17 @@ public class OpenAISttService {
             e.printStackTrace();
             return "Error occurred: " + e.getMessage();
         }
+    }
+    /**
+     * 파일에서 prompt 내용을 읽는 메서드
+     *
+     * 파일 경로
+     * @return 파일의 내용
+     * 파일 읽기 실패 시 예외 발생
+     */
+    private String readPromptFromFile(String filePath) throws IOException, URISyntaxException {
+        ClassLoader classLoader = getClass().getClassLoader();
+        Path path = Paths.get(classLoader.getResource(filePath).toURI());
+        return Files.readString(path);
     }
 }
