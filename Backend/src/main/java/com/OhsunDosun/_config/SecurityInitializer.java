@@ -5,10 +5,9 @@
 //import org.springframework.web.multipart.support.MultipartFilter;
 //
 //import javax.servlet.ServletContext;
-//import javax.servlet.ServletException;
 //
 //public class SecurityInitializer extends AbstractSecurityWebApplicationInitializer {
-//    //문자셋 필터
+//    // 문자셋 필터
 //    private CharacterEncodingFilter encodingFilter() {
 //        CharacterEncodingFilter encodingFilter = new CharacterEncodingFilter();
 //        encodingFilter.setEncoding("UTF-8");
@@ -18,6 +17,6 @@
 //
 //    @Override
 //    protected void beforeSpringSecurityFilterChain(ServletContext servletContext) {
-//        insertFilters(servletContext, encodingFilter(),new MultipartFilter());
+//        insertFilters(servletContext, encodingFilter(), new MultipartFilter());
 //    }
 //}
