@@ -6,122 +6,14 @@
 <mapper namespace="com.OhsunDosun.member.mapper.MemberMapper">
 
     <resultMap id="memberResultMap" type="com.OhsunDosun.member.dto.Member">
-        <id property="mno" column="mno" />
-        <result property="id" column="id" />
-        <result property="password" column="password" />
-        <result property="name" column="name" />
-        <result property="email" column="email" />
-        <result property="phone" column="phone" /> <!-- 추가된 필드 -->
-        <result property="goalAmount" column="goal_amount" /> <!-- 추가된 필드 -->
-        <result property="message" column="message" /> <!-- 추가된 필드 -->
-        <result property="gender" column="gender" /> <!-- 추가된 필드 -->
-        <result property="status" column="status" />
-        <result property="createDate" column="create_date" />
-        <result property="modifyDate" column="modify_date" />
-        <collection property="authorities"
-                    javaType="arraylist"
-                    ofType="org.springframework.security.core.authority.SimpleGrantedAuthority"
-                    resultMap="authoritiesMap"/>
+        <id column="user_id" property="userId" />
+        <result column="username" property="username" />
+        <result column="password" property="password" />
     </resultMap>
 
-    <resultMap type="org.springframework.security.core.authority.SimpleGrantedAuthority" id="authoritiesMap">
-        <constructor>
-            <arg column="authority" javaType="string"/>
-        </constructor>
-    </resultMap>
-
-    <select id="selectMemberAll" resultMap="memberResultMap">
-        SELECT
-            m.mno, id, password, name, email, status, create_date, modify_date, a.authority
-        FROM
-            member m
-            LEFT OUTER JOIN member_auth a ON m.mno = a.mno
-        WHERE m.status = 'y'
+    <select id="selectByName" resultMap="memberResultMap">
+        SELECT user_id, username, password
+        FROM user u
+        WHERE u.username = #{username}
     </select>
-
-
-    <select id="selectById" resultMap="memberResultMap" parameterType="string">
-        SELECT
-        m.mno,
-        m.id,
-        m.password,
-        m.name,
-        m.email,
-        m.phone,         <!-- 추가 -->
-        m.goal_amount,   <!-- 추가 -->
-        m.message,       <!-- 추가 -->
-        m.gender,        <!-- 추가 -->
-        m.status,
-        m.create_date,
-        m.modify_date,
-        a.authority
-        FROM
-        member m
-        LEFT OUTER JOIN member_auth a ON m.mno = a.mno
-        WHERE
-        m.status = 'y'
-        AND m.id = #{id}
-    </select>
-
-    <insert id="insertMember" parameterType="com.OhsunDosun.member.dto.Member">
-        <selectKey keyProperty="mno" resultType="long" order="AFTER">
-            SELECT LAST_INSERT_ID()
-        </selectKey>
-        INSERT INTO member(mno, id, password, name, email, status)
-        VALUES(default, #{id}, #{password}, #{name}, #{email}, default)
-    </insert>
-
-
-    <update id="updateMember" parameterType="com.OhsunDosun.member.dto.Member">
-        UPDATE member
-        SET
-        name = #{name},
-        email = #{email},
-        phone = #{phone},
-        goal_amount = #{goalAmount},  <!-- 필드 추가 -->
-        message = #{message},          <!-- 필드 추가 -->
-        gender = #{gender},            <!-- 필드 추가 -->
-        modify_date = now()
-        WHERE mno = #{mno}
-    </update>
-
-    <update id="updateMemberName" parameterType="com.OhsunDosun.member.dto.Member">
-        UPDATE member
-        SET
-            name = #{name},
-            modify_date = now()
-        WHERE mno = #{mno}
-    </update>
-
-
-    <update id="updatePassword" parameterType="com.OhsunDosun.member.dto.Member">
-        UPDATE member
-        SET
-            password = #{newPassword},
-            modify_date = now()
-        WHERE id = #{id}
-    </update>
-
-<!--    <delete id="deleteMember">-->
-<!--        DELETE FROM member-->
-<!--        WHERE mno = #{mno}-->
-<!--    </delete> -->
-
-    <update id="deleteMember" parameterType="long">
-        UPDATE member
-        SET
-            status = 'n',
-            modify_date = now()
-        WHERE mno = #{mno}
-    </update>
-
-    <insert id="insertAuth"  parameterType="com.OhsunDosun.member.dto.Auth">
-        INSERT INTO member_auth(mno, authority)
-        VALUES(#{mno}, #{authority})
-    </insert>
-
-    <delete id="deleteAuth"  parameterType="com.OhsunDosun.member.dto.Auth">
-        DELETE FROM  member_auth
-        WHERE mno = #{mno} AND authority = #{auth}
-    </delete>
 </mapper>
