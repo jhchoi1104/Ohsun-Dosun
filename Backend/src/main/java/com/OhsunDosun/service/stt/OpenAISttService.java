@@ -11,10 +11,10 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.List;
+import java.nio.file.Paths;
 
 
 @Service
@@ -38,7 +38,7 @@ public class OpenAISttService {
             body.add("file", transcriptionRequest.getFile().getResource()); // MultipartFile을 Resource로 변환하여 추가
 
             // prompt 추가
-            String promptFilePath = "prompt/stt.prompt"; // 파일 경로
+            String promptFilePath = "prompts/stt.prompt"; // 파일 경로
             String prompt = readPromptFromFile(promptFilePath); // 파일 내용 읽기
             body.add("prompt", prompt);
 
@@ -76,8 +76,9 @@ public class OpenAISttService {
      * @return 파일의 내용
      * 파일 읽기 실패 시 예외 발생
      */
-    private String readPromptFromFile(String filePath) throws IOException {
-        Path path = Paths.get(filePath);
-        return Files.readString(path); // 파일 내용을 문자열로 읽기
+    private String readPromptFromFile(String filePath) throws IOException, URISyntaxException {
+        ClassLoader classLoader = getClass().getClassLoader();
+        Path path = Paths.get(classLoader.getResource(filePath).toURI());
+        return Files.readString(path);
     }
 }
