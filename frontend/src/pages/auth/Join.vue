@@ -1,8 +1,12 @@
 <script setup>
 import { reactive, ref } from 'vue';
+import { useRouter } from 'vue-router';
+import authApi from '@/api/authAPI.js';
+
+const router = useRouter();
 
 const member = reactive({
-  userId: '',
+  username: '',
   password: '',
   password2: '',
 });
@@ -10,6 +14,17 @@ const member = reactive({
 const join = async () => {
   if (member.password != member.password2) {
     return alert('비밀번호가 다릅니다.');
+  }
+
+  console.log('회원가입 정보:', member);
+  try {
+    //회원가입 정보 전송
+    await authApi.create(member);
+    localStorage.setItem('username', member.username); // username 저장
+    localStorage.setItem('password', member.password); // password 저장
+    router.push({ name: 'home' });
+  } catch (e) {
+    console.error(e);
   }
 };
 
@@ -55,7 +70,7 @@ const togglePasswordShow2 = () => {
             <input
               class="form-input"
               type="email"
-              v-model="member.userId"
+              v-model="member.username"
               placeholder=" 이메일을 입력하세요."
             />
           </div>

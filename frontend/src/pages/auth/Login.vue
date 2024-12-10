@@ -1,14 +1,28 @@
 <script setup>
 import { reactive, ref } from 'vue';
+import { useAuthStore } from '@/stores/auth.js';
+import { useRouter } from 'vue-router';
+
+const authStore = useAuthStore(); //pinia 사용
+const router = useRouter();
 
 const member = reactive({
-  userId: '',
-  password: '',
+  username: 'mink123@naver.com',
+  password: 'password123',
 });
 
 const login = async () => {
   console.log(member);
   try {
+    //로그인 시 AIP호출
+    const result = await authStore.login({
+      username: member.username,
+      password: member.password,
+    });
+
+    // API 응답 데이터 확인
+    console.log('로그인 성공 응답 데이터:', result);
+
     //로그인 성공 시 chat 페이지로 이동하는 메소드
     const path = router.currentRoute.value.query.redirect || '/chat';
     router.push(path);
@@ -23,6 +37,7 @@ const togglePasswordVisibility = () => {
   passwordHidden.value = !passwordHidden.value;
 };
 
+//패스워드 입력 시 아이콘 상태 변경
 const passwordHiddenshow = ref(false);
 const togglePasswordShow = () => {
   passwordHiddenshow.value = member.password.length > 0;
@@ -49,7 +64,7 @@ const togglePasswordShow = () => {
             <input
               class="form-input"
               type="email"
-              v-model="member.userId"
+              v-model="member.username"
               placeholder=" 이메일을 입력하세요."
             />
           </div>

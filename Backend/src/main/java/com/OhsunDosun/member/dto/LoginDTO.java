@@ -17,6 +17,8 @@ public class LoginDTO {
     private String username;
     private String password;
 
+
+
     public static LoginDTO of(HttpServletRequest request) throws AuthenticationException {
         ObjectMapper om = new ObjectMapper();
         try {
