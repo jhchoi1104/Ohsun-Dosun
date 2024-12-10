@@ -1,7 +1,7 @@
 import api from '@/api';
 
 const BASE_URL = '/api/member';
-const headers = { 'Content-Type': 'multipart/form-data' };
+const headers = { 'Content-Type': 'application/json' };
 
 export default {
   async create(member) {

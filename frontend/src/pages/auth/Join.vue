@@ -22,7 +22,7 @@ const join = async () => {
     await authApi.create(member);
     localStorage.setItem('username', member.username); // username 저장
     localStorage.setItem('password', member.password); // password 저장
-    router.push({ name: 'home' });
+    router.push({ name: 'Main' });
   } catch (e) {
     console.error(e);
   }
