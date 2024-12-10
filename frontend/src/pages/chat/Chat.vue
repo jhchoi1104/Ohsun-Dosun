@@ -12,6 +12,10 @@ import NewReissuanceForm from '@/components/Reissuance.vue';
 import TransferForm from '@/components/TransferForm.vue';
 import LoanDetail from '@/components/LoanDetail.vue';
 
+let sttCancelTokenSource = null;
+let chatbotCancelTokenSource = null;
+let ttsCancelTokenSource = null;
+
 const NewIssuanceFormVisible = ref(false);
 const NewReissunaceFormVisible = ref(false);
 const isConsultantModalVisible = ref(false);
@@ -90,19 +94,28 @@ const startRecording = () => {
           formData.append('file', audioBlob, 'audio.wav');
 
           try {
-            const data = await sendAudioToServer(formData);
+            // STT 요청 취소 처리
+            if (sttCancelTokenSource) sttCancelTokenSource.cancel('이전 STT 요청 취소');
+            sttCancelTokenSource = axios.CancelToken.source();
+
+            const data = await sendAudioToServer(formData, sttCancelTokenSource.token);
             console.log(data);
             transcription.value = data.text || '텍스트를 인식할 수 없습니다.';
             if (transcription.value !== '텍스트를 인식할 수 없습니다') {
               // conversationRoomNo와 userId는 임의의 값으로 지정
               const conversationRoomNo = 3; // 임의로 지정한 대화방 번호
               const userId = 1; // 임의로 지정한 사용자 ID
+              
+              // Chatbot 요청 취소 처리
+              if (chatbotCancelTokenSource) chatbotCancelTokenSource.cancel('이전 Chatbot 요청 취소');
+              chatbotCancelTokenSource = axios.CancelToken.source();
 
               // ChatBot API 호출
               const response = await sendTextToServer(
                 userId,
                 transcription.value,
-                conversationRoomNo
+                conversationRoomNo,
+                chatbotCancelTokenSource.token
               );
               console.log(response);
               chatbotMessage.value = response.content; // Chatbot 응답 저장
@@ -173,7 +186,11 @@ const startRecording = () => {
               audio.play();
             }
           } catch (error) {
-            errorMessage.value = '서버에 전송하는 중 오류가 발생했습니다.';
+            if (axios.isCancel(error)) {
+              console.log('요청이 취소되었습니다.');
+            } else {
+              errorMessage.value = '서버에 전송하는 중 오류가 발생했습니다.';
+            }
           }
         };
 
@@ -201,6 +218,45 @@ const stopRecording = () => {
     errorMessage.value = '녹음이 진행되지 않았습니다.';
   }
 };
+
+// 답변 생성 중 사용자가 초기화해서 다시 말하고 싶을 때
+const stopAnswering = () => {
+  // 진행 중인 STT 요청 취소
+  if (sttCancelTokenSource) {
+    sttCancelTokenSource.cancel('STT 요청 취소');
+    sttCancelTokenSource = null;
+  }
+
+  // 진행 중인 Chatbot 요청 취소
+  if (chatbotCancelTokenSource) {
+    chatbotCancelTokenSource.cancel('Chatbot 요청 취소');
+    chatbotCancelTokenSource = null;
+  }
+
+  // 진행 중인 TTS 요청 취소
+  if (ttsCancelTokenSource) {
+    ttsCancelTokenSource.cancel('TTS 요청 취소');
+    ttsCancelTokenSource = null;
+  }
+
+  // 오디오 재생 중단
+  if (audio && !audio.paused) {
+    audio.pause();
+    audio.currentTime = 0;
+  }
+
+  // 상태 초기화
+  isRecording.value = false;
+  isAnswering.value = false;
+  transcription.value = '';
+  chatbotMessage.value = '';
+  chatbotMessagesub.value = '';
+  transferstep.value = '';
+  errorMessage.value = '';
+
+  console.log('모든 요청 및 작업이 취소되었습니다.');
+};
+
 
 // 처음 인사말 생성 함수
 const createGreet = async () => {
