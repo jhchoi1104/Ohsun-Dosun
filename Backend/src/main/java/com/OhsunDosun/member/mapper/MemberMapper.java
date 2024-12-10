@@ -6,4 +6,5 @@ import org.mapstruct.Mapper;
 @Mapper
 public interface MemberMapper {
     Member selectByName(String username);
+    int insertMember(Member member);
 }

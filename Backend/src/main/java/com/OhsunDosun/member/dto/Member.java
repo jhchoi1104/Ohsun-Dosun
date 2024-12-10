@@ -59,4 +59,12 @@ public class Member implements UserDetails {
     public boolean isEnabled() {
         return status.equalsIgnoreCase("Y");
     } //계정이 활성화 상태인지 여부를 반환. Spring Security의 인증 및 권한 부여 과정에서 사용.
+    public boolean checkRequiredValue(){
+        try {
+            return (username.isEmpty() || password.isEmpty());
+        }catch (Exception e){
+            return false;
+        }
+    }
+
 }

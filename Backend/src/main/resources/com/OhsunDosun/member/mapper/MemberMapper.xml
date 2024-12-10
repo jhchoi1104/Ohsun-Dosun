@@ -16,4 +16,9 @@
         FROM user u
         WHERE u.username = #{username}
     </select>
+
+    <insert id="insertMember" parameterType="com.OhsunDosun.member.dto.Member">
+        INSERT INTO user(username, password)
+        VALUES(#{username}, #{password})
+    </insert>
 </mapper>
