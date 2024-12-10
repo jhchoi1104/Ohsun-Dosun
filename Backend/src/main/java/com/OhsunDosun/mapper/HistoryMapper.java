@@ -1,8 +1,10 @@
 package com.OhsunDosun.mapper;
 
 import com.OhsunDosun.dto.HistoryDTO;
-import java.util.List;
+import org.mapstruct.Mapper;
 
+import java.util.List;
+@Mapper
 public interface HistoryMapper {
     List<HistoryDTO> getTransfer(Integer userId);
 }
