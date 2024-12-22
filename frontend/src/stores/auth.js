@@ -6,6 +6,7 @@ const initState = {
   username: '',
   Password: '',
   token: '', //접근 토큰
+  userId: null,
 };
 
 export const useAuthStore = defineStore('auth', () => {
@@ -44,7 +45,12 @@ export const useAuthStore = defineStore('auth', () => {
 
   const getToken = () => state.value.token;
 
+  const setUserId = (id) =>{
+    state.value.userId = id; //동적으로 userId 설정
+    localStorage.setItem('auth', JSON.stringify(state.value)); // 업데이트된 userid 저장
+  }
+
   load();
 
-  return { state, isLogin, username, password, login, logout, getToken };
+  return { state, isLogin, username, password, login, logout, getToken, setUserId };
 });
