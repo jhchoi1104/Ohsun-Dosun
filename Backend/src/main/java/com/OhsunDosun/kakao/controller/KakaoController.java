@@ -1,6 +1,7 @@
 package com.OhsunDosun.kakao.controller;
 
 import com.OhsunDosun.kakao.service.KakaoService;
+import com.OhsunDosun.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
@@ -25,6 +27,7 @@ import java.io.IOException;
 public class KakaoController {
 
     private final KakaoService kakaoService;
+    private final MemberService memberService;
 
     // application.properties에서 카카오 클라이언트 ID 읽어오기
     @Value("${kakao.client-id}")
@@ -48,6 +51,8 @@ public class KakaoController {
             // 2. 사용자 정보 요청
             Map<String, Object> userInfo = kakaoService.getUserInfo(accessToken);
             log.info("카카오 사용자 정보: {}", userInfo);
+
+            memberService.registerOrUpdateKakaoUser(userInfo);
 
             // 3. 사용자 정보를 세션에 저장 (세션 유지, 로그인 상태 저장)
             session.setAttribute("userInfo", userInfo);

@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Map;
 
 
 @Slf4j
@@ -54,5 +55,25 @@ public class MemberService {
             throw new IllegalAccessException("회원 가입에 실패했습니다."); //예외 처리
         }
         return mapper.selectByName(member.getUsername());
+    }
+
+    public void registerOrUpdateKakaoUser(Map<String, Object> userInfo){
+        String username = (String) userInfo.get("username");
+        String name = (String) userInfo.get("name");
+
+        // 기존 사용자 확인
+        Member existingMember = mapper.selectByName(username);
+
+        if (existingMember == null) {
+            // 새 사용자 등록
+            Member newMember = new Member();
+            newMember.setUsername(username);
+            newMember.setname(name);
+            newMember.setPassword(""); // 카카오 로그인 사용자는 비밀번호 설정하지 않음
+
+             mapper.insertMember(newMember);
+        } else {
+            log.info("이미 등록된 사용자: {}", username);
+        }
     }
 }

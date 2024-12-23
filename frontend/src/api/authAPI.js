@@ -10,7 +10,7 @@ export default {
     formData.append('password', member.password);
 
     const { data } = await api.post(BASE_URL, formData, { headers });
-    console.log('AUTH POST: ', data); //서버 응답 로그
+    console.log('회원가입 정보: ', data); //서버 응답 로그
 
     return data;
   },

@@ -116,5 +116,6 @@ export const useAuthStore = defineStore('auth', () => {
     logout,
     getToken,
     setUserId,
+    loginWithKakao,
   };
 });

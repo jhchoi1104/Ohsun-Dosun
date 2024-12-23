@@ -18,7 +18,7 @@
     </select>
 
     <insert id="insertMember" parameterType="com.OhsunDosun.member.dto.Member">
-        INSERT INTO user(username, password)
-        VALUES(#{username}, #{password})
+        INSERT INTO user(name, username, password)
+        VALUES(#{name}, #{username}, #{password})
     </insert>
 </mapper>
