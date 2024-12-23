@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref } from 'vue';
+import { reactive, ref, onMounted } from 'vue';
 import { useAuthStore } from '@/stores/auth.js';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
@@ -60,32 +60,50 @@ const loginWithKakao = () => {
     },
   });
 };
+// 페이지 로드 시 인증 코드 처리
+onMounted(() => {
+  if (window.location.pathname.includes('chat')) {
+    // 'chat'이 포함된 모든 경로에서 callback 처리
+    handlekakaocallback();
+  }
+});
 
 const handlekakaocallback = async () => {
   console.log('handlekakaocallback 함수가 호출되었습니다!');
   const code = new URLSearchParams(window.location.search).get('code');
   console.log('현재 URL:', window.location.href); // 현재 URL 확인
-  console.log('카카오 인증 코드:', code);
-  if (code) {
-    try {
-      await authStore.loginWithKakao(code);
-      alert('카카오 로그인에 성공했습니다!');
 
-      // 로그인 후 페이지 이동
-      const path = router.currentRoute.value.query.redirect || '/chat';
-      router.push(path);
-      console.log(path);
+  if (code) {
+    // console.log('카카오 인증 코드:', code);
+    // try {
+    //   await authStore.loginWithKakao(code);
+    //   alert('카카오 로그인에 성공했습니다!');
+
+    //   // 로그인 후 페이지 이동
+    //   const path = router.currentRoute.value.query.redirect || '/chat';
+    //   router.push(path);
+    //   console.log(path);
+    // }
+    try {
+      // Exchange the authorization code for an access token in the backend
+      const result = await axios.post('http://localhost:8080/kakao/callback', {
+        code,
+      });
+
+      // Successfully logged in
+      if (result.status === 200) {
+        // Redirect to chat or other page after successful login
+        const path = router.currentRoute.value.query.redirect || '/chat';
+        router.push(path);
+      } else {
+        alert('로그인 실패!');
+      }
     } catch (error) {
       console.error('카카오 로그인 실패:', error);
       alert('카카오 로그인에 실패했습니다. 다시 시도해주세요.');
     }
   }
 };
-
-// 페이지 로드 시 인증 코드 처리
-if (window.location.pathname === '/chat') {
-  handlekakaocallback();
-}
 </script>
 
 <template>

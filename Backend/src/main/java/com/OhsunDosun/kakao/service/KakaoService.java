@@ -15,6 +15,8 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.http.MediaType;  // MediaType 추가
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,6 +42,10 @@ public class KakaoService {
     // 액세스 토큰 요청 (POST 방식)
     public String getAccessToken(String code) {
         try {
+            // code가 URL에 포함되어 있는 경우, URL 디코딩을 시도
+            code = URLDecoder.decode(code, StandardCharsets.UTF_8);
+            log.info("디코딩된 코드: {}", code);
+
             // 액세스 토큰 요청에 필요한 파라미터 설정
             MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
             params.add("grant_type", "authorization_code");
@@ -63,18 +69,7 @@ public class KakaoService {
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode jsonNode = objectMapper.readTree(response.getBody());
 
-            // 액세스 토큰 추출
-            if (jsonNode.has("access_token")) {
-                return jsonNode.get("access_token").asText();
-            } else {
-                // 응답에 access_token이 없다면 에러 처리
-                String errorMessage = jsonNode.has("error_description")
-                        ? jsonNode.get("error_description").asText()
-                        : "카카오 액세스 토큰 요청 실패";
-                log.error(errorMessage);
-                throw new RuntimeException(errorMessage);
-            }
-
+            return jsonNode.get("access_token").asText();
         } catch (Exception e) {
             log.error("카카오 액세스 토큰 요청 실패", e);
             throw new RuntimeException("카카오 액세스 토큰 요청 실패");
@@ -101,20 +96,18 @@ public class KakaoService {
             // 사용자 정보 파싱
             Map<String, Object> userInfo = new HashMap<>();
 
-            // "properties"와 "nickname" 존재 여부 확인
-            JsonNode propertiesNode = jsonNode.get("properties");
-            if (propertiesNode != null && propertiesNode.has("nickname")) {
-                userInfo.put("nickname", propertiesNode.get("nickname").asText());
+            JsonNode kakaoAccountNode = jsonNode.get("kakao_account");
+            if (kakaoAccountNode != null && kakaoAccountNode.has("email")) {
+                userInfo.put("username", kakaoAccountNode.get("email").asText());
             } else {
-                userInfo.put("nickname", "Unknown");  // nickname이 없을 경우 기본값 설정
+                userInfo.put("username", "No email available");  // 이메일이 없으면 기본값 설정
             }
 
-            // "profile_image"도 존재 여부를 확인하고 처리
-            JsonNode profileImageNode = propertiesNode != null ? propertiesNode.get("profile_image") : null;
-            if (profileImageNode != null) {
-                userInfo.put("profile_image", profileImageNode.asText());
+            JsonNode propertiesNode = jsonNode.get("properties");
+            if (propertiesNode != null && propertiesNode.has("nickname")) {
+                userInfo.put("name", propertiesNode.get("nickname").asText());
             } else {
-                userInfo.put("profile_image", "default_image_url");  // 기본 이미지 설정
+                userInfo.put("name", "Unknown");  // nickname이 없을 경우 기본값 설정
             }
 
             return userInfo;
