@@ -13,13 +13,13 @@ export const useFontSizeStore = defineStore('fontSize', () => {
   const getFontSizeValue = () => {
     switch (fontSize.value) {
       case 'small':
-        return '1.2rem';
-      case 'medium':
         return '1.5rem';
-      case 'large':
+      case 'medium':
         return '1.8rem';
+      case 'large':
+        return '2.1rem';
       default:
-        return '1.5rem'; // 기본값
+        return '1.8rem'; // 기본값
     }
   };
 

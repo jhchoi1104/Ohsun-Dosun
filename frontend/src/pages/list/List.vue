@@ -186,10 +186,11 @@ watch(
   color: white; /* 글자색 */
   border: none; /* 테두리 제거 */
   border-radius: 25px; /* 모서리 둥글게 (더 둥글게) */
-  padding: 10px 20px; /* 패딩 추가 */
+  padding: 5px 5px; /* 패딩 추가 */
   cursor: pointer; /* 커서 포인터로 변경 */
   transition: background-color 0.3s, transform 0.2s; /* 배경색 변화 애니메이션 */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 그림자 추가 */
+  white-space: nowrap; /* 텍스트가 줄 바꿈되지 않도록 설정 */
 }
 
 .font-size-options button:hover {
