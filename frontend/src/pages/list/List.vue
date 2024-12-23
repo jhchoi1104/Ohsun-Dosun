@@ -1,6 +1,6 @@
 <template>
   <Navbar />
-  <div class="container">
+  <div class="container" :style="fontSizeStyle">
     <div class="d-flex" id="top">
       <div class="chatbot">
         <div
@@ -39,7 +39,7 @@
           :style="{ cursor: 'pointer' }"
         >
           <img src="../../assets/계좌내역.png" alt="계좌 아이콘" class="icon" />
-          계좌 내역 조회
+          계좌 내역
           <span class="arrow">></span>
         </div>
         <div
@@ -48,18 +48,19 @@
           :style="{ cursor: 'pointer' }"
         >
           <img src="../../assets/챗봇.png" alt="챗봇 아이콘" class="icon" />
-          챗봇 내역 조회
+          챗봇 내역
           <span class="arrow">></span>
         </div>
-        <div class="middle-item">
-          <img
-            src="../../assets/환경설정.png"
-            alt="환경 설정 아이콘"
-            class="icon"
-          />
-          환경 설정
-          <span class="arrow">></span>
-        </div>
+        <div class="middle-item" @click="toggleFontSizeOptions" :style="{ cursor: 'pointer' }">
+    <img src="../../assets/환경설정.png" alt="환경 설정 아이콘" class="icon" />
+    <span>글자 크기</span>
+    <span class="arrow">></span>
+  </div>
+  <div v-if="showFontSizeOptions" class="font-size-options">
+    <button @click="changeFontSize('small')">작게</button>
+    <button @click="changeFontSize('medium')">보통</button>
+    <button @click="changeFontSize('large')">크게</button>
+  </div>
       </div>
     </div>
     <div class="d-flex" id="bottom">
@@ -97,14 +98,22 @@
     </div>
   </div>
 </template>
+
 <script setup>
 import Navbar from '@/components/Navbar.vue';
-import Header from '@/components/Header.vue';
 import { useRouter } from 'vue-router';
 import { useMenuStore } from '@/stores/close.js';
 import { useAuthStore } from '@/stores/auth.js';
-import { ref, watch } from 'vue';
+import { ref, computed, watch } from 'vue';
 import '@fortawesome/fontawesome-free/css/all.css';
+import { useFontSizeStore } from '@/api/fontsize.js'; // fontSizeStore 가져오기
+
+// fontsize 조절
+const showFontSizeOptions = ref(false);
+
+function toggleFontSizeOptions() {
+  showFontSizeOptions.value = !showFontSizeOptions.value;
+}
 
 const props = defineProps({
   isNavShow: Boolean,
@@ -112,19 +121,19 @@ const props = defineProps({
 
 const router = useRouter();
 
-//챗봇 말하기 이동
+// 챗봇 말하기 이동
 function navigateToChat() {
   closeMenu();
   router.push('/chat');
 }
 
-//계좌 내역 조회로 이동
+// 계좌 내역 조회로 이동
 function navigateToHistory() {
   closeMenu();
   router.push('/history');
 }
 
-//챗봇 내역 조회로 이동
+// 챗봇 내역 조회로 이동
 function navigateToChatRoom() {
   closeMenu();
   router.push('/chatbotList');
@@ -144,8 +153,21 @@ function closeModal() {
 const menuStore = useMenuStore();
 
 const closeMenu = () => {
-  menuStore.closeNav(); //메뉴 닫기
+  menuStore.closeNav(); // 메뉴 닫기
 };
+
+const fontSizeStore = useFontSizeStore(); // store 인스턴스 생성
+
+// 폰트 사이즈 스타일 설정
+const fontSizeStyle = computed(() => {
+  return { fontSize: fontSizeStore.fontSize.value }; // store에서 직접 가져오기
+});
+
+// 폰트 사이즈 변경 함수
+function changeFontSize(size) {
+  fontSizeStore.setFontSize(size); // store의 setFontSize 메서드 호출
+  // localStorage에 저장은 이제 필요 없음, store에서 처리
+}
 
 watch(
   () => menuStore.isNavShow,
@@ -166,6 +188,33 @@ function logoutUser() {
 </script>
 
 <style>
+.font-size-options {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 10px;
+}
+
+.font-size-options button {
+  background-color: #007bff; /* 버튼 배경색 */
+  color: white; /* 글자색 */
+  border: none; /* 테두리 제거 */
+  border-radius: 25px; /* 모서리 둥글게 (더 둥글게) */
+  padding: 5px 5px; /* 패딩 추가 */
+  cursor: pointer; /* 커서 포인터로 변경 */
+  transition: background-color 0.3s, transform 0.2s; /* 배경색 변화 애니메이션 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 그림자 추가 */
+  white-space: nowrap; /* 텍스트가 줄 바꿈되지 않도록 설정 */
+}
+
+.font-size-options button:hover {
+  background-color: #0056b3; /* 호버 시 배경색 변화 */
+  transform: translateY(-2px); /* 호버 시 약간 위로 이동 */
+}
+
+.font-size-options button:focus {
+  outline: none; /* 포커스 시 테두리 제거 */
+}
+
 .page-wrapper {
   display: flex;
   flex-direction: column;
@@ -179,7 +228,6 @@ function logoutUser() {
   height: 100vh; /* 전체 화면 높이에 맞춤 */
   background-color: #fff5f2;
   padding: 20px; /* 추가적인 패딩 적용 */
-  background-color: #fff5f2;
 }
 #top {
   width: 90%;
@@ -254,13 +302,6 @@ function logoutUser() {
   width: 40%;
   white-space: nowrap;
   font-size: 12px;
-  /* width: 100%;
-        background-color: #FFFFFF;
-        border-radius: 10px; 
-        padding: 15px; 
-        display: flex;
-        flex-direction: column;
-        align-items: center;*/
 }
 .ars1 {
   margin-right: 20px;
@@ -269,6 +310,12 @@ function logoutUser() {
   width: 14px;
   height: 14px;
   margin-right: 10px;
+}
+
+.font-size-buttons {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 10px;
 }
 
 .container {

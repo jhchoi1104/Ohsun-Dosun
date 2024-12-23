@@ -1,6 +1,6 @@
 <script setup>
 import Header from '@/components/Header.vue';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { sendAudioToServer } from '@/api/SttApi'; // SttApi.js에서 함수 import
 import { sendTextToServer } from '@/api/ChatBotApi.js';
 import { bringAudioFromServer } from '@/api/TtsApi.js';
@@ -11,6 +11,8 @@ import NewIssuanceForm from '@/components/NewIssuanceForm.vue';
 import NewReissuanceForm from '@/components/Reissuance.vue';
 import TransferForm from '@/components/TransferForm.vue';
 import LoanDetail from '@/components/LoanDetail.vue';
+
+import { useFontSizeStore } from '@/api/fontsize.js'; // fontSizeStore 가져오기
 
 let sttCancelTokenSource = null;
 let chatbotCancelTokenSource = null;
@@ -32,6 +34,14 @@ let audio = null;
 const call = ref(''); //상담원
 import { useInputStore } from '@/stores/inputStore';
 const inputStore = useInputStore();
+
+const fontSizeStore = useFontSizeStore(); // store 인스턴스 생성
+
+// 폰트 사이즈 스타일 설정
+const fontSizeStyle = computed(() => {
+  return { fontSize: fontSizeStore.getFontSizeValue() }; // store의 getFontSizeValue 메서드 호출
+});
+
 // 버튼을 눌러서 아래 이벤트를 실행해야 됨.
 // const exampleString = '안녕하세요. tts가 잘되는지 테스트해봅니다.';
 const playAudio = async (input) => {
@@ -309,76 +319,78 @@ const closeTransferForm = () => {
 </script>
 
 <template>
-  <Header />
-  <div class="main-container">
-    <p v-if="errorMessage" style="color: red">{{ errorMessage }}</p>
-    <p
-      class="additional-bubble"
-      v-if="chatbotMessage"
-      :style="{ whiteSpace: 'pre-line' }"
-    >
-      {{ chatbotMessage }}
-    </p>
-    <!-- Chatbot 응답 표시 -->
+  <div :style="fontSizeStyle">
+    <Header />
+    <div class="main-container" :style="fontSizeStyle">
+      <p v-if="errorMessage" style="color: red">{{ errorMessage }}</p>
+      <p
+        class="additional-bubble"
+        v-if="chatbotMessage"
+        :style="{ whiteSpace: 'pre-line' }"
+      >
+        {{ chatbotMessage }}
+      </p>
+      <!-- Chatbot 응답 표시 -->
 
-    <div class="sub-container">
-      <div id="main-character" v-if="!isLoanDetailVisible" @click="createGreet">
-        <img v-if="!isRecording" src="@/assets/images/sooni.png" alt="" />
-        <div v-else class="listenimg">
-          듣는 중...
-          <img src="@/assets/images/listen.png" alt="" />
+      <div class="sub-container" :style="fontSizeStyle">
+        <div id="main-character" v-if="!isLoanDetailVisible" @click="createGreet">
+          <img v-if="!isRecording" src="@/assets/images/sooni.png" alt="" />
+          <div v-else class="listenimg">
+            듣는 중...
+            <img src="@/assets/images/listen.png" alt="" />
+          </div>
+        </div>
+        <LoanDetail
+          v-if="isLoanDetailVisible"
+          @close="closeLoanDetail"
+          class="loan-detail-component"
+        />
+      </div>
+      <div class="speech-bubble" v-if="transcription" :style="fontSizeStyle">
+        {{ transcription }}
+      </div>
+      <div class="button-section">
+        <button class="chat-button" @click="startRecording" v-if="!isRecording && !isAnswering">
+          말하기
+        </button>
+        <button class="chat-button" @click="stopRecording" v-if="isRecording && !isAnswering">
+          중지
+        </button>
+        <div class="answer-section" v-if="isAnswering">
+          <button class="chat-button answer-button" disabled>
+            답변 중입니다 ...
+          </button>
+          <button class="chat-button close-button" @click="stopAnswering">
+            X
+          </button>
         </div>
       </div>
-      <LoanDetail
-        v-if="isLoanDetailVisible"
-        @close="closeLoanDetail"
-        class="loan-detail-component"
+
+      <Consultant
+        v-if="isConsultantModalVisible"
+        :isModalVisible="isConsultantModalVisible"
+        @close="closeConsultantModal"
+      />
+      <NewIssuanceForm
+        v-if="NewIssuanceFormVisible"
+        :show="NewIssuanceFormVisible"
+        @close="closeNewIssuanceForm"
+      />
+      <NewReissuanceForm
+        v-if="NewReissunaceFormVisible"
+        :show="NewReissunaceFormVisible"
+        @close="closeReissunaceForm"
+      />
+      <TransferForm
+        v-if="TransferFormVisible"
+        :show="TransferFormVisible"
+        @close="closeTransferForm"
       />
     </div>
-    <div class="speech-bubble" v-if="transcription">
-      {{ transcription }}
-    </div>
-    <div class="button-section">
-      <button class="chat-button" @click="startRecording" v-if="!isRecording && !isAnswering">
-        말하기
-      </button>
-      <button class="chat-button" @click="stopRecording" v-if="isRecording && !isAnswering">
-        중지
-      </button>
-      <div class="answer-section" v-if="isAnswering">
-        <button class="chat-button answer-button" disabled>
-          답변 중입니다 ...
-        </button>
-        <button class="chat-button close-button" @click="stopAnswering">
-          X
-        </button>
-      </div>
-    </div>
-
-    <Consultant
-      v-if="isConsultantModalVisible"
-      :isModalVisible="isConsultantModalVisible"
-      @close="closeConsultantModal"
-    />
-    <NewIssuanceForm
-      v-if="NewIssuanceFormVisible"
-      :show="NewIssuanceFormVisible"
-      @close="closeNewIssuanceForm"
-    />
-    <NewReissuanceForm
-      v-if="NewReissunaceFormVisible"
-      :show="NewReissunaceFormVisible"
-      @close="closeReissunaceForm"
-    />
-    <TransferForm
-      v-if="TransferFormVisible"
-      :show="TransferFormVisible"
-      @close="closeTransferForm"
-    />
   </div>
 </template>
 
-<style>
+<style scoped>
 .additional-bubble {
   white-space: pre-line;
 }
@@ -387,8 +399,6 @@ const closeTransferForm = () => {
   flex-direction: column;
   align-items: center;
   justify-content: space-between; /* 요소 간의 공간을 균등하게 분배 */
-  /* border: 1px solid blue; */
-  height: 100vh; /* 전체 화면 높이에 맞춤 */
   height: calc(100vh - 70px); /* 화면에서 Header를 제외한 나머지 높이 */
 }
 
@@ -406,6 +416,37 @@ const closeTransferForm = () => {
   margin-bottom: 30px;
   width: 100%; /* 버튼 섹션의 너비를 100%로 설정 */
   padding: 0 20px; /* 좌우 패딩 20px 추가 */
+}.additional-bubble {
+  font-size: inherit; /* 상속받도록 변경 */
+  background-color: #f7c8bd; /* 말풍선 배경색 */
+  border-radius: 10px; /* 모서리 둥글게 */
+  padding: 10px 15px; /* 패딩 추가 */
+  position: absolute; /* 절대 위치 설정 */
+  max-width: 80%; /* 최대 너비 설정 */
+  width: 300px;
+  max-height: 150px;
+  text-align: center; /* 텍스트 중앙 정렬 */
+  top: calc(50% - 150px); /* 이미지 바로 위로 위치 조정 */
+  left: 50%; /* 수평 중앙 정렬 */
+  transform: translate(-50%, -100%); /* 정확히 이미지 위에 배치 */
+  z-index: 2; /* 이미지 위에 표시 */
+  overflow: scroll;
+}
+
+.speech-bubble {
+  width: 80%; /* 박스 너비 */
+  background-color: #f9f9f9; /* 박스 배경색 */
+  border: 1px solid #ddd; /* 박스 테두리 */
+  border-radius: 10px; /* 박스 모서리 둥글게 */
+  padding: 15px; /* 안쪽 여백 */
+  text-align: center; /* 텍스트 중앙 정렬 */
+  margin: 10px auto; /* 위아래 여백 및 중앙 정렬 */
+  z-index: 1; /* 레이어 우선 순위 설정 */
+  position: relative; /* 박스의 위치를 일반 흐름에 맞춤 */
+  top: -100px; /* Y축 위치 조정 (이미지 위로 이동) */
+  margin-top: 450px;
+  font-size: inherit; /* 상속받도록 변경 */
+  overflow: scroll;
 }
 .chat-button {
   background-color: #ef5554;
@@ -416,7 +457,7 @@ const closeTransferForm = () => {
   cursor: pointer;
   width: 100%;
   height: 55px;
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   font-weight: bold;
   text-align: center;
   display: inline-block; /* block으로 변경하여 너비 조정 */
@@ -452,7 +493,7 @@ const closeTransferForm = () => {
 #main-logo {
   justify-content: center;
   align-items: center;
-  margin-top: 30px; /* 상단에서 150px 떨어지도록 추가 */
+  margin-top: 30px; /* 상단에서 150px 떨어지록 추가 */
 }
 
 #main-logo > img {
@@ -499,12 +540,13 @@ const closeTransferForm = () => {
   position: relative; /* 박스의 위치를 일반 흐름에 맞춤 */
   top: -100px; /* Y축 위치 조정 (이미지 위로 이동) */
   margin-top: 450px;
+  font-size: 1.44rem;
 }
 .chat-button[disabled] {
   cursor: not-allowed;
   opacity: 0.6;
 }
-.answer-section {
+.answer-section { 
   display: flex;
   justify-content: center;
   gap: 10px; /* 버튼 사이 간격 */
