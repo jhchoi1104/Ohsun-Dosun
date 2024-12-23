@@ -114,6 +114,9 @@ dependencies {
 
   // python
   implementation 'org.python:jython-slim:2.7.4'
+
+  //kakao
+  implementation 'org.springframework.boot:spring-boot-starter-web:2.7.13'
 }
 
 
