@@ -1,16 +1,18 @@
 <script setup>
-import { reactive, ref } from 'vue';
+import { reactive, ref, onMounted } from 'vue';
 import { useAuthStore } from '@/stores/auth.js';
 import { useRouter } from 'vue-router';
+import axios from 'axios';
 
 const authStore = useAuthStore(); //pinia 사용
 const router = useRouter();
 
 const member = reactive({
-  username: 'mink123@naver.com',
-  password: 'password123',
+  username: '',
+  password: '',
 });
 
+//일반 로그인 함수
 const login = async () => {
   console.log(member);
   try {
@@ -41,6 +43,66 @@ const togglePasswordVisibility = () => {
 const passwordHiddenshow = ref(false);
 const togglePasswordShow = () => {
   passwordHiddenshow.value = member.password.length > 0;
+};
+
+// 카카오 로그인
+const loginWithKakao = () => {
+  // 카카오 SDK가 로드된 후 호출
+  if (!window.Kakao.isInitialized()) {
+    alert('카카오 SDK 초기화 안 됨');
+    return;
+  }
+  Kakao.Auth.authorize({
+    redirectUri: `http://localhost:8080/kakao/callback`, //리디렉션 URL을 실제 로그인 처리하는 경로
+    fail: (error) => {
+      console.error('카카오 인증 실패', error);
+      alert('카카오 인증에 실패했습니다. 다시 시도해주세요.');
+    },
+  });
+};
+// 페이지 로드 시 인증 코드 처리
+onMounted(() => {
+  if (window.location.pathname.includes('chat')) {
+    // 'chat'이 포함된 모든 경로에서 callback 처리
+    handlekakaocallback();
+  }
+});
+
+const handlekakaocallback = async () => {
+  console.log('handlekakaocallback 함수가 호출되었습니다!');
+  const code = new URLSearchParams(window.location.search).get('code');
+  console.log('현재 URL:', window.location.href); // 현재 URL 확인
+
+  if (code) {
+    // console.log('카카오 인증 코드:', code);
+    // try {
+    //   await authStore.loginWithKakao(code);
+    //   alert('카카오 로그인에 성공했습니다!');
+
+    //   // 로그인 후 페이지 이동
+    //   const path = router.currentRoute.value.query.redirect || '/chat';
+    //   router.push(path);
+    //   console.log(path);
+    // }
+    try {
+      // Exchange the authorization code for an access token in the backend
+      const result = await axios.post('http://localhost:8080/kakao/callback', {
+        code,
+      });
+
+      // Successfully logged in
+      if (result.status === 200) {
+        // Redirect to chat or other page after successful login
+        const path = router.currentRoute.value.query.redirect || '/chat';
+        router.push(path);
+      } else {
+        alert('로그인 실패!');
+      }
+    } catch (error) {
+      console.error('카카오 로그인 실패:', error);
+      alert('카카오 로그인에 실패했습니다. 다시 시도해주세요.');
+    }
+  }
 };
 </script>
 
@@ -94,10 +156,14 @@ const togglePasswordShow = () => {
               "
             ></span>
           </div>
-          <div class="kakao">
-            <button class="kakao-form">
-              <i class="fa-brands fa-facebook-messenger"></i> 카카오 로그인
-            </button>
+          <div class="kakao mt-4">
+            <a @click.prevent="loginWithKakao">
+              <img
+                src="@/assets/images/kakao_login_large_wide.png"
+                alt="카카오 로그인"
+                style="width: 100%; cursor: pointer"
+              />
+            </a>
           </div>
           <div class="find">아이디 찾기 &vert; 비밀번호 찾기</div>
           <button class="login-form">로그인</button>
