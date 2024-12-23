@@ -92,6 +92,10 @@
         </div>
       </div>
     </div>
+    <!-- 로그아웃 버튼 추가 -->
+    <div class="logout" @click="logoutUser" style="cursor: pointer">
+      로그아웃
+    </div>
   </div>
 </template>
 
@@ -99,6 +103,7 @@
 import Navbar from '@/components/Navbar.vue';
 import { useRouter } from 'vue-router';
 import { useMenuStore } from '@/stores/close.js';
+import { useAuthStore } from '@/stores/auth.js';
 import { ref, computed, watch } from 'vue';
 import '@fortawesome/fontawesome-free/css/all.css';
 import { useFontSizeStore } from '@/api/fontsize.js'; // fontSizeStore 가져오기
@@ -172,6 +177,14 @@ watch(
     }
   }
 );
+
+const authStore = useAuthStore();
+// 로그아웃 기능
+function logoutUser() {
+  authStore.logout(); // authStore에서 logout 메서드 호출
+  menuStore.closeNav();
+  router.push('/'); // 로그인 페이지로 리다이렉트
+}
 </script>
 
 <style>

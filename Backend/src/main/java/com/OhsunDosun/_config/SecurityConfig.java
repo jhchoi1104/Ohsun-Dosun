@@ -49,6 +49,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
     private final CustomAccessDeniedHandler accessDeniedHandler;
 
+    public static final String[] ALLOWED_URLS = {
+            "/swagger-ui/**",
+            "/swagger-resources/**",
+            "/v3/api-docs/**",
+            "/api/v1/posts/**",
+            "/api/v1/replies/**",
+            "/login",
+            "/auth/login/kakao/**"  // 여기에 카카오 로그인 URL 추가
+    };
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -73,9 +82,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.addAllowedOriginPattern("*");
-        config.addAllowedHeader("*");
-        config.addAllowedMethod("*");
+        config.addAllowedOriginPattern("*"); //모든 origin을 허용
+        config.addAllowedHeader("*"); //모든 헤더를 허용
+        config.addAllowedMethod("*"); //모든 메서드를 허용
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
     }
@@ -97,11 +106,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(HttpSecurity http) throws Exception {
         // 한글 인코딩 필터 설정
-        http.addFilterBefore(encodingFilter(), CsrfFilter.class)
-                // 인증 에러 필터
-                .addFilterBefore(authenticationErrorFilter, UsernamePasswordAuthenticationFilter.class)
+        http.cors().and()
+                .addFilterBefore(encodingFilter(), CsrfFilter.class)
                 // Jwt 인증 필터
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                // 인증 에러 필터
+                .addFilterBefore(authenticationErrorFilter, UsernamePasswordAuthenticationFilter.class)
                 // 로그인 인증 필터
                 .addFilterBefore(jwtUsernamePasswordAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -113,6 +123,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         http
                 .authorizeRequests()
+                .antMatchers(ALLOWED_URLS).permitAll()  // 허용 URL 추가
                 .antMatchers(HttpMethod.OPTIONS).permitAll()
                 .antMatchers(HttpMethod.POST, "/api/member").authenticated()
                 .antMatchers(HttpMethod.PUT, "/api/member", "/api/member/*/changepassword").authenticated()

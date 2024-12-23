@@ -10,6 +10,7 @@ import Password from '@/pages/bankTransfer/password.vue';
 import TransferSucceed from '@/components/TransferSucceed.vue';
 import login from './login.js';
 import join from './join.js';
+import KakaoCallback from '@/components/KakaoCallback.vue';
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -66,6 +67,12 @@ const router = createRouter({
       path: '/transfersucceed',
       name: 'TransferSucceed',
       component: TransferSucceed,
+    },
+    {
+      //카카오 로그인 콜백
+      path: '/kakao/callback',
+      name: 'KakaoCallback',
+      component: KakaoCallback,
     },
     ...login,
     ...join,
