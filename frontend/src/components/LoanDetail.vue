@@ -3,51 +3,36 @@
     <p>아래 버튼을 누르시면 대출에 대한 설명이 들립니다.</p>
     <div class="d-flex justify-content-between" alt="1">
       <div class="flex-item">
-        <button class="btn" @click="playAudio('주택 담보 대출')">
-          주택 담보 대출🎙️
+        <button class="btn" @click="playAudio('주택을 담보로 신청 가능한 대출 상품입니다.')">
+          주택 담보 대출🔊
         </button>
-        <audio
-          ref="audio1"
-          src="../../src/assets/대출음성/주택담보.mp3"
-        ></audio>
       </div>
       <div class="flex-item">
-        <button class="btn" @click="playAudio('전세자금 대출')">
-          전세 자금 대출🎙️
+        <button class="btn" @click="playAudio('고객님의 전세금을 지원하는 대출입니다.')">
+          전세 자금 대출🔊
         </button>
-        <audio
-          ref="audio2"
-          src="../../src/assets/대출음성/전세자금.mp3"
-        ></audio>
       </div>
     </div>
     <div class="d-flex justify-content-between" alt="2">
       <div class="flex-item">
-        <button class="btn" @click="playAudio('자동차 구입 대출')">
-          자동차 구입 대출🎙️
+        <button class="btn" @click="playAudio('신차 및 중고차 구매를 위한 제품입니다.')">
+          자동차 구입 대출🔊
         </button>
-        <audio ref="audio3" src="../../src/assets/대출음성/자동차.mp3"></audio>
-      </div>
+       </div>
       <div class="flex-item">
-        <button class="btn" @click="playAudio('신용 대출')">신용 대출🎙️</button>
-        <audio ref="audio4" src="../../src/assets/대출음성/신용.mp3"></audio>
-      </div>
+        <button class="btn" @click="playAudio('신용도에 기반한 대출입니다.')">신용 대출🔊</button>
+       </div>
     </div>
     <div class="d-flex justify-content-between" alt="3">
       <div class="flex-item">
-        <button class="btn" @click="playAudio('예치금 담보 대출')">
-          예금 담보 대출🎙️
+        <button class="btn" @click="playAudio('중도 해지의 불이익이 없는 예금 담보 대출입니다.')">
+          예금 담보 대출🔊
         </button>
-        <audio
-          ref="audio5"
-          src="../../src/assets/대출음성/예금담보.mp3"
-        ></audio>
       </div>
       <div class="flex-item">
-        <button class="btn" @click="playAudio('KB 비상금 대출')">
-          KB 비상금 대출🎙️
+        <button class="btn" @click="playAudio('비대면으로 간편하게 신청하고 바로 사용하는 kb 비상금 대출입니다.')">
+          KB 비상금 대출🔊
         </button>
-        <audio ref="audio6" src="../../src/assets/대출음성/비상금.mp3"></audio>
       </div>
     </div>
   </div>
@@ -55,48 +40,36 @@
 
 <script setup>
 import { ref } from 'vue';
+import { bringAudioFromServer } from '@/api/TtsApi';
 
-const audio1 = ref(null);
-const audio2 = ref(null);
-const audio3 = ref(null);
-const audio4 = ref(null);
-const audio5 = ref(null);
-const audio6 = ref(null);
+let audio = null;
 
-// 현재 재생 중인 오디오 추적하기
-const currentAudio = ref(null);
-
-// type과 오디오 참조를 매핑하는 객체
-const audioMap = {
-  '주택 담보 대출': audio1,
-  '전세자금 대출': audio2,
-  '자동차 구입 대출': audio3,
-  '신용 대출': audio4,
-  '예치금 담보 대출': audio5,
-  'KB 비상금 대출': audio6,
-};
-
-const playAudio = (type) => {
-  const audioRef = audioMap[type];
-  console.log('Playing audio for type:', type, 'AudioRef:', audioRef.value);
-  if (audioRef && audioRef.value) {
-    // 현재 재생 중인 오디오가 있고, 새로운 오디오가 다르면 중지
-    if (currentAudio.value && currentAudio.value !== audioRef.value) {
-      currentAudio.value.pause();
-      currentAudio.value.currentTime = 0;
+const playAudio = async (message) => {
+  try {
+    // 기존 재생 중인 오디오 멈추기
+    if (audio && !audio.paused) {
+      audio.pause();
+      audio.currentTime = 0;
     }
 
-    // 새로운 오디오를 재생
-    audioRef.value
-      .play()
-      .then(() => {
-        currentAudio.value = audioRef.value;
-      })
-      .catch((error) => {
-        console.error('오디오 재생 에러:', error);
-      });
-  } else {
-    console.warn('해당 오디오 요소를 찾을 수 없습니다:', type);
+    // TTS API를 통해 음성 데이터를 가져오기
+    const base64Audio = await bringAudioFromServer(message);
+
+    // Base64 디코딩 및 Blob 생성
+    const byteCharacters = atob(base64Audio);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    const blob = new Blob([byteArray], { type: 'audio/mp3' });
+    const audioUrl = URL.createObjectURL(blob);
+
+    // 오디오 객체 생성 및 재생
+    audio = new Audio(audioUrl);
+    audio.play();
+  } catch (error) {
+    console.error('음성 재생 오류:', error);
   }
 };
 </script>
