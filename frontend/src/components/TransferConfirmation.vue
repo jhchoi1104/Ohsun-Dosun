@@ -45,7 +45,11 @@
       </div>
     </div>
     <div class="button-section">
-      <router-link class="chat-button" to="/password">송금하기</router-link>
+      <!-- <router-link class="chat-button" to="/password" @click="handleSendMoney"
+        >송금하기</router-link
+      > *** -->
+      <!-- @click="handleSendMoney" **추가 -->
+      <button class="chat-button" @click="handleSendMoney">송금하기</button>
     </div>
   </div>
 </template>
@@ -54,9 +58,40 @@
 import { useInputStore } from '@/stores/inputStore'; // Pinia 스토어 가져오기
 import '@/assets/main.css';
 import Header from '@/components/Header.vue';
+import axios from 'axios'; // ** axios import 추가
+import { useRouter } from 'vue-router'; // **
 
+const router = useRouter(); // **
 const inputStore = useInputStore(); // 스토어 인스턴스 생성
 const inputs = inputStore.inputs; // 스토어의 inputs 상태 가져오기
+
+const handleSendMoney = async () => {
+  try {
+    // 1. 이름으로 receiverId 조회 ***
+    const userResponse = await axios.get(
+      `/api/user/findByName?name=${inputs.name}`
+    );
+    const receiverId = userResponse.data.userId; // 조회된 receiverId
+
+    // 2. 송금 요청 ***
+    const response = await axios.post('/api/transfer/send', {
+      senderId: inputs.senderid,
+      receiverId: receiverId, // 조회된 ID 사용 ***
+      // receiverId: inputs.recieverid, ***
+      receiverAccountBank: inputs.recieveraccountbank,
+      receiverAccountNumber: inputs.recieveraccountnumber,
+      amount: parseInt(inputs.amount), // 금액은 정수로 변환
+    });
+
+    console.log(response.data); // "transfer succeed" 메시지 확인
+    // 송금 성공 후 TransferSucceed.vue로 이동
+    // router.push('/transferSucceed'); ***
+    router.push('/password');
+  } catch (error) {
+    console.error('송금 실패:', error);
+    alert('송금 처리 중 오류가 발생했습니다.');
+  }
+};
 </script>
 
 <style scoped>
