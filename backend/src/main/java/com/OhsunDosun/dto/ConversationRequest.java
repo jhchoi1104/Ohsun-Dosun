@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ConversationRequest {
+    private int userId;
     private String input;
     private int conversationRoomNo;
 }

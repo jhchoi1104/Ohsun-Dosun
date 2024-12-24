@@ -16,7 +16,7 @@ Main Categories:
 4. Passbook Reissuance Service (Main Task 004): Inquiries related to passbook loss and reissuance. The subcategories are as follows:
 	- User requests reissuance without providing any information (Sub Task 004-01): When the user requests passbook reissuance but does not provide any details regarding the reissuance.
 	- User specifies the reissuance method (Sub Task 004-02): When the user requests passbook reissuance by specifying a method such as branch collection, STM collection, or registered mail delivery.
-5. New Deposit Account Opening Service (Main Task 005): Inquiries related to the issuance of new deposit accounts.
+5. New Deposit Account Opening Service (Main Task 005, Sub Task 005-01): Inquiries related to the issuance of new deposit accounts.
 Response Format:
 For each user input, determine the appropriate main category and subcategory (if applicable) and return the corresponding task numbers in the following strict JSON format:
 ```

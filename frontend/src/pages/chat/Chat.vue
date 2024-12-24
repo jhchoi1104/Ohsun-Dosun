@@ -1,16 +1,16 @@
 <script setup>
 import Header from '@/components/Header.vue';
-import { ref, onMounted } from 'vue';
-import { sendAudioToServer } from '@/api/SttApi'; // SttApi.js에서 함수 import
-import { sendTextToServer } from '@/api/ChatBotApi.js';
+import { ref, onMounted, onUnmounted } from 'vue';
+import { sendAudioToServer } from '@/api/SttApi';
 import { bringAudioFromServer } from '@/api/TtsApi.js';
-
-import axios from 'axios';
 import Consultant from '@/components/Consultant.vue';
 import NewIssuanceForm from '@/components/NewIssuanceForm.vue';
 import NewReissuanceForm from '@/components/Reissuance.vue';
 import TransferForm from '@/components/TransferForm.vue';
 import LoanDetail from '@/components/LoanDetail.vue';
+import { useInputStore } from '@/stores/inputStore';
+
+const inputStore = useInputStore();
 
 const NewIssuanceFormVisible = ref(false);
 const NewReissunaceFormVisible = ref(false);
@@ -24,52 +24,162 @@ const transcription = ref('');
 const chatbotMessage = ref(''); // Chatbot 응답 메시지
 const chatbotMessagesub = ref(''); //subTask 저장
 const transferstep = ref('');
-let audio = null;
 const call = ref(''); //상담원
-import { useInputStore } from '@/stores/inputStore';
-const inputStore = useInputStore();
-// 버튼을 눌러서 아래 이벤트를 실행해야 됨.
-// const exampleString = '안녕하세요. tts가 잘되는지 테스트해봅니다.';
-const playAudio = async (input) => {
-  try {
-    // 서버에서 오디오 데이터 가져오기
-    const base64Audio = await bringAudioFromServer(input);
+const socket = ref(null); // WebSocket 관련 변수
+const messages = ref([]); // WebSocket 관련 변수
+let audio = null;
+let mediaRecorder = null; // 녹음기 초기화
+const audioQueue = ref([]);
 
-    // Base64 디코딩 및 오디오 재생
-    const byteCharacters = atob(base64Audio);
-    const byteNumbers = new Array(byteCharacters.length);
-    for (let i = 0; i < byteCharacters.length; i++) {
-      byteNumbers[i] = byteCharacters.charCodeAt(i);
+let sttCancelRequested = false;
+let chatbotCancelRequested = false;
+let ttsCancelRequested = false;
+
+// 웹 서버 -> 클라이언트 (웹소켓)
+const connectWebSocket = () => {
+  socket.value = new WebSocket('ws://localhost:8080/ws/chat');
+
+  socket.value.onmessage = async (event) => {
+    if (typeof event.data === 'string') {
+      try {
+        const data = JSON.parse(event.data);
+
+        if (chatbotCancelRequested) {
+          console.log('Chatbot 요청이 취소되었습니다.');
+          return;
+        }
+
+        if (data.content && data.step !== undefined) {
+          // transfer 챗봇 응답 처리
+          chatbotMessage.value = data.content;
+          transferstep.value = data.step;
+          inputStore.updateInput('step', transferstep.value);
+          inputStore.updateInput('name', data.name);
+          inputStore.updateInput('amount', data.amount);
+        } else if (data.mainTaskNo && data.subTaskNo) {
+          // 클래스 분류 처리
+          chatbotMessagesub.value = data.subTaskNo;
+          handleSubTask(data.mainTaskNo, data.subTaskNo);
+        } else {
+          // JSON이지만 처리할 유형이 정의되지 않은 경우
+          console.warn('Unhandled JSON data:', data);
+        }
+      } catch (error) {
+        // JSON 파싱 실패 -> 일반 텍스트 메시지로 처리
+        if (!chatbotCancelRequested) {
+          chatbotMessage.value += event.data; // 스트리밍된 일반 텍스트를 이어붙임
+        }
+      }
+    } else if (event.data instanceof Blob) {
+      if (!ttsCancelRequested) {
+        audioQueue.value.push(event.data); // 새 데이터 추가
+        if (!audio) {
+          playAudioQueue(); // 오디오 재생이 진행 중이 아닌 경우에만 호출
+        }
+      }
+    } else {
+      console.warn('Unhandled WebSocket message type:', event.data);
     }
-    const byteArray = new Uint8Array(byteNumbers);
-    const audioBlob = new Blob([byteArray], { type: 'audio/wav' });
+  };
 
-    // Blob URL 생성 후 오디오 재생
-    const audioUrl = URL.createObjectURL(audioBlob);
+  socket.value.onerror = (error) => {
+    console.error('WebSocket Error:', error);
+  };
 
-    console.log(audioUrl);
-    audio = new Audio(audioUrl);
-    audio.play();
-  } catch (error) {
-    console.error('TTS 처리 중 오류:', error);
-    alert('오류가 발생했습니다. 콘솔을 확인하세요.');
+  socket.value.onclose = () => {
+    console.log('WebSocket closed.');
+  };
+};
+
+// 통신 중단
+const disconnectWebSocket = () => {
+  if (socket.value) {
+    socket.value.close();
   }
 };
 
-// 녹음기 초기화
-let mediaRecorder = null;
+const handleSubTask = (mainTask, subTask) => {
+  switch (subTask) {
+    case '002-01':
+    case '002-02':
+      setTimeout(() => {
+        openConsultantModal();
+      }, 3000); //3초 지연
+      break;
+    case '003-01':
+      if (transferstep.value >= 3) {
+        openTransferForm();
+      }
+      break;
+    case '003-02':
+      if (transferstep.value >= 3) {
+        openTransferForm();
+      }
+      break;
+    case '003-03':
+      if (transferstep.value >= 3) {
+        openTransferForm();
+      }
+      break;
+    case '004-01':
+      openNewReissuanceForm();
+      break;
+    case '004-02':
+      openNewReissuanceForm();
+      break;
+    case '005-01':
+      openNewIssuanceForm();
+      break;
+    case '001-02': //새로운 case
+      openLoanDetail();
+      break;
+    case '01-02': //새로운 case
+      openLoanDetail();
+      break;
+    case '001.02': //새로운 case
+      openLoanDetail();
+      break;
+    case '001-03':
+      closeLoanDetail();
 
+    default:
+      break;
+  }
+};
+
+// 챗봇 응답 오디오 송출(스트리밍 처리)
+const playAudioQueue = () => {
+  if (audio || audioQueue.value.length === 0) return; // 이미 재생 중이면 종료
+
+  const audioBlob = audioQueue.value.shift(); // 큐에서 데이터 추출
+  const audioUrl = URL.createObjectURL(audioBlob);
+  audio = new Audio(audioUrl);
+
+  audio.addEventListener('ended', () => {
+    audio = null; // 현재 재생 상태 초기화
+    playAudioQueue(); // 다음 오디오 재생
+  });
+
+  audio.play();
+};
+
+// 녹음 함수: 사용자 음성 -> 웹 서버 (웹소켓)
 const startRecording = () => {
   try {
-    chatbotMessage.value= '';
+    // 상태 초기화
+    sttCancelRequested = false;
+    chatbotCancelRequested = false;
+    ttsCancelRequested = false;
+
+    chatbotMessage.value = '';
+    transcription.value = '';
+    let audioChunks = [];
+
     // 음성 출력이 진행 중이라면 멈추기
     if (audio && !audio.paused) {
-      audio.pause(); // 이전 오디오 중지
-      audio.currentTime = 0; // 오디오를 처음으로 되돌리기
+      audio.pause();
+      audio.currentTime = 0;
     }
-
-    transcription.value = ''; // 녹음 시작 시 기존 텍스트 초기화
-    let audioChunks = [];
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       throw new Error('마이크 권한을 요청할 수 없습니다.');
@@ -90,90 +200,32 @@ const startRecording = () => {
           formData.append('file', audioBlob, 'audio.wav');
 
           try {
+            if (sttCancelRequested) return;
             const data = await sendAudioToServer(formData);
-            console.log(data);
             transcription.value = data.text || '텍스트를 인식할 수 없습니다.';
+
             if (transcription.value !== '텍스트를 인식할 수 없습니다') {
-              // conversationRoomNo와 userId는 임의의 값으로 지정
-              const conversationRoomNo = 3; // 임의로 지정한 대화방 번호
-              const userId = 1; // 임의로 지정한 사용자 ID
+              const conversationRoomNo = 3;
+              const userId = 1;
 
-              // ChatBot API 호출
-              const response = await sendTextToServer(
-                userId,
-                transcription.value,
-                conversationRoomNo
+              // ChatBot 챗봇 API 호출
+              if (chatbotCancelRequested) return;
+              console.log('웹소켓 통신 전');
+              socket.value.send(
+                JSON.stringify({
+                  userId,
+                  input: transcription.value,
+                  conversationRoomNo,
+                })
               );
-              console.log(response);
-              chatbotMessage.value = response.content; // Chatbot 응답 저장
-              chatbotMessagesub.value = response.subTask; //subTask 저장
-              transferstep.value = response.step;
-              inputStore.updateInput('step', transferstep.value);
-              inputStore.updateInput('name', response.name);
-              inputStore.updateInput('amount', response.amount);
-              switch (chatbotMessagesub.value) {
-                case '002-01':
-                case '002-02':
-                  setTimeout(() => {
-                    openConsultantModal();
-                  }, 3000); //3초 지연
-                  break;
-                case '003-01':
-                  if (transferstep.value >= 3) {
-                    openTransferForm();
-                  }
-                  break;
-                case '003-02':
-                  if (transferstep.value >= 3) {
-                    openTransferForm();
-                  }
-                  break;
-                case '003-03':
-                  if (transferstep.value >= 3) {
-                    openTransferForm();
-                  }
-                  break;
-                case '004':
-                  openNewReissuanceForm();
-                  break;
-                case '005':
-                  openNewIssuanceForm();
-                  break;
-                case '001-02': //새로운 case
-                  openLoanDetail();
-                  break;
-                case '01-02': //새로운 case
-                  openLoanDetail();
-                  break;
-                case '001.02': //새로운 case
-                  openLoanDetail();
-                  break;
-                case '001-03':
-                  closeLoanDetail();
-
-                default:
-                  break;
-              }
-              const audioData = response.audioData;
-              const byteCharacters = atob(audioData);
-              const byteNumbers = new Array(byteCharacters.length);
-              for (let i = 0; i < byteCharacters.length; i++) {
-                byteNumbers[i] = byteCharacters.charCodeAt(i);
-              }
-              const byteArray = new Uint8Array(byteNumbers);
-              const audioBlob = new Blob([byteArray], { type: 'audio/wav' });
-
-              const audioUrl = URL.createObjectURL(audioBlob);
-              audio = new Audio(audioUrl);
-              // 오디오 종료 시점에 답변 중 상태 비활성화
-              audio.addEventListener('ended', () => {
-                isAnswering.value = false;
-                isRecording.value = false;
-              });
-              audio.play();
+              console.log('웹소켓 통신 후');
             }
           } catch (error) {
-            errorMessage.value = '서버에 전송하는 중 오류가 발생했습니다.';
+            if (sttCancelRequested) {
+              console.log('STT 요청이 취소되었습니다.');
+            } else {
+              console.error('Error sending audio to server:', error);
+            }
           }
         };
 
@@ -202,6 +254,57 @@ const stopRecording = () => {
   }
 };
 
+// 요청 취소 함수
+const stopAnswering = () => {
+  sttCancelRequested = true;
+  chatbotCancelRequested = true;
+  ttsCancelRequested = true;
+
+  // 오디오 재생 중단
+  if (audio && !audio.paused) {
+    audio.pause();
+    audio.currentTime = 0;
+  }
+
+  // 상태 초기화
+  isRecording.value = false;
+  isAnswering.value = false;
+  transcription.value = '';
+  chatbotMessage.value = '';
+  chatbotMessagesub.value = '';
+  transferstep.value = '';
+  errorMessage.value = '';
+
+  audioQueue.value = [];
+};
+
+// TTS 모델 통신, Audio 송출
+const playAudio = async (input) => {
+  try {
+    // 서버에서 오디오 데이터 가져오기
+    const base64Audio = await bringAudioFromServer(input);
+
+    // Base64 디코딩 및 오디오 재생
+    const byteCharacters = atob(base64Audio);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    const audioBlob = new Blob([byteArray], { type: 'audio/wav' });
+
+    // Blob URL 생성 후 오디오 재생
+    const audioUrl = URL.createObjectURL(audioBlob);
+
+    console.log(audioUrl);
+    audio = new Audio(audioUrl);
+    audio.play();
+  } catch (error) {
+    console.error('TTS 처리 중 오류:', error);
+    alert('오류가 발생했습니다. 콘솔을 확인하세요.');
+  }
+};
+
 // 처음 인사말 생성 함수
 const createGreet = async () => {
   try {
@@ -209,6 +312,8 @@ const createGreet = async () => {
 
     const response = playAudio(chatbotMessage.value); // 음성 재생
     console.log(response); // 응답 확인 (필요 시 로그)
+
+    connectWebSocket();
   } catch (error) {
     console.error('Error during createGreet execution:', error); // 에러 로그
     errorMessage.value = '서버에 전송하는 중 오류가 발생했습니다.'; // 에러 메시지 설정
@@ -250,6 +355,14 @@ const openTransferForm = () => {
 const closeTransferForm = () => {
   TransferFormVisible.value = false;
 };
+
+onMounted(() => {
+  connectWebSocket();
+});
+
+onUnmounted(() => {
+  disconnectWebSocket();
+});
 </script>
 
 <template>
@@ -283,10 +396,18 @@ const closeTransferForm = () => {
       {{ transcription }}
     </div>
     <div class="button-section">
-      <button class="chat-button" @click="startRecording" v-if="!isRecording && !isAnswering">
+      <button
+        class="chat-button"
+        @click="startRecording"
+        v-if="!isRecording && !isAnswering"
+      >
         말하기
       </button>
-      <button class="chat-button" @click="stopRecording" v-if="isRecording && !isAnswering">
+      <button
+        class="chat-button"
+        @click="stopRecording"
+        v-if="isRecording && !isAnswering"
+      >
         중지
       </button>
       <div class="answer-section" v-if="isAnswering">

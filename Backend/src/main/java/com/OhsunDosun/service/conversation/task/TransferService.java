@@ -1,6 +1,7 @@
 package com.OhsunDosun.service.conversation.task;
 
 import com.OhsunDosun.dto.ChatbotResponse;
+import com.OhsunDosun.dto.ConversationRequest;
 import com.OhsunDosun.dto.Log;
 import com.OhsunDosun.dto.TransferRequest;
 import com.OhsunDosun.mapper.TransferMapper;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.socket.WebSocketSession;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -23,10 +25,10 @@ public class TransferService {
     private final PromptService promptService;
     private final ChainService chainService;
 
-    public ChatbotResponse generateTransferConversation(String input, List<Log> conversationLogs) throws JsonProcessingException {
+    public ChatbotResponse generateTransferConversation(ConversationRequest request, List<Log> conversationLogs) throws JsonProcessingException {
         List<String> promptFilePathList = Collections.singletonList("prompts/transfer.prompt");
-        List<Map<String, String>> chatbotPrompt = promptService.chatbotPrompt(promptFilePathList, input, conversationLogs);
-        return chainService.chatbotChain(chatbotPrompt);
+        List<Map<String, String>> chatbotPrompt = promptService.chatbotPrompt(promptFilePathList, request.getInput(), conversationLogs);
+        return chainService.chatbotPlainChain(chatbotPrompt);
     }
 
     @Autowired

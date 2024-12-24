@@ -26,6 +26,6 @@ public class SummaryTextService {
         List<String> promptFilePathList = Arrays.asList("prompts/summary.prompt");
         List<Log> conversationLogs = Collections.emptyList();
         List<Map<String, String>> chatbotPrompt = promptService.chatbotPrompt(promptFilePathList, input, conversationLogs);
-        return chainService.chatbotChain(chatbotPrompt);
+        return chainService.chatbotPlainChain(chatbotPrompt);
     }
 }

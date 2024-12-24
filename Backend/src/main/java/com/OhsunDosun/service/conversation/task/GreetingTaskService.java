@@ -8,6 +8,7 @@ import com.OhsunDosun.service.conversation.ChainService;
 import com.OhsunDosun.service.conversation.PromptService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.socket.WebSocketSession;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -23,7 +24,7 @@ public class GreetingTaskService {
     private final PromptService promptService;
     private final ChainService chainService;
 
-    public ChatbotResponse generateGreeting(ConversationRequest request, int userNo) {
+    public void generateGreeting(ConversationRequest request, int userNo, WebSocketSession session) {
         List<Log> conversationLogList = conversationRoomService.findLastNByConversationRoomNo(5, request.getConversationRoomNo());
         String conversationLogListString = conversationLogList != null && !conversationLogList.isEmpty()
                 ? "\nPrevious Conversation:\n" + String.join("\n", conversationLogList.stream()
@@ -34,7 +35,6 @@ public class GreetingTaskService {
         List<String> promptFilePathList = Arrays.asList("prompts/basic.prompt", "prompts/greeting.prompt");
         List<Log> conversationLogs = Collections.emptyList();
         List<Map<String, String>> chatbotPrompt = promptService.chatbotPrompt(promptFilePathList, "", conversationLogs, conversationLogListString);
-        // 여기부터 해야함.
-        return chainService.chatbotChain(chatbotPrompt);
+        chainService.chatbotChain(request, chatbotPrompt, session);
     }
 }

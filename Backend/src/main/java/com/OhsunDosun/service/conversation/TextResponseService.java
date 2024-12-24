@@ -11,11 +11,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.stereotype.Service;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
 
+import java.io.IOException;
 import java.util.List;
 
 @Slf4j
@@ -24,8 +28,6 @@ import java.util.List;
 public class TextResponseService {
 
     private final ConversationRoomService conversationRoomService;
-    private final TokenService tokenService;
-
     private final ClassificationTaskService classificationTaskService;
     private final GreetingTaskService greetingTaskService;
     private final DailyConversationTaskService dailyConversationTaskService;
@@ -36,8 +38,7 @@ public class TextResponseService {
     private final ReissuanceService reissuanceService;
     private final FavoritesService favoritesService;
 
-    public ChatbotResponse TextResponse(ConversationRequest request, int userNo) throws JsonProcessingException {
-        ChatbotResponse response;
+    public void TextResponse(ConversationRequest request, int userNo, WebSocketSession session) throws JsonProcessingException {
         String input = request.getInput();
 
         // 이전 대화내용 조회
@@ -45,48 +46,47 @@ public class TextResponseService {
 
         // 첫 인사 생성
         if (conversationLogs.isEmpty() && request.getInput().equals("Greeting")) {
-            response = greetingTaskService.generateGreeting(request, userNo);
-            log.info("🖐️ [{}] Greeting generated for: {}", userNo, response.getContent());
-            return response;
+            greetingTaskService.generateGreeting(request, userNo, session);
         }
 
         // 사용자 입력에 따른 작업 분류
         ClassificationResponse classificationResult = classificationTaskService.classificationTask(input, conversationLogs);
         String mainTaskNo = classificationResult.getMainTaskNumber();
         String subTaskNo = classificationResult.getSubTaskNumber();
+        Integer step = 0;
+
         Boolean taskLocked = classificationResult.getTaskLocked();
+
+
+
         log.info("🔗1️⃣ [{}] Task Classification Completed by - Main Task No: \u001B[34m{}\u001B[0m, Sub Task No: \u001B[34m{}\u001B[0m", userNo, mainTaskNo, subTaskNo, taskLocked);
 
         // Main Task 분류
         switch (mainTaskNo) {
             // 대출 서비스
             case "001" -> {
-                response = loanService.generateLoanConversation(input, conversationLogs);
-
-                response.setSubTaskNo(subTaskNo);
+                loanService.generateLoanConversation(request, conversationLogs, session);
             }
 
             //상담원 연결 서비스
             case "002" -> {
-                response = consultantService.generateConsultConversation(input, conversationLogs);
-                response.setSubTaskNo(subTaskNo);
+                consultantService.generateConsultConversation(request, conversationLogs, session);
             }
 
             // 송금하기 서비스
             case "003" -> {
 
-                response = transferService.generateTransferConversation(input, conversationLogs);
-                response.setSubTaskNo(subTaskNo);
+                ChatbotResponse response = transferService.generateTransferConversation(request, conversationLogs);
                 log.info("response json 객체 확인 : {}" , response);
+
                 ObjectMapper objectMapper = new ObjectMapper();
                 String jsonString = response.getContent()
                         .replaceAll("```json", "")
                         .replaceAll("```", "")
                         .trim();
                 JsonNode jsonNode = objectMapper.readTree(jsonString);
-                Integer step = jsonNode.get("step").asInt();
-                System.out.println("step : 값은 " + step);
-                response.setStep(step);
+                step = jsonNode.get("step").asInt();
+
                 if(step == 2){
                     String step2_content_name = jsonNode.get("name").asText();
                     Long userId = Long.valueOf(userNo); // 현재 유저의 ID로 설정
@@ -125,36 +125,46 @@ public class TextResponseService {
                         step2_content_json.put("amount","");
                     }
                     String step2_content_string = step2_content_json.toString();
-                    response.setContent(step2_content_string);
 
+                    try {
+                        session.sendMessage(new TextMessage(step2_content_string));
+                    }  catch (IOException e) {
+                        log.error("JSON 파싱 오류: content 필드에서 값을 추출할 수 없습니다.", e);
+                    }
                 }
 
             }
 
             // 통장 재발행 서비스
             case "004" -> {
-                response = reissuanceService.generateReissuanceConversation(input, conversationLogs);
-                response.setSubTaskNo(mainTaskNo);
+                reissuanceService.generateReissuanceConversation(request, conversationLogs, session);
 
             }
 
             // 통장 신규 생성 서비스
             case "005" -> {
-                response = newissuanceService.generateNewissuanceConversation(input, conversationLogs);
-                response.setSubTaskNo(mainTaskNo);
+                newissuanceService.generateNewissuanceConversation(request, conversationLogs, session);
             }
 
 
             // 일상 대화
             default -> {
-                response = dailyConversationTaskService.generateDailyConversation(input, conversationLogs);
+                dailyConversationTaskService.generateDailyConversation(request, conversationLogs, session);
             }
         }
+        // classification 결과 전송
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            ObjectNode responseJson = objectMapper.createObjectNode();
+            responseJson.put("mainTaskNo", mainTaskNo);
+            responseJson.put("subTaskNo", subTaskNo);
+            responseJson.put("step", step);
 
-        // 전체 token 계산
-        tokenService.calculateToken(response, classificationResult);
-
-        log.info("🔗2️⃣ [{}] Response generated for: {}", userNo, response.getSubTaskNo());
-        return response;
+            // WebSocket으로 전송
+            session.sendMessage(new TextMessage(responseJson.toString()));
+            log.info("🔗2️⃣ [{}] Classification result sent: {}", userNo, responseJson);
+        } catch (Exception e) {
+            log.error("Error sending WebSocket message", e);
+        }
     }
 }

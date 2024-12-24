@@ -1,99 +1,89 @@
 package com.OhsunDosun.service.conversation;
 
-import com.OhsunDosun.exception.TextToSpeechException;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.microsoft.cognitiveservices.speech.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.io.ByteArrayOutputStream;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class TextToSpeechService {
 
-    @Value("${OPENAI_API_KEY}")
-    private String apiKey;
+    @Value("${SPEECH_KEY}")
+    private String speechKey;
 
-    @Value("${voice}")
-    private String voice;
-
-    private static final String API_URL = "https://api.openai.com/v1/audio/speech";
+    @Value("${SPEECH_REGION}")
+    private String speechRegion;
 
     /**
      * <pre>
      * 메소드명   : convertTextToSpeech
-     * 설명       : 텍스트를 음성으로 변환하는 API를 호출하여 음성 데이터를 반환한다.
+     * 설명       : 텍스트를 음성으로 변환하는 Azure TTS API를 호출하여 음성 데이터를 반환한다.
      *
      * @param input   음성으로 변환할 텍스트 입력
      * @return        변환된 음성 데이터 (MP3 파일 형식의 byte 배열)
-     * @throws TextToSpeechException  JSON 변환 실패 또는 API 호출 실패 시 발생
      * </pre>
      */
     public byte[] convertTextToSpeech(String input) {
-        try {
-            System.out.println("Input 텍스트: " + input);
-            // ObjectMapper를 사용하여 JSON 본문 생성
-            ObjectMapper objectMapper = new ObjectMapper();
-            Map<String, String> requestBodyMap = new HashMap<>();
-            requestBodyMap.put("model", "tts-1");
-            requestBodyMap.put("input", input);
-            requestBodyMap.put("voice", voice);
-            String requestBody = objectMapper.writeValueAsString(requestBodyMap);
+        synchronized (this) {
+            SpeechConfig speechConfig = null;
+            SpeechSynthesizer synthesizer = null;
 
+            try {
+                // JSON 파싱
+                ObjectMapper objectMapper = new ObjectMapper();
+                JsonNode jsonNode = objectMapper.readTree(input);
 
-            // requestBody의 "input" 값이 중첩된 형태인 경우 수정
-            if (requestBody.contains("\"input\":\"{\\\"input\\\":")) {
-                // 중첩된 "input" 제거 로직
-                String modifiedInput = input;
-                if (modifiedInput.startsWith("{\"input\":")) {
-                    // 중첩된 "input" 제거하고 실제 텍스트만 추출
-                    modifiedInput = modifiedInput.substring(modifiedInput.indexOf(":") + 2, modifiedInput.lastIndexOf("\""));
+                if (!jsonNode.has("input")) {
+                    throw new IllegalArgumentException("JSON does not contain 'input' key");
                 }
-                // 수정된 "input" 값을 다시 설정
-                requestBodyMap.put("input", modifiedInput);
-                // 다시 직렬화하여 수정된 requestBody 생성
-                requestBody = objectMapper.writeValueAsString(requestBodyMap);
-            }
 
-            // RestTemplate 객체 생성
-            RestTemplate restTemplate = new RestTemplate();
+                String inputText = jsonNode.get("input").asText();
 
-            // HTTP 헤더 설정
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setBearerAuth(apiKey);
+                // Azure Speech SDK 설정
+                speechConfig = SpeechConfig.fromSubscription(speechKey, speechRegion);
+                speechConfig.setSpeechSynthesisVoiceName("ko-KR-YuJinNeural");
 
-            // 요청 생성
-            HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
+                synthesizer = new SpeechSynthesizer(speechConfig);
 
-            // API 호출 및 응답 받기
-            ResponseEntity<byte[]> responseEntity = restTemplate.exchange(
-                    API_URL,
-                    HttpMethod.POST,
-                    requestEntity,
-                    byte[].class
-            );
+                // SSML을 사용하여 음성 속도를 조정
+                String ssml = "<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='ko-KR'>" +
+                        "<voice name='ko-KR-YuJinNeural'>" +
+                        "<prosody rate='" + "+20%" + "'>" +
+                        inputText +
+                        "</prosody>" +
+                        "</voice>" +
+                        "</speak>";
 
-            // 응답 상태 코드 확인 및 처리
-            if (responseEntity.getStatusCode() == HttpStatus.OK) {
-                byte[] audioData = responseEntity.getBody();
-                if (audioData != null) {
-                    return audioData;
+                // 비동기적으로 SSML 텍스트를 음성으로 변환
+                SpeechSynthesisResult result = synthesizer.SpeakSsmlAsync(ssml).get();
+
+                if (result.getReason() == ResultReason.SynthesizingAudioCompleted) {
+                    return result.getAudioData(); // 음성 데이터를 byte 배열로 반환
+                } else if (result.getReason() == ResultReason.Canceled) {
+                    SpeechSynthesisCancellationDetails cancellationDetails =
+                            SpeechSynthesisCancellationDetails.fromResult(result);
+                    throw new RuntimeException("TTS synthesis canceled: " + cancellationDetails.getErrorDetails());
                 } else {
-                    throw new TextToSpeechException("Failed to receive audio data from API.");
+                    throw new RuntimeException("Unexpected TTS result reason: " + result.getReason());
                 }
-            } else {
-                throw new TextToSpeechException("Failed to request TTS API: " + responseEntity.getStatusCode());
+            } catch (Exception e) {
+                throw new RuntimeException("Error during TTS synthesis", e);
+            } finally {
+                if (synthesizer != null) {
+                    synthesizer.close();
+                }
+                if (speechConfig != null) {
+                    speechConfig.close();
+                }
             }
-        } catch (JsonProcessingException e) {
-            throw new TextToSpeechException("Failed to create JSON request body.", e);
         }
     }
+
 }

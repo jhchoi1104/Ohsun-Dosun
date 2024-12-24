@@ -1,5 +1,6 @@
 package com.OhsunDosun._config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.Setter;
@@ -59,6 +60,11 @@ public class RootConfig {
     @Bean
     public DataSourceTransactionManager transactionManager(){
         return new DataSourceTransactionManager(dataSource());
+    }
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
     }
 
 }

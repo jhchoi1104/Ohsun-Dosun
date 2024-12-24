@@ -13,7 +13,7 @@ export const sendAudioToServer = async (formData) => {
 
     return response.data; // 서버 응답 데이터 반환
   } catch (error) {
-    console.error("서버 전송 오류:", error);
+    console.error('서버 전송 오류:', error);
     throw error; // 호출한 곳에서 에러 처리
   }
 };

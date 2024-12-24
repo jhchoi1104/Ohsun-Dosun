@@ -1,6 +1,7 @@
 package com.OhsunDosun.service.conversation;
 
 import com.OhsunDosun.dto.ClassificationResponse;
+import com.OhsunDosun.dto.ConversationRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -8,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import com.OhsunDosun.dto.ChatbotResponse;
+import org.springframework.web.socket.WebSocketSession;
 
 import java.util.HashMap;
 import java.util.List;
@@ -33,10 +35,15 @@ public class ChainService {
         responseSchema.put("mainTaskNumber", Map.of("type", "string"));
         responseSchema.put("subTaskNumber", Map.of("type", "string", "nullable", true));
 
-        ChatbotResponse response = chatbotService.getChatbotResponse(prompt, responseSchema);
+        ChatbotResponse response = chatbotService.getClassificationResult(prompt, responseSchema);
+        String cleanContent = response.getContent()
+                .replaceAll("```json", "")
+                .replaceAll("```", "")
+                .trim();
 
         ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode rootNode = objectMapper.readTree(response.getContent());
+
+        JsonNode rootNode = objectMapper.readTree(cleanContent);
 
         return ClassificationResponse.builder()
                 .mainTaskNumber(rootNode.path("mainTaskNumber").asText().trim())
@@ -55,8 +62,12 @@ public class ChainService {
      * @param prompt 챗봇에 전송할 메시지 리스트
      * @return ChatbotResponse 챗봇 응답 객체
      */
-    public ChatbotResponse chatbotChain(List<Map<String, String>> prompt) {
-        return chatbotService.getChatbotResponse(prompt);
+    public void chatbotChain(ConversationRequest request, List<Map<String, String>> prompt, WebSocketSession session) {
+        chatbotService.getChatbotResponse(request, prompt, session);
+    }
+
+    public ChatbotResponse chatbotPlainChain(List<Map<String, String>> prompt) {
+        return  chatbotService.getChatbotResponse(prompt);
     }
 
 }
