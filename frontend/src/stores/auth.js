@@ -6,6 +6,10 @@ import { useRouter } from 'vue-router'; // router import
 const initState = {
   username: '',
   Password: '',
+  name: '',
+  age: '',
+  gender: '',
+  ssn: '',
   token: '', //접근 토큰
   userId: null,
 };
@@ -19,6 +23,10 @@ export const useAuthStore = defineStore('auth', () => {
 
   const username = computed(() => state.value.username);
   const password = computed(() => state.value.Password);
+  const name = computed(() => state.value.neme);
+  const age = computed(() => state.value.age);
+  const gender = computed(() => state.value.gender);
+  const ssn = computed(() => state.value.ssn);
 
   const load = () => {
     const auth = localStorage.getItem('auth');
@@ -112,6 +120,10 @@ export const useAuthStore = defineStore('auth', () => {
     isLogin,
     username,
     password,
+    name,
+    age,
+    gender,
+    ssn,
     login,
     logout,
     getToken,

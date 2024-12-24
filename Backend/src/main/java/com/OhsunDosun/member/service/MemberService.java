@@ -45,6 +45,7 @@ public class MemberService {
         if(member.checkRequiredValue()){
             throw new IllegalAccessException("필수 값이 누락되었습니다."); //예외 처리
         }
+
         member.setPassword(passwordEncoder.encode(member.getPassword()));//비밀번호 암호화
         log.info("비밀번호 암호화 완료");
 
