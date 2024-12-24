@@ -22,6 +22,7 @@ public class AuthenticationErrorFilter extends OncePerRequestFilter {
         try {
             super.doFilter(request, response, filterChain);
         } catch (ExpiredJwtException  e) {
+            System.out.println("만료된 토큰 요청: " + e.getMessage());
             JsonResponse.sendError(response, HttpStatus.UNAUTHORIZED, "토큰의 유효시간이 지났습니다.");
         } catch (UnsupportedJwtException | MalformedJwtException | SignatureException e) {
             JsonResponse.sendError(response, HttpStatus.UNAUTHORIZED, e.getMessage());

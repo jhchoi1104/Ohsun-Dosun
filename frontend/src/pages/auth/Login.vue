@@ -15,6 +15,13 @@ const member = reactive({
 //일반 로그인 함수
 const login = async () => {
   console.log(member);
+
+  // 비밀번호가 비어있는 경우 처리
+  if (!member.password || !member.username) {
+    alert('비밀번호와 아이디를 입력해주세요.');
+    return;
+  }
+
   try {
     //로그인 시 AIP호출
     const result = await authStore.login({
@@ -29,6 +36,12 @@ const login = async () => {
     const path = router.currentRoute.value.query.redirect || '/chat';
     router.push(path);
   } catch (e) {
+    // 백엔드에서 전달하는 에러 메시지 처리
+    if (e.response && e.response.data) {
+      alert(e.response.data.message || '비밀번호가 틀렸습니다.');
+    } else {
+      alert('비밀번호를 다시 입력해주세요.');
+    }
     console.log('에러=====', e);
   }
 };
@@ -74,25 +87,12 @@ const handlekakaocallback = async () => {
   console.log('현재 URL:', window.location.href); // 현재 URL 확인
 
   if (code) {
-    // console.log('카카오 인증 코드:', code);
-    // try {
-    //   await authStore.loginWithKakao(code);
-    //   alert('카카오 로그인에 성공했습니다!');
-
-    //   // 로그인 후 페이지 이동
-    //   const path = router.currentRoute.value.query.redirect || '/chat';
-    //   router.push(path);
-    //   console.log(path);
-    // }
     try {
-      // Exchange the authorization code for an access token in the backend
       const result = await axios.post('http://localhost:8080/kakao/callback', {
         code,
       });
 
-      // Successfully logged in
       if (result.status === 200) {
-        // Redirect to chat or other page after successful login
         const path = router.currentRoute.value.query.redirect || '/chat';
         router.push(path);
       } else {
@@ -122,7 +122,7 @@ const handlekakaocallback = async () => {
         <form @submit.prevent="login">
           <!-- 아이디 입력 -->
           <div class="mb-4">
-            <label class="form-label">아이디</label>
+            <label class="form-label">로그인</label>
             <input
               class="form-input"
               type="email"
@@ -132,7 +132,6 @@ const handlekakaocallback = async () => {
           </div>
           <!-- 비밀번호 입력 -->
           <div class="password-container">
-            <label class="form-label">비밀번호</label>
             <input
               class="form-input"
               :type="passwordHidden ? 'password' : 'text'"
@@ -156,20 +155,22 @@ const handlekakaocallback = async () => {
               "
             ></span>
           </div>
-          <div class="kakao mt-4">
-            <a @click.prevent="loginWithKakao">
-              <img
-                src="@/assets/images/kakao_login_large_wide.png"
-                alt="카카오 로그인"
-                style="width: 100%; cursor: pointer"
-              />
-            </a>
-          </div>
           <div class="find">아이디 찾기 &vert; 비밀번호 찾기</div>
           <button class="login-form">로그인</button>
         </form>
+
         <div class="join">
           <RouterLink class="join-form" to="/join"> 회원가입 </RouterLink>
+        </div>
+        <div class="simplelogin">간편 로그인</div>
+        <div class="kakao mt-3">
+          <a @click.prevent="loginWithKakao">
+            <img
+              src="@/assets/images/kakao_login_large_wide.png"
+              alt="카카오 로그인"
+              style="width: 100%; cursor: pointer"
+            />
+          </a>
         </div>
       </div>
     </div>
@@ -184,48 +185,55 @@ const handlekakaocallback = async () => {
   justify-content: space-between; /* 요소 간의 공간을 균등하게 분배 */
   height: 100vh; /* 전체 화면 높이에 맞춤 */
 }
+.sub-container {
+  width: 100%;
+  max-width: 400px;
+  padding: 0 10px;
+}
 .form-label {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   font-weight: bold;
-  font-size: 25px;
+  font-size: 35px;
+  text-align: center;
+  margin-bottom: 5%;
 }
 .form-input {
-  border-radius: 4px; /*모서리 둥글게*/
+  border-radius: 8px; /*모서리 둥글게*/
   width: 100%;
   height: 50px;
-  font-size: 35px;
+  font-size: 30px;
+  padding-bottom: 2%;
+}
+.form-input::placeholder {
+  font-size: 20px; /* 원하는 크기로 변경 */
+  text-indent: 2%;
 }
 .password-container {
   position: relative; /* 필요한 위치 지정 */
 }
 .password-icon {
   position: absolute;
-  margin-top: 23px; /* 위쪽으로 30px 이동 */
+  /* margin-top: 30px; 위쪽으로 30px 이동 */
   right: 10px;
   cursor: pointer;
 }
-.kakao-form {
-  background-color: #fee500;
-  color: black;
-  border: none;
-  border-radius: 5px;
-  margin-top: 10%;
-  width: 100%;
-  padding: 5px;
-  font-size: 20px;
-}
 .find {
-  margin-top: 25%;
+  margin-top: 7%;
   color: gray;
+  display: flex; /* flexbox 사용 */
+  justify-content: center; /* 가로 중앙 정렬 */
+  align-items: center; /* 세로 중앙 정렬 */
+  font-size: 15px;
+  margin-bottom: 3%;
 }
 .login-form {
   background-color: #ef5554;
   color: white;
   border: none;
   border-radius: 5px;
-  margin-top: 10%;
+  margin-top: 5%;
   width: 100%;
   padding: 10px;
   font-size: 20px;
@@ -239,7 +247,23 @@ const handlekakaocallback = async () => {
 }
 .join-form {
   text-decoration: none; /* 밑줄 제거 */
-  color: gray;
+  color: #ef5554;
+  font-weight: bold;
   font-size: 20px;
+  margin-top: 5%;
+}
+.simplelogin {
+  margin-top: 15%;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  color: silver;
+}
+.simplelogin::before,
+.simplelogin::after {
+  content: '';
+  flex-grow: 1;
+  border-top: 1px solid silver;
+  margin: 0 10px;
 }
 </style>

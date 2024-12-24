@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
@@ -11,6 +12,7 @@ import java.security.Key;
 import java.util.Date;
 
 @Component
+@Slf4j
 public class JwtProcessor {
     static private final long TOKEN_VALID_MILLISECONDS = 1000L * 60 * 60 * 2; // 2시간
 
@@ -47,8 +49,11 @@ public class JwtProcessor {
                 .build()
                 .parseClaimsJws(jwtToken);
         if(claims == null) {
+            log.info("Token expired: {}",claims);
             return false;
         }
-        return !claims.getBody().getExpiration().before(new Date());
+        boolean isExpried = !claims.getBody().getExpiration().before(new Date());
+        log.info("Token expired: {}", isExpried);
+        return !isExpried;
     }
 }

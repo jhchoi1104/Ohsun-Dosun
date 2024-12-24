@@ -19,6 +19,9 @@ public class Member implements UserDetails {
     private String username;     //username
     private String password;     //userpassword
     private String name;
+    private String age;
+    private String gender;
+    private String ssn;
     private String status = "Y"; //계정 활성화 여부. 인증 및 권한 부여 과정 isEnabled()메서드로 확인.
 
     private String token; // JWT 토큰값, DB에는 저장하지 않음. 클라이언트-서버 간 통신
@@ -66,10 +69,9 @@ public class Member implements UserDetails {
     } //계정이 활성화 상태인지 여부를 반환. Spring Security의 인증 및 권한 부여 과정에서 사용.
     public boolean checkRequiredValue(){
         try {
-            return (username.isEmpty() || password.isEmpty());
+            return (username.isEmpty() || password.isEmpty() || name.isEmpty() || age.isEmpty() || gender.isEmpty() || ssn.isEmpty());
         }catch (Exception e){
             return false;
         }
     }
-
 }

@@ -30,13 +30,13 @@ public class MemberController {
             log.info("회원 조회 성공: {}", member);
             return ResponseEntity.ok(member);
         } catch (NoSuchElementException e) {
-            log.error("회원 조회 실패: username={}, message={}", username, e.getMessage());
+            log.error("회원 조회 실패 or 없는 회원입니다: username={}, message={}", username, e.getMessage());
             return ResponseEntity.notFound().build();
         }
     }
 
 
-    @PostMapping("")
+    @RequestMapping("")
     public ResponseEntity<Member> join(@RequestBody MemberDTO memberDTO) throws IllegalAccessException {
         log.info("회원 가입 요청: {}", memberDTO);
         try {
