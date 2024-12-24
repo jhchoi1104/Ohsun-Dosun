@@ -82,6 +82,26 @@ const saveInputs = () => {
   console.log('Saved inputs:', inputStore.$state); // 전역 상태 확인
 };
 
+// ** 송금 요청 보내는 함수(사용자가 확인 버튼 누르면 함수 호출)
+// const handleSendMoney = async () => {
+//   try {
+//     const response = await axios.post('/api/transfer/send', {
+//       senderId: inputStore.inputs.senderid,
+//       receiverId: inputStore.inputs.recieverid,
+//       receiverAccountBank: inputStore.inputs.recieveraccountbank,
+//       receiverAccountNumber: inputStore.inputs.recieveraccountnumber,
+//       // ** amount: inputStore.inputs.amount,
+//       amount: parseInt(inputStore.inputs.amount), // 금액은 정수로 변환
+//     });
+//     console.log(response.data); // "transfer succeed" 메시지 확인
+//     // 송금 성공 후 TransferSucceed.vue로 이동
+//     router.push('/transferSucceed');
+//   } catch (error) {
+//     console.error('송금 실패:', error);
+//     alert('송금 처리 중 오류가 발생했습니다.');
+//   }
+// };
+
 const nextStep = () => {
   //const currentStep = inputStore.inputs.step; // 현재 스텝을 가져옴
   if (inputStore.inputs.step < 6) {
@@ -89,6 +109,8 @@ const nextStep = () => {
     inputStore.updateInput('step', inputStore.inputs.step);
   } else {
     emit('close'); // 모달 닫기
+    saveInputs(); // ** 입력값 저장
+    // handleSendMoney(); // ** 송금 요청 전송
     console.log('inputs' + inputStore.inputs);
     inputStore.inputs.step = 7;
     inputStore.updateInput('step', inputStore.inputs.step);
