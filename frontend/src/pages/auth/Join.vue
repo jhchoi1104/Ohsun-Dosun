@@ -1,7 +1,7 @@
 <script setup>
 import { reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import authApi from '@/api/authAPI.js';
+import axios from 'axios';
 
 const router = useRouter();
 
@@ -19,10 +19,10 @@ const join = async () => {
   console.log('회원가입 정보:', member);
   try {
     //회원가입 정보 전송
-    await authApi.create(member);
-    localStorage.setItem('username', member.username); // username 저장
-    localStorage.setItem('password', member.password); // password 저장
-    router.push({ name: 'Main' });
+    const { data } = await axios.post('/api/member', member);
+    localStorage.setItem('join', JSON.stringify(data));
+
+    router.push({ name: 'Chat' });
   } catch (e) {
     console.error(e);
   }

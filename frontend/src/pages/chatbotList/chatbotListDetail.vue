@@ -3,9 +3,14 @@ import Header from '../../components/Header.vue';
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useRoute } from 'vue-router';
+import { useFontSizeStore } from '../../api/fontsize'; // 폰트 사이즈 스토어 가져오기
 
 const route = useRoute();
 const id = route.params.id; // 동적 경로의 id 가져오기
+
+// 폰트 사이즈 스토어 사용
+const fontSizeStore = useFontSizeStore();
+const fontSize = fontSizeStore.getFontSizeValue(); // 현재 폰트 사이즈 가져오기
 
 // 메시지를 저장할 변수
 const messages = ref([]);
@@ -29,37 +34,42 @@ onMounted(() => {
 </script>
 <template>
   <Header />
-  <div class="main-container chat-container mt-5">
+  <div class="main-container chat-container">
     <div class="ms-3 me-3">
       <div
-        v-for="message in messages"
-        :key="message.messageId"
-        :class="[
-          'card border-light p-4 mb-4',
-          message.senderType === 'Bot'
-            ? 'chatbot-response bg-light text-dark'
-            : 'user-request bg-light text-dark ',
-        ]"
+        class="message-container"
       >
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <span class="font-small">
-            <img
-              v-if="message.senderType === 'Bot'"
-              class="avatar-sm img-fluid rounded-circle mr-2"
-              src="@/assets/images/sooni.png"
-              alt="avatar"
-            />
-            <span class="font-weight-bold">
-              {{ message.senderType === 'Bot' ? '순이' : '김대한' }}
+        <div
+          v-for="message in messages"
+          :key="message.messageId"
+          :class="[
+            'card border-light p-4 mb-4',
+            message.senderType === 'Bot'
+              ? 'chatbot-response bg-light text-dark'
+              : 'user-request bg-light text-dark ',
+          ]"
+          :style="{ fontSize }"
+        >
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="font-small">
+              <img
+                v-if="message.senderType === 'Bot'"
+                class="avatar-sm img-fluid rounded-circle mr-2"
+                src="@/assets/images/sooni.png"
+                alt="avatar"
+              />
+              <span class="font-weight-bold small-font">
+                {{ message.senderType === 'Bot' ? '순이' : '김대한' }}
+              </span>
             </span>
-          </span>
-          <span class="ml-auto text-end text-muted">{{
-            message.timestamp
-          }}</span>
+            <span class="ml-auto text-end text-muted small-font">{{
+              message.timestamp
+            }}</span>
+          </div>
+          <p class="m-0">
+            {{ message.messageText }}
+          </p>
         </div>
-        <p class="m-0">
-          {{ message.messageText }}
-        </p>
       </div>
     </div>
   </div>
@@ -70,11 +80,21 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
   justify-content: space-between; /* 요소 간의 공간을 균등하게 분배 */
-  /* border: 1px solid blue; */
-  height: 100vh; /* 전체 화면 높이에 맞춤 */
   height: calc(100vh - 70px); /* 화면에서 Header를 제외한 나머지 높이 */
+  padding: 0 10px; /* 좌우 여백 추가 */
 }
+
+.message-container {
+  width: 100%; /* 메시지 컨테이너의 너비를 100%로 설정 */
+  max-width: 375px; /* 최대 너비를 375px로 설정 */
+  overflow-y: auto; /* 세로 스크롤 추가 */
+  overflow-x: hidden; /* 가로 스크롤 숨기기 */
+  height: 100%; /* 높이를 100%로 설정하여 공간을 꽉 채움 */
+}
+
 .card {
+  width: 100%; /* 카드의 너비를 100%로 설정 */
+  box-sizing: border-box; /* 패딩과 보더를 포함한 너비 계산 */
   position: relative;
   display: flex;
   flex-direction: column;
@@ -141,5 +161,9 @@ onMounted(() => {
 .chat-container {
   display: flex;
   flex-direction: column-reverse; /* 메시지를 아래에서 위로 쌓기 */
+}
+
+.small-font {
+  font-size: 1rem; /* 고정된 작은 폰트 사이즈 설정 */
 }
 </style>

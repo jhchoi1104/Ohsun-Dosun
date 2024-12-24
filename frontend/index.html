@@ -12,6 +12,12 @@
       referrerpolicy="no-referrer"
     />
     <title>ohsun-dosun</title>
+
+    <script src="https://developers.kakao.com/sdk/js/kakao.min.js"></script>
+    <script>
+      Kakao.init('4943f3247bdf76054e76715cb00a5333');
+      console.log(Kakao.isInitialized()); // 초기화 판단여부
+    </script>
   </head>
   <body>
     <div id="app"></div>
