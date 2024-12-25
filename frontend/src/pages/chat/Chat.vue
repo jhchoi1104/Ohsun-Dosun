@@ -1,6 +1,6 @@
 <script setup>
 import Header from '@/components/Header.vue';
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { sendAudioToServer } from '@/api/SttApi';
 import { bringAudioFromServer } from '@/api/TtsApi.js';
 import Consultant from '@/components/Consultant.vue';
