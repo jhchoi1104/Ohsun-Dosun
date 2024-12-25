@@ -12,8 +12,13 @@
     </resultMap>
 
     <select id="selectByName" resultMap="memberResultMap">
-        SELECT user_id, username, password
+        SELECT user_id, username, password, name, age, gender, ssn
         FROM user u
         WHERE u.username = #{username}
     </select>
+
+    <insert id="insertMember" parameterType="com.OhsunDosun.member.dto.Member">
+        INSERT INTO user(name, username, password, age, gender, ssn)
+        VALUES(#{name}, #{username}, #{password}, #{age}, #{gender},#{ssn})
+    </insert>
 </mapper>

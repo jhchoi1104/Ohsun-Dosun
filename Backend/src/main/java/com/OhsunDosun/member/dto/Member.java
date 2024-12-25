@@ -18,6 +18,10 @@ public class Member implements UserDetails {
     private long userId;       //userPk(고유식별자)
     private String username;     //username
     private String password;     //userpassword
+    private String name;
+    private String age;
+    private String gender;
+    private String ssn;
     private String status = "Y"; //계정 활성화 여부. 인증 및 권한 부여 과정 isEnabled()메서드로 확인.
 
     private String token; // JWT 토큰값, DB에는 저장하지 않음. 클라이언트-서버 간 통신
@@ -34,6 +38,10 @@ public class Member implements UserDetails {
     public String setUsername(String username) {
         return this.username = username;
     } //username의 커스텀 메서드. username 대신 userId를 설정하고 반환하도록 설계함. why?? 고유식별자인 userId로 설계하면 검색의 조회의 기준이 더 명확하다.
+
+    public String setname(String name) {
+        return this.name=name;
+    }
 
     @Override
     public  String getUsername() {
@@ -59,4 +67,11 @@ public class Member implements UserDetails {
     public boolean isEnabled() {
         return status.equalsIgnoreCase("Y");
     } //계정이 활성화 상태인지 여부를 반환. Spring Security의 인증 및 권한 부여 과정에서 사용.
+    public boolean checkRequiredValue(){
+        try {
+            return (username.isEmpty() || password.isEmpty() || name.isEmpty() || age.isEmpty() || gender.isEmpty() || ssn.isEmpty());
+        }catch (Exception e){
+            return false;
+        }
+    }
 }

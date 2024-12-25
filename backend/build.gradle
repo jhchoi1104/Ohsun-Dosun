@@ -123,6 +123,9 @@ dependencies {
   // Azure AI service
   implementation group: 'com.microsoft.cognitiveservices.speech', name: 'client-sdk', version: "1.42.0", ext: "jar"
 
+
+  //kakao
+  implementation 'org.springframework.boot:spring-boot-starter-web:2.7.13'
 }
 
 
