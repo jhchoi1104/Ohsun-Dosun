@@ -27,7 +27,7 @@ const errorMessage = ref('');
 const transcription = ref('');
 const chatbotMessage = ref(''); // Chatbot 응답 메시지
 const chatbotMessagesub = ref(''); //subTask 저장
-const transferstep = ref('');
+const transferstep = ref(0);
 const call = ref(''); //상담원
 const socket = ref(null); // WebSocket 관련 변수
 const messages = ref([]); // WebSocket 관련 변수
@@ -65,8 +65,8 @@ const connectWebSocket = () => {
           inputStore.updateInput('amount', data.amount);
         } else if (data.mainTaskNo && data.subTaskNo) {
           // 클래스 분류 처리
-          chatbotMessagesub.value = data.subTaskNo;
-          handleSubTask(data.mainTaskNo, data.subTaskNo);
+          chatbotMessagesub.value = data.subTaskNo;   
+          handleSubTask(data.step, data.subTaskNo);
         } else {
           // JSON이지만 처리할 유형이 정의되지 않은 경우
           console.warn('Unhandled JSON data:', data);
@@ -105,7 +105,7 @@ const disconnectWebSocket = () => {
   }
 };
 
-const handleSubTask = (mainTask, subTask) => {
+const handleSubTask = (step, subTask) => {
   switch (subTask) {
     case '002-01':
     case '002-02':
@@ -114,17 +114,17 @@ const handleSubTask = (mainTask, subTask) => {
       }, 3000); //3초 지연
       break;
     case '003-01':
-      if (transferstep.value >= 3) {
+      if (step >= 3) {
         openTransferForm();
       }
       break;
     case '003-02':
-      if (transferstep.value >= 3) {
+      if (step >= 3) {
         openTransferForm();
       }
       break;
     case '003-03':
-      if (transferstep.value >= 3) {
+      if (step >= 3) {
         openTransferForm();
       }
       break;

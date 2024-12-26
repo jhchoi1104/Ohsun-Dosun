@@ -6,6 +6,7 @@ import com.OhsunDosun.dto.Log;
 import com.OhsunDosun.service.ConversationRoomService;
 import com.OhsunDosun.service.conversation.ChainService;
 import com.OhsunDosun.service.conversation.PromptService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +23,7 @@ public class SummaryTextService {
     private final PromptService promptService;
     private final ChainService chainService;
 
-    public ChatbotResponse generateSummary(String input) {
+    public ChatbotResponse generateSummary(String input) throws JsonProcessingException {
         List<String> promptFilePathList = Arrays.asList("prompts/summary.prompt");
         List<Log> conversationLogs = Collections.emptyList();
         List<Map<String, String>> chatbotPrompt = promptService.chatbotPrompt(promptFilePathList, input, conversationLogs);

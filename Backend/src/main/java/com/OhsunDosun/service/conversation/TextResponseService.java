@@ -1,10 +1,8 @@
 package com.OhsunDosun.service.conversation;
 
 
-import com.OhsunDosun.dto.ChatbotResponse;
-import com.OhsunDosun.dto.ClassificationResponse;
-import com.OhsunDosun.dto.ConversationRequest;
-import com.OhsunDosun.dto.Log;
+import com.OhsunDosun.dto.*;
+import com.OhsunDosun.service.ConversationLogService;
 import com.OhsunDosun.service.ConversationRoomService;
 import com.OhsunDosun.service.conversation.task.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -21,6 +19,8 @@ import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Slf4j
 @Service
@@ -37,8 +37,11 @@ public class TextResponseService {
     private final NewissuanceService newissuanceService;
     private final ReissuanceService reissuanceService;
     private final FavoritesService favoritesService;
+    private final ConversationLogService conversationLogService;
+    private final ChatbotService chatbotService;
+    private final ExecutorService executorService = Executors.newFixedThreadPool(5);
 
-    public void TextResponse(ConversationRequest request, int userNo, WebSocketSession session) throws JsonProcessingException {
+    public void TextResponse(ConversationRequest request, int userNo, WebSocketSession session) throws IOException {
         String input = request.getInput();
 
         // 이전 대화내용 조회
@@ -57,8 +60,6 @@ public class TextResponseService {
 
         Boolean taskLocked = classificationResult.getTaskLocked();
 
-
-
         log.info("🔗1️⃣ [{}] Task Classification Completed by - Main Task No: \u001B[34m{}\u001B[0m, Sub Task No: \u001B[34m{}\u001B[0m", userNo, mainTaskNo, subTaskNo, taskLocked);
 
         // Main Task 분류
@@ -75,63 +76,7 @@ public class TextResponseService {
 
             // 송금하기 서비스
             case "003" -> {
-
-                ChatbotResponse response = transferService.generateTransferConversation(request, conversationLogs);
-                log.info("response json 객체 확인 : {}" , response);
-
-                ObjectMapper objectMapper = new ObjectMapper();
-                String jsonString = response.getContent()
-                        .replaceAll("```json", "")
-                        .replaceAll("```", "")
-                        .trim();
-                JsonNode jsonNode = objectMapper.readTree(jsonString);
-                step = jsonNode.get("step").asInt();
-
-                if(step == 2){
-                    String step2_content_name = jsonNode.get("name").asText();
-                    Long userId = Long.valueOf(userNo); // 현재 유저의 ID로 설정
-
-                    // 별칭 존재 여부 확인
-                    boolean favoriteExists = favoritesService.isFavoriteExists(userId, step2_content_name);
-
-                    // 사용자가 금액에 대한 정보를 미리 말한 경우와 그렇지 않은 경우 구분하기 위함
-                    JSONObject step2_content_json = new JSONObject();
-
-
-                    // DB user 이름 혹은 별칭 조회
-                    String step2_content_message;
-                    if (favoriteExists) { //존재하는 경우 003.a.01
-                        step2_content_message = String.format("%s님에게 송금하시겠습니까?", step2_content_name);
-                        step2_content_json.put("step", 2);
-                    } else { //존재하지 않을 경우 003.a.02
-                        step2_content_message = "송금하신적 없는 분이네요. 계좌번호를 입력해주세요.";
-                        step2_content_json.put("step", 3);
-
-                    }
-
-                    step2_content_json.put("content", step2_content_message);
-
-                    String name = jsonNode.get("name").asText();
-                    if(!name.isEmpty()){
-                        step2_content_json.put("name", name);
-                    } else{
-                        step2_content_json.put("name","");
-                    }
-
-                    String amount = jsonNode.get("amount").asText();
-                    if(!amount.isEmpty()){
-                        step2_content_json.put("amount", amount);
-                    } else{
-                        step2_content_json.put("amount","");
-                    }
-                    String step2_content_string = step2_content_json.toString();
-
-                    try {
-                        session.sendMessage(new TextMessage(step2_content_string));
-                    }  catch (IOException e) {
-                        log.error("JSON 파싱 오류: content 필드에서 값을 추출할 수 없습니다.", e);
-                    }
-                }
+                step = handleTransferTask(request, userNo, session, conversationLogs, subTaskNo);
 
             }
 
@@ -167,4 +112,39 @@ public class TextResponseService {
             log.error("Error sending WebSocket message", e);
         }
     }
+    private int handleTransferTask(ConversationRequest request, int userNo, WebSocketSession session, List<Log> conversationLogs, String subTaskNo) {
+        int step = 0;
+        try {
+            ChatbotResponse response = transferService.generateTransferConversation(request, conversationLogs);
+            response.setSubTaskNo(subTaskNo);
+
+            if (response.getStep() == 2) {
+                String recipientName = response.getName();
+                boolean favoriteExists = favoritesService.isFavoriteExists((long) userNo, recipientName);
+
+                if (favoriteExists) {
+                    response.setContent(String.format("%s님에게 송금하시겠습니까?", recipientName));
+                    response.setStep(2);
+                } else {
+                    response.setContent("송금하신 적 없는 분이네요. 계좌번호를 입력해주세요.");
+                    response.setStep(3);
+                }
+            }
+
+            session.sendMessage(new TextMessage(response.getContent()));
+            ConversationLogRequest conversationLog = chatbotService.makeConversationLogRequest(request, response.getContent());
+            conversationLogService.createConversationLog(conversationLog);
+            executorService.submit(() -> chatbotService.handleTtsStreaming(response.getContent(), session));
+            return response.getStep();
+        } catch (Exception e) {
+            log.error("Error during transfer task", e);
+            try {
+                session.sendMessage(new TextMessage("Error: Unable to process your request."));
+            } catch (Exception sendError) {
+                log.error("Error sending error message via WebSocket", sendError);
+            }
+        }
+        return step;
+    }
+
 }
