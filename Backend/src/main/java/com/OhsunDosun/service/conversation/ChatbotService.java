@@ -129,7 +129,6 @@ public class ChatbotService {
         }
     }
 
-
     /**
      * sendRequestClassification
      */
@@ -167,7 +166,6 @@ public class ChatbotService {
                 requestEntity,
                 String.class
         );
-
         // 응답 상태 코드 확인 및 처리
         if (responseEntity.getStatusCode() == HttpStatus.OK) {
             try {
@@ -200,8 +198,8 @@ public class ChatbotService {
     /**
      * json 형태로 내보내는 경우의 응답
      */
-    public ChatbotResponse getChatbotResponse(List<Map<String, String>> messagesList) {
-        return sendRequestPlain(modelName, messagesList, null);
+    public ChatbotResponse getChatbotResponse(List<Map<String, String>> messagesList, Map<String, Object> responseSchema) {
+        return sendRequestPlain(modelName, messagesList, responseSchema);
     }
 
 
@@ -287,7 +285,7 @@ public class ChatbotService {
                 .build();
     }
 
-    private void handleTtsStreaming(String text, WebSocketSession session) {
+    void handleTtsStreaming(String text, WebSocketSession session) {
         try {
             // Azure Speech SDK 설정
             SpeechConfig speechConfig = SpeechConfig.fromSubscription(speechKey, speechRegion);
@@ -362,7 +360,7 @@ public class ChatbotService {
     /**
      * 로그로 저장 가능한지 검사
      */
-    private ConversationLogRequest makeConversationLogRequest(ConversationRequest request, String content) {
+    ConversationLogRequest makeConversationLogRequest(ConversationRequest request, String content) {
         ConversationLogRequest conversationLog;
 
         if (content == null || content.isEmpty()) {

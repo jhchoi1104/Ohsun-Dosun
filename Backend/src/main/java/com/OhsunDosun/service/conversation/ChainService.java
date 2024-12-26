@@ -53,7 +53,30 @@ public class ChainService {
                 .totalTokens(response.getTotalTokens())
                 .build();
     }
+    public ChatbotResponse chatbotPlainChain(List<Map<String, String>> prompt) throws JsonProcessingException {
+        Map<String, Object> responseSchema = new HashMap<>();
+        responseSchema.put("name", Map.of("type", "string", "nullable", true));
+        responseSchema.put("account", Map.of("type", "string", "nullable", true));
+        responseSchema.put("amount", Map.of("type", "string", "nullable", true));
+        responseSchema.put("main_account", Map.of("type", "string", "nullable", true));
+        responseSchema.put("step", Map.of("type", "integer", "nullable", true)); // 필수 필드라면 nullable 제외
+        responseSchema.put("content", Map.of("type", "string"));
 
+        ChatbotResponse response = chatbotService.getChatbotResponse(prompt, responseSchema);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode rootNode = objectMapper.readTree(response.getContent());
+        ChatbotResponse responseInfo = ChatbotResponse.builder()
+                .name(rootNode.path("name").asText().trim())
+                .account(rootNode.path("account").asText().trim())
+                .amount(rootNode.path("amount").asInt())
+                .main_account(rootNode.path("main_account").asText().trim())
+                .step(rootNode.path("step").asInt())
+                .content(rootNode.path("content").asText().trim())
+                .build();
+
+        return responseInfo;
+    }
     /**
      * <pre>
      * 메소드명   : chatbotChain
@@ -66,8 +89,5 @@ public class ChainService {
         chatbotService.getChatbotResponse(request, prompt, session);
     }
 
-    public ChatbotResponse chatbotPlainChain(List<Map<String, String>> prompt) {
-        return  chatbotService.getChatbotResponse(prompt);
-    }
 
 }
