@@ -9,7 +9,7 @@ Backend/src/main/resources/bin/ffmpeg.exe
 .DS_Store
 ### IntelliJ IDEA ###
 !**/src/main/resources/application.properties
-!**/src/main/resources/favorable-logic-442105-e9-a4027010002a.json
+!**/src/main/resources/.json
 /.idea/
 *.idea
 *.iws
