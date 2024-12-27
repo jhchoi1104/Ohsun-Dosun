@@ -50,6 +50,14 @@
         </label>
       </div>
 
+      <div v-if="currentStep === 6" class="additional-image-section">
+        <img
+          src="@/assets/images/sooni.png"
+          alt="Step 6 Image"
+          class="step-image"
+        />
+      </div>
+
       <div class="button-section">
         <button class="chat-button" @click="nextStep">확인</button>
       </div>
@@ -60,6 +68,52 @@
 <script setup>
 import { defineProps, defineEmits, computed, ref, watch } from 'vue';
 import Camera from './Camera.vue'; // Camera 컴포넌트 임포트
+import { bringAudioFromServer } from '@/api/TtsApi.js';
+
+let audio;
+// 버튼을 눌러서 아래 이벤트를 실행해야 됨.
+const exampleString = {
+  1: '입출금 계좌 개설을 위해 본인 인증이 필요합니다.이름과 주민등록번호를 입력해주세요.',
+  2: '다음으로 휴대폰 인증, 신분증 확인이 필요합니다.',
+  3: '계좌 개설을 위해 추가 본인 인증이 필요합니다.원하는 인증 방법 하나를 고르세요.',
+  4: '신분증과 얼굴이 잘 나오게 화면을 봐주세요.',
+  5: '고객 확인 정보를 입력해주세요.',
+  6: '입출금 계좌 개설이 완료되었습니다. 이제 통장을 사용할 수 있습니다.',
+};
+
+// Modify playAudio to accept a step parameter
+const playAudio = async (step) => {
+  try {
+    // 음성 출력이 진행 중이라면 멈추기
+    if (audio && !audio.paused) {
+      audio.pause(); // 이전 오디오 중지
+      audio.currentTime = 0; // 오디오를 처음으로 되돌리기
+    }
+    // Get the audio message for the current step
+    const audioMessage = exampleString[step];
+    console.log(audioMessage);
+    // 서버에서 오디오 데이터 가져오기
+    const base64Audio = await bringAudioFromServer(audioMessage);
+
+    // Base64 디코딩 및 오디오 재생
+    const byteCharacters = atob(base64Audio);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    const audioBlob = new Blob([byteArray], { type: 'audio/wav' });
+
+    // Blob URL 생성 후 오디오 재생
+    const audioUrl = URL.createObjectURL(audioBlob);
+    console.log(audioUrl);
+    audio = new Audio(audioUrl);
+    audio.play();
+  } catch (error) {
+    console.error('TTS 처리 중 오류:', error);
+    alert('오류가 발생했습니다. 콘솔을 확인하세요.');
+  }
+};
 
 const props = defineProps({
   show: {
@@ -143,8 +197,10 @@ const nextStep = () => {
   if (currentStep.value < 6) {
     currentStep.value += 1; // 로컬 상태 업데이트
     emit('update:step', currentStep.value); // 부모 컴포넌트에 업데이트 알림
+    playAudio(currentStep.value);
   } else {
     emit('close'); // Emit close event when reaching step 6
+    location.reload(); // 페이지 새로고침 추가
   }
 };
 
@@ -156,7 +212,7 @@ const selectOption = (option) => {
 // 팝업으로 PDF 열기 함수
 const openTermsPopup = () => {
   window.open(
-    'http://localhost:5173/Perms.pdf',
+    '/assets/Perms.pdf',
     '약관 및 상품 설명서',
     'width=800,height=600'
   );
@@ -187,7 +243,7 @@ const openTermsPopup = () => {
   border-radius: 10px 10px 0 0;
   width: 100%;
   max-width: 500px;
-  height: 80vh; /* 최대 높이를 80vh로 증가시킴 */
+  height: 85vh; /* 최대 높이를 80vh로 증가시킴 */
   display: flex;
   flex-direction: column;
 }
@@ -206,7 +262,7 @@ const openTermsPopup = () => {
 }
 
 .additional-bubble {
-  background-color: #efefef; /* 말풍선 배경색 */
+  background-color: #f7c8bd; /* 말풍선 배경색 */
   border-radius: 10px; /* 모서리 둥글게 */
   padding: 10px 15px; /* 패딩 추가 */
   max-width: 100%; /* 최대 너비 설정 */
@@ -267,8 +323,8 @@ const openTermsPopup = () => {
   height: 55px;
 }
 
-.chat-button:hover {
-  background-color: #0056b3;
+.chat-button:active {
+  background-color: #d9534f;
 }
 
 .option-list {
@@ -287,5 +343,16 @@ const openTermsPopup = () => {
 
 .option-item:hover {
   background-color: #e0e0e0;
+}
+.step-image {
+  justify-content: center; /* Center the image horizontally */
+  align-items: center; /* Center the image vertically */
+  max-width: 80%; /* Ensure the image does not exceed the width of its container */
+  height: auto; /* Maintain aspect ratio */
+  margin: 10px 0; /* Add some margin for spacing */
+  position: absolute; /* Positioning to allow for absolute placement */
+  left: 50%; /* Center the image horizontally */
+  transform: translateX(-50%); /* Adjust for centering */
+  z-index: 1; /* Ensure it appears above other elements */
 }
 </style>

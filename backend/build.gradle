@@ -114,6 +114,18 @@ dependencies {
 
   // python
   implementation 'org.python:jython-slim:2.7.4'
+
+  // WebSocket
+  implementation 'org.springframework:spring-websocket:5.3.30' // Spring WebSocket Core
+  implementation 'org.springframework:spring-messaging:5.3.30' // Messaging support
+  implementation 'org.springframework:spring-webmvc:5.3.30'    // WebMVC (Servlet 환경 필요 시)
+
+  // Azure AI service
+  implementation group: 'com.microsoft.cognitiveservices.speech', name: 'client-sdk', version: "1.42.0", ext: "jar"
+
+
+  //kakao
+  implementation 'org.springframework.boot:spring-boot-starter-web:2.7.13'
 }
 
 

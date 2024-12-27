@@ -23,26 +23,16 @@ public class ConversationController {
 
     // 말동무 대화 답변 생성(사용자 말하기 버튼 -> 중지 버튼 눌리게 되면 controller 호출)
     // 만약 처음 상황이라면 "Greeting"을 Requestbody의 reqeust input에 넣어주어야 함. -> front에서 request input 데이터 "Greeting" 으로 넣기
-    @PostMapping
-    public ResponseEntity<ConversationResponse> conversation(
-            @RequestHeader("userId") int userNo,
-            @RequestBody ConversationRequest request,
-            HttpServletRequest httpServletRequest) {
-
-        long startTime = System.currentTimeMillis();
-        ConversationResponse response = conversationService.conversation(request, userNo);
-
-        log.info("log check : {}", response.getContent());
-        long endTime = System.currentTimeMillis();
-        long duration = endTime - startTime;
-
-        log.info("📌 Chatbot response: {}", duration);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        return new ResponseEntity<>(response, headers, HttpStatus.OK);
-
-    }
+//    @PostMapping
+//    public ResponseEntity<ConversationResponse> conversation(
+//            @RequestHeader("userId") int userNo,
+//            @RequestBody ConversationRequest request,
+//            HttpServletRequest httpServletRequest) {
+//
+//        long startTime = System.currentTimeMillis();
+//        conversationService.conversation(request, userNo, session);
+//
+//    }
 
     //003.b 예금주 정보 확인 controller(예금 정보 입력 후 확인 버튼 눌리게 되면 controller 호출)
 

@@ -9,13 +9,30 @@
       </div>
     </div>
     <div class="button-section">
-      <router-link class="chat-button" to="/chat">시작하기</router-link>
+      <button class="chat-button" @click="checkLogin">시작하기</button>
     </div>
   </div>
 </template>
 
-<script>
+<script setup>
 import '@/assets/main.css';
+import { useAuthStore } from '@/stores/auth.js'; // auth store import
+import { useRouter } from 'vue-router';
+
+const authStore = useAuthStore();
+const router = useRouter();
+
+console.log('로그인 상태:', authStore.isLogin);
+
+const checkLogin = () => {
+  if (!authStore.isLogin) {
+    // 로그인되지 않은 상태라면 로그인 페이지로 리다이렉트
+    router.push('/login');
+  } else {
+    // 로그인 상태라면 채팅 페이지로 이동
+    router.push('/chat');
+  }
+};
 </script>
 
 <style scoped>

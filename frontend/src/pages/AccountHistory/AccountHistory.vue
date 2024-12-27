@@ -108,12 +108,23 @@ function filterTransactionsByMonth(transactions, yearMonth) {
 // API 응답 데이터 변환 함수
 function transformTransaction(transaction) {
   const isWithdrawal = transaction.senderId === 1;
+
+  const amount = transaction.amount ?? 0;
   return {
     date: formatDate(transaction.transactionDate),
     description: isWithdrawal ? '출금' : '입금',
     type: isWithdrawal ? 'withdraw' : 'deposit',
-    amount: transaction.amount.toLocaleString(),
-    balance: '잔액 확인 중',
+    amount: amount.toLocaleString(),
+    balance:
+      transaction.senderId === 2 || transaction.receiverId === 2
+        ? '쵸단'
+        : transaction.senderId === 3 || transaction.receiverId === 3
+        ? '마젠타'
+        : transaction.senderId === 4 || transaction.receiverId === 4
+        ? '히나'
+        : transaction.senderId === 5 || transaction.receiverId === 5
+        ? '시연'
+        : '잔액 확인 중',
   };
 }
 
