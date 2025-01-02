@@ -1,4 +1,4 @@
-![Main](assets/images/Main.png)
+![Main](assets/image/Main.png)
 
 ---
 
@@ -22,9 +22,9 @@
 
 ## 프로젝트 개요 및 소개
 
-![Background](assets/images/background.png)
+![Background](assets/image/background.png)
 
-![Goal](assets/images/goal.png)
+![Goal](assets/image/goal.png)
 
 프로젝트의 주제 : 고령층을 위한 대화형 금융 지원 서비스<br>
 기획 의도 : 고령층의 디지털 소외 문제를 해결하기 위해 고령층도 쉽게 이용할 수 있는 비대면 금융 서비스 앱을 개발하는 것
@@ -34,11 +34,11 @@
 
 # 주요 기능
 
-![service](assets/images/service.png)
+![service](assets/image/service.png)
 
-![transfer](assets/images/transfer.png)
+![transfer](assets/image/transfer.png)
 
-![loan](assets/images/loan.png)
+![loan](assets/image/loan.png)
 
 - 음성 대화를 통한 비대면 금융 서비스
 - 대출 상품 음성 설명 요약, 간편 대출 신청
@@ -61,14 +61,14 @@
 
 <h3>Frontend</h3> 
 
-![architecture](assets/images/architecture.png)
+![architecture](assets/image/architecture.png)
 
 ---
 
 ## ERD 설계
 
 <div align="center">
-<img src="assets/images/ERD.png" width="600"/>
+<img src="assets/image/ERD.png" width="600"/>
 </div>
 
 ---
