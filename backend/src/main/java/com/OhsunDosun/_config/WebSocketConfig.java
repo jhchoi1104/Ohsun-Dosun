@@ -1,7 +1,6 @@
 package com.OhsunDosun._config;
 
 import com.OhsunDosun.Handler.ConversationWebSocketHandler;
-import com.OhsunDosun.controller.ConversationController;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;

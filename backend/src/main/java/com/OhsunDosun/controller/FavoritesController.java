@@ -25,13 +25,12 @@ public class FavoritesController {
     @PostMapping
     public ResponseEntity<String> saveNickname(
             @RequestHeader("userId") long userId,
-            @RequestBody Favorites nickname) { //별칭 정보를 (json 형태)를 요청 본문에서 전달받음
-        //별칭 존재 여부 체크
-        System.out.println("test : " + nickname.getNickname());
+            @RequestBody Favorites nickname) {
+        // 별칭 존재 여부 체크
         if (favoritesService.isFavoriteExists(userId, nickname.getNickname())) {
             return ResponseEntity.status(HttpStatus.CREATED).body("별칭이 이미 존재합니다.");
         }
-        //별칭 저장
+        // 별칭 없을 시, 새로운 별칭 저장
         else {
             favoritesService.saveNickname(userId, nickname);
             log.info("별칭 저장 완료 - User: {}, Nickname: {}", userId, nickname.getNickname());

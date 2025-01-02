@@ -13,9 +13,8 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping("/api/transfer")
 public class TransferController {
-
-    @Autowired
-    private TransferService transferService;
+    
+    private final TransferService transferService;
 
     // 송금하기
     @PostMapping("/send")

@@ -16,7 +16,11 @@ public class SearchUserController {
 
     private final SearchUserService userService;
 
-    // 사용자 이름으로 ID 조회
+    /**
+     *
+     * @param name
+     * @return 사용자 정보
+     */
     @GetMapping("/findByName")
     public ResponseEntity<SearchUserDTO> findUserByName(@RequestParam String name) {
         SearchUserDTO user = userService.findUserIdByName(name);

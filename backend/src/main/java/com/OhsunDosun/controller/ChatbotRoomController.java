@@ -21,38 +21,42 @@ import java.util.List;
 public class ChatbotRoomController {
     private final ChatRoomService chatRoomService;
 
+    /**
+     *
+     * @return 챗봇 대화방 리스트
+     */
     @GetMapping
         public List<ChatbotRoom> bringChatRoom() {
         return chatRoomService.bringChatRoom();
     }
 
+    /**
+     *
+     * @param id
+     * @return 개별 챗봇 대화 내역 리스트
+     */
     @GetMapping("/{id}")
     public List<Message> bringMessage(@PathVariable("id") long id) {
-
         List<Message> messages = chatRoomService.bringMessage(id);
-
-        // ObjectMapper 생성 (Jackson을 이용해 JSON 파싱)
         ObjectMapper objectMapper = new ObjectMapper();
+        extracted(messages, objectMapper);
+        return messages;
+    }
 
-        // 메시지 텍스트 처리
+    // 메시지 텍스트 처리
+    private static void extracted(List<Message> messages, ObjectMapper objectMapper) {
         for (Message message : messages) {
             try {
-
-                // 불필요한 문자 제거 (예: ```json … ```)
+                // json 형식 처리
                 String jsonString = message.getMessageText().replaceAll("```json", "").replaceAll("```", "").trim();
-                // messageText가 JSON 형식이라면 파싱하여 content 필드만 추출
                 JsonNode jsonNode = objectMapper.readTree(jsonString);
                 if (jsonNode.has("content")) {
-                    // content가 존재하면 그 값만 가져와서 새로 설정
                     message.setMessageText(jsonNode.get("content").asText());
                 }
             } catch (Exception e) {
-                // messageText가 JSON 형식이 아닌 경우는 그대로 둔다.
-                // 예외 처리
+                // json 형식이 아닌 경우
             }
         }
-
-        return messages;
     }
 
 }
