@@ -1,42 +1,95 @@
-# Ohsun-Dosun
+![Summary](assets/images/Main.png)
 
-KB해커톤 - 비대면 대화형 금융 서비스
+---
 
-## 커밋 메시지 규칙
+## 목차
 
-이 프로젝트는 **Conventional Commits** 스타일을 따릅니다. 커밋 메시지를 일관성 있게 작성하여 코드 변경 사항을 쉽게 추적하고, 다른 개발자와 협업을 원활하게 할 수 있도록 합니다.
+- [프로젝트 기간](#프로젝트-기간)
+- [프로젝트 개요 및 소개](#프로젝트-개요-및-소개)
+- [주요 기능](#주요-기능)
+- [기술 스택](#기술-스택)
+- [시스템 아키텍처](#시스템-아키텍처)
+- [ERD 설계](#erd-설계)
+- [팀원 소개](#팀원-소개)
 
-### 커밋 유형과 설명
+---
 
-| 유형       | 설명                                                                                                     |
-| ---------- | -------------------------------------------------------------------------------------------------------- |
-| `feat`     | 새로운 기능을 추가할 때 사용합니다. 예: `feat: 사용자 로그인 기능 추가`                                  |
-| `fix`      | 버그를 수정할 때 사용합니다. 예: `fix: 로그인 시 비밀번호 검증 오류 수정`                                |
-| `docs`     | 문서(README, Wiki 등)를 수정할 때 사용합니다. 예: `docs: 프로젝트 소개 및 설치 방법 추가`                |
-| `style`    | 코드 포맷팅, 세미콜론 누락 등 코드 의미에 영향을 주지 않는 변경사항에 사용합니다. 예: `style: 코드 정렬` |
-| `refactor` | 코드 리팩토링(기능 변화 없이 코드 구조를 재조정) 시 사용합니다. 예: `refactor: 로그인 로직 개선`         |
-| `test`     | 테스트 코드를 추가하거나 수정할 때 사용합니다. 예: `test: 로그인 기능 테스트 추가`                       |
-| `chore`    | 빌드 업무 수정, 패키지 매니저 설정 등 기타 작업에 사용합니다. 예: `chore: .gitignore 업데이트`           |
-| `perf`     | 성능을 개선하는 경우에 사용합니다. 예: `perf: 반복문 최적화`                                             |
-| `ci`       | CI 설정 파일 및 스크립트 관련 변경사항에 사용합니다. 예: `ci: GitHub Actions 워크플로우 수정`            |
+## 프로젝트 기간
 
-### 커밋 메시지 작성 예시
+2024.10.19 ~ 2025.01.02
 
-- `feat: 사용자가 비밀번호를 재설정할 수 있는 기능 추가`
-- `fix: 모바일에서 발생하는 레이아웃 깨짐 현상 수정`
-- `style: 코드 포맷 맞춤`
-- `refactor: 중복 로직을 별도 메소드로 분리`
-- `docs: API 명세서 업데이트`
-- `test: 회원가입 유닛 테스트 추가`
+---
 
-각 커밋 메시지는 커밋 유형과 함께 간결하게 변경 사항을 설명하며, 커밋 메시지의 첫 글자는 소문자로 작성하는 것을 권장합니다.
+## 프로젝트 개요 및 소개
 
-### 메시지 구조
+![Background](assets/images/background.png)
 
-커밋 메시지는 다음과 같은 형식을 따릅니다.
+![Goal](assets/images/goal.png)
 
-```plaintext
-<type>: <변경 사항 요약>
+프로젝트의 주제 : 고령층을 위한 대화형 금융 지원 서비스<br>
+기획 의도 : 고령층의 디지털 소외 문제를 해결하기 위해 고령층도 쉽게 이용할 수 있는 비대면 금융 서비스 앱을 개발하는 것
+<br>
 
-<변경 사항에 대한 추가 설명 (선택사항)>
-```
+---
+
+# 주요 기능
+
+- 음성 대화를 통한 비대면 금융 서비스
+- 대출 상품 음성 설명 요약, 간편 대출 신청
+- 가상 계좌를 통한 간편한 송금
+- 챗봇 사용이 어려운 이용자를 대상으로 한 상담원 연결
+- 입출금 통장 개설 및 통장 재발행
+<br>
+
+---
+
+## 사용 API
+
+<div align="center">
+<img src="assets/images/usedAPI.png" width="600"/>
+</div>
+
+---
+
+## 시스템 아키텍처
+
+<h3>Frontend</h3> 
+<div style="display: flex;">
+  <img src="https://img.shields.io/badge/Vue.js-4FC08D?style=for-the-badge&logo=Vue.js&logoColor=white">
+  <img src="https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=HTML5&logoColor=white">
+  <img src="https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=CSS3&logoColor=white">
+  <img src="https://img.shields.io/badge/Javascript-F7DF1E?style=for-the-badge&logo=Javascript&logoColor=white">
+</div>
+
+<h3>Backend</h3>
+<div style="display: flex;">
+  <img src="https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white">
+</div>
+
+<!-- <h3>AI</h3>
+<div style="display: flex;">
+  <img src= "https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=MySQL&logoColor=white">
+</div> -->
+
+<h3>DB</h3>
+<div style="display: flex;">
+  <img src= "https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=MySQL&logoColor=white">
+</div>
+
+---
+
+## ERD 설계
+
+<div align="center">
+<img src="assets/images/ERD.png" width="600"/>
+</div>
+
+---
+
+## 팀원 소개
+
+# 오순도순
+
+| <img src="https://github.com/jhchoi1104.png" width="80"> | <img src="https://github.com/ParkJeongBin01.png" width="80"> | <img src="https://github.com/ybon1107.png" width="80"> | <img src="https://github.com/owzl.png" width="80"> | <img src="https://github.com/runeunrun.png" width="80"> | <img src="https://github.com/cyh000127.png" width="80"> |
+| :------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------: | :------------------------------------------------: | :-----------------------------------------------------: | :-----------------------------------------------------: |
+|         [최종현](https://github.com/jhchoi1104)          |         [박정빈](https://github.com/ParkJeongBin01)          |         [이예본](https://github.com/ybon1107)          |         [정유리](https://github.com/owzl)          |         [이은지](https://github.com/runeunrun)          |         [최윤혁](https://github.com/cyh000127)          |
