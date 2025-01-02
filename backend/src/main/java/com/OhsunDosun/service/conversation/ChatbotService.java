@@ -1,6 +1,5 @@
 package com.OhsunDosun.service.conversation;
 
-import com.OhsunDosun.dto.ChatCompletionChunk;
 import com.OhsunDosun.dto.ChatbotResponse;
 import com.OhsunDosun.dto.ConversationLogRequest;
 import com.OhsunDosun.dto.ConversationRequest;
@@ -9,7 +8,6 @@ import com.OhsunDosun.service.ConversationLogService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.microsoft.cognitiveservices.speech.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,11 +21,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.util.concurrent.*;
-
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -44,14 +38,15 @@ public class ChatbotService {
     @Value("${MODEL_NAME}")
     private String modelName;
 
-    @Value("${MINI_MODEL_NAME}")
-    private String miniModelName;
 
     @Value("${SPEECH_KEY}")
     private String speechKey;
 
     @Value("${SPEECH_REGION}")
     private String speechRegion;
+
+    @Value("${voice}")
+    private String voice;
 
     private static final String API_URL = "https://api.openai.com/v1/chat/completions";
 
@@ -60,61 +55,29 @@ public class ChatbotService {
 
 
     /**
-     * <pre>
-     * 메소드명   : sendRequest
-     * 설명       : OpenAI API에 POST 요청을 보내고 응답을 받아 처리한다.
-     * </pre>
-     * @param messagesList 챗봇에 전송할 메시지 리스트
-     * @param responseSchema 응답 스키마 (필요한 경우)
-     * @return ChatbotResponse 챗봇의 응답 데이터
+     * 설명       : 웹소켓 일반 응답 Case
+     *           : 1. 챗봇 응답 생성 및 응답 전달
+     *           : 2. 대화 내역 저장
+     *           : 3. TTS 처리
      */
     public void sendRequest(ConversationRequest request, String model,
                             List<Map<String, String>> messagesList,
                             Map<String, Object> responseSchema,
                             WebSocketSession session) {
         try {
-            // HTTP 헤더 설정
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setBearerAuth(apiKey);
-
-            // 요청 본문 데이터 생성
-            Map<String, Object> requestBody = new HashMap<>();
-            requestBody.put("model", model);
-            requestBody.put("messages", messagesList.toArray(new Map[0]));
-
-            // Response Format 생성
-            if (responseSchema != null) {
-                Map<String, Object> jsonSchema = createJsonSchema(responseSchema);
-                requestBody.put("response_format", jsonSchema);
-            }
-
-            // HTTP Entity 생성
-            HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(requestBody, headers);
-
-            printChatbotRequest(requestBody);
-
-            // RestTemplate 객체 생성
-            RestTemplate restTemplate = new RestTemplate();
-
-            // API 호출 및 응답 처리
-            ResponseEntity<String> responseEntity = restTemplate.postForEntity(
-                    UriComponentsBuilder.fromHttpUrl(API_URL).toUriString(),
-                    requestEntity,
-                    String.class
-            );
+            // OpenAI 요청 및 응답 처리
+            ResponseEntity<String> responseEntity = sendOpenAIRequest(model, messagesList, responseSchema);
 
             if (responseEntity.getStatusCode() == HttpStatus.OK) {
-                // OpenAI 응답 처리
+                // 응답 처리
                 String content = parseOpenAIResponse(responseEntity.getBody());
                 session.sendMessage(new TextMessage(content));
 
-                // 챗봇 대화 내역 검사
+                // 대화 내역 저장
                 ConversationLogRequest conversationLog = makeConversationLogRequest(request, content);
-
-                // 챗봇 대화 내역 저장
                 conversationLogService.createConversationLog(conversationLog);
 
+                // TTS 처리
                 executorService.submit(() -> handleTtsStreaming(content, session));
             } else {
                 throw new RuntimeException("Failed to get STT response: " + responseEntity.getStatusCode());
@@ -130,9 +93,38 @@ public class ChatbotService {
     }
 
     /**
-     * sendRequestClassification
+     * 설명       : 웹소켓 일반 응답 Case
+     *           : 1. 챗봇 응답 생성 및 응답 전달
+     *           : 2. 대화 내역 저장
+     *           : 3. TTS 처리
      */
     private ChatbotResponse sendRequestPlain(String model, List<Map<String, String>> messagesList, Map<String, Object> responseSchema) {
+        try {
+            // OpenAI 요청 및 응답 처리
+            ResponseEntity<String> responseEntity = sendOpenAIRequest(model, messagesList, responseSchema);
+
+            if (responseEntity.getStatusCode() == HttpStatus.OK) {
+                log.debug("📍 Chatbot Response:\n{}", responseEntity.getBody());
+                return parseResponse(responseEntity.getBody());
+            }
+
+            return ChatbotResponse.builder()
+                    .content("Error: " + responseEntity.getStatusCode())
+                    .build();
+        } catch (Exception e) {
+            throw new ChatbotException("Failed to parse chatbot response", e);
+        }
+    }
+
+    /**
+     * OpenAI API에 요청을 보내고 응답을 반환하는 공통 메서드
+     *
+     * @param model         OpenAI 모델 이름
+     * @param messagesList  챗봇에 전송할 메시지 리스트
+     * @param responseSchema 응답 스키마 (필요한 경우)
+     * @return ResponseEntity<String> OpenAI API의 응답
+     */
+    private ResponseEntity<String> sendOpenAIRequest(String model, List<Map<String, String>> messagesList, Map<String, Object> responseSchema) {
         // HTTP 헤더 설정
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -141,45 +133,29 @@ public class ChatbotService {
         // 요청 본문 데이터 생성
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("model", model);
-
-        // messagesList를 배열로 변환하여 requestBody에 추가
         requestBody.put("messages", messagesList.toArray(new Map[0]));
 
-        // Response Format 생성
+        // 응답 스키마 추가
         if (responseSchema != null) {
             Map<String, Object> jsonSchema = createJsonSchema(responseSchema);
             requestBody.put("response_format", jsonSchema);
         }
 
-        // HTTP Entity 생성
+        // HTTP 엔티티 생성
         HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(requestBody, headers);
 
         printChatbotRequest(requestBody);
 
-        // RestTemplate 객체 생성
+        // RestTemplate을 통해 API 호출
         RestTemplate restTemplate = new RestTemplate();
-
-        // API 호출 및 응답 받기
-        ResponseEntity<String> responseEntity = restTemplate.exchange(
+        return restTemplate.exchange(
                 UriComponentsBuilder.fromHttpUrl(API_URL).toUriString(),
                 HttpMethod.POST,
                 requestEntity,
                 String.class
         );
-        // 응답 상태 코드 확인 및 처리
-        if (responseEntity.getStatusCode() == HttpStatus.OK) {
-            try {
-                log.debug("📍 Chatbot Response:\n{}", responseEntity.getBody());
-                return parseResponse(responseEntity.getBody());
-            } catch (Exception e) {
-                throw new ChatbotException("Failed to parse chatbot response", e);
-            }
-        }
-
-        return ChatbotResponse.builder()
-                .content("Error: " + responseEntity.getStatusCode())
-                .build();
     }
+
 
 
 
@@ -204,7 +180,7 @@ public class ChatbotService {
 
 
     /**
-     * classification을 위한
+     * classification 정보 반환
      */
     public ChatbotResponse getClassificationResult(List<Map<String, String>> messagesList, Map<String, Object> responseSchema) {
         return sendRequestPlain(modelName, messagesList, null);
@@ -289,7 +265,7 @@ public class ChatbotService {
         try {
             // Azure Speech SDK 설정
             SpeechConfig speechConfig = SpeechConfig.fromSubscription(speechKey, speechRegion);
-            speechConfig.setSpeechSynthesisVoiceName("ko-KR-YuJinNeural");
+            speechConfig.setSpeechSynthesisVoiceName(voice);
 
             // SpeechSynthesizer 생성
             SpeechSynthesizer synthesizer = new SpeechSynthesizer(speechConfig);

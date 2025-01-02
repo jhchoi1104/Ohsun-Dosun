@@ -12,5 +12,4 @@ import org.springframework.web.multipart.MultipartFile;
 @AllArgsConstructor
 public class TranscriptionRequest {
     private MultipartFile file;
-
 }

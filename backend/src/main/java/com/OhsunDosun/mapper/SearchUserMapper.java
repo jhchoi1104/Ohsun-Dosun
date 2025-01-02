@@ -6,6 +6,5 @@ import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface SearchUserMapper {
-    // 이름으로 사용자 ID 조회
     SearchUserDTO findUserByName(@Param("name") String name);
 }

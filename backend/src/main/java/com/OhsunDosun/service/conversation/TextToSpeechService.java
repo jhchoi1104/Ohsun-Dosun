@@ -1,5 +1,6 @@
 package com.OhsunDosun.service.conversation;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.cognitiveservices.speech.*;
@@ -21,6 +22,9 @@ public class TextToSpeechService {
     @Value("${SPEECH_REGION}")
     private String speechRegion;
 
+    @Value("${voice}")
+    private String voice;
+
     /**
      * <pre>
      * 메소드명   : convertTextToSpeech
@@ -36,19 +40,11 @@ public class TextToSpeechService {
             SpeechSynthesizer synthesizer = null;
 
             try {
-                // JSON 파싱
-                ObjectMapper objectMapper = new ObjectMapper();
-                JsonNode jsonNode = objectMapper.readTree(input);
-
-                if (!jsonNode.has("input")) {
-                    throw new IllegalArgumentException("JSON does not contain 'input' key");
-                }
-
-                String inputText = jsonNode.get("input").asText();
+                String inputText = getInputText(input);
 
                 // Azure Speech SDK 설정
                 speechConfig = SpeechConfig.fromSubscription(speechKey, speechRegion);
-                speechConfig.setSpeechSynthesisVoiceName("ko-KR-YuJinNeural");
+                speechConfig.setSpeechSynthesisVoiceName(voice);
 
                 synthesizer = new SpeechSynthesizer(speechConfig);
 
@@ -84,6 +80,19 @@ public class TextToSpeechService {
                 }
             }
         }
+    }
+
+    private static String getInputText(String input) throws JsonProcessingException {
+        // JSON 파싱
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode jsonNode = objectMapper.readTree(input);
+
+        if (!jsonNode.has("input")) {
+            throw new IllegalArgumentException("JSON does not contain 'input' key");
+        }
+
+        String inputText = jsonNode.get("input").asText();
+        return inputText;
     }
 
 }

@@ -7,6 +7,5 @@ import java.util.List;
 
 public interface ChatRoomMapper {
     List<ChatbotRoom> bringChatRoom();
-
     List<Message> bringMessage(long id);
 }

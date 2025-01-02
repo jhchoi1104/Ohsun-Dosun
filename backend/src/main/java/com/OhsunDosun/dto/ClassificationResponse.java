@@ -13,7 +13,6 @@ public class ClassificationResponse {
     private String mainTaskNumber;
     private String subTaskNumber;
     private Boolean taskLocked;
-
     private int promptTokens;
     private int completionTokens;
     private int totalTokens;

@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ConversationLogRequest {
-
     private String conversationLogInput;
     private String conversationLogResponse;
     private Integer conversationLogToken;

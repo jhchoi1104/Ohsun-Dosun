@@ -53,13 +53,23 @@ public class ChainService {
                 .totalTokens(response.getTotalTokens())
                 .build();
     }
+
+    /**
+     * <pre>
+     * 메소드명   : classificationChain
+     * 설명      : 송금 관련 챗봇 응답 처리
+     * </pre>
+     * @param prompt
+     * @return
+     * @throws JsonProcessingException
+     */
     public ChatbotResponse chatbotPlainChain(List<Map<String, String>> prompt) throws JsonProcessingException {
         Map<String, Object> responseSchema = new HashMap<>();
         responseSchema.put("name", Map.of("type", "string", "nullable", true));
         responseSchema.put("account", Map.of("type", "string", "nullable", true));
         responseSchema.put("amount", Map.of("type", "string", "nullable", true));
         responseSchema.put("main_account", Map.of("type", "string", "nullable", true));
-        responseSchema.put("step", Map.of("type", "integer", "nullable", true)); // 필수 필드라면 nullable 제외
+        responseSchema.put("step", Map.of("type", "integer", "nullable", true));
         responseSchema.put("content", Map.of("type", "string"));
 
         ChatbotResponse response = chatbotService.getChatbotResponse(prompt, responseSchema);
@@ -88,6 +98,4 @@ public class ChainService {
     public void chatbotChain(ConversationRequest request, List<Map<String, String>> prompt, WebSocketSession session) {
         chatbotService.getChatbotResponse(request, prompt, session);
     }
-
-
 }

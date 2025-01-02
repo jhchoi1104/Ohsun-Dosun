@@ -1,16 +1,15 @@
 package com.OhsunDosun.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserAuth {
     private int account_id;
     private int account_password;
-
-    // Getter추가
-    public int getAccount_id() {
-        return account_id;
-    }
-
-    public int getAccount_password() {
-        return account_password;
-    }
-
 }
