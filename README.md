@@ -68,7 +68,7 @@
 ## ERD 설계
 
 <div align="center">
-<img src="assets/image/ERD.png" width="600"/>
+<img src="assets/image/erd.png" width="600"/>
 </div>
 
 ---
