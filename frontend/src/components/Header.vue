@@ -1,8 +1,6 @@
 <script setup>
 import { useMenuStore } from '@/stores/close.js';
 import List from '@/pages/list/List.vue';
-import Navbar from '@/components/Navbar.vue';
-import { ref } from 'vue';
 
 const menuStore = useMenuStore();
 

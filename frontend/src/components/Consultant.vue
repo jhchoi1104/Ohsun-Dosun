@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, defineProps, defineEmits } from 'vue';
+import { defineProps, defineEmits } from 'vue';
 
 // Props와 Emit 정의
 const props = defineProps({
