@@ -1,4 +1,4 @@
-![Summary](assets/images/Main.png)
+![Main](assets/images/Main.png)
 
 ---
 
@@ -7,7 +7,7 @@
 - [프로젝트 기간](#프로젝트-기간)
 - [프로젝트 개요 및 소개](#프로젝트-개요-및-소개)
 - [주요 기능](#주요-기능)
-- [기술 스택](#기술-스택)
+- [사용 API](#사용-API)
 - [시스템 아키텍처](#시스템-아키텍처)
 - [ERD 설계](#erd-설계)
 - [팀원 소개](#팀원-소개)
@@ -34,6 +34,12 @@
 
 # 주요 기능
 
+![service](assets/images/service.png)
+
+![transfer](assets/images/transfer.png)
+
+![loan](assets/images/loan.png)
+
 - 음성 대화를 통한 비대면 금융 서비스
 - 대출 상품 음성 설명 요약, 간편 대출 신청
 - 가상 계좌를 통한 간편한 송금
@@ -54,27 +60,8 @@
 ## 시스템 아키텍처
 
 <h3>Frontend</h3> 
-<div style="display: flex;">
-  <img src="https://img.shields.io/badge/Vue.js-4FC08D?style=for-the-badge&logo=Vue.js&logoColor=white">
-  <img src="https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=HTML5&logoColor=white">
-  <img src="https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=CSS3&logoColor=white">
-  <img src="https://img.shields.io/badge/Javascript-F7DF1E?style=for-the-badge&logo=Javascript&logoColor=white">
-</div>
 
-<h3>Backend</h3>
-<div style="display: flex;">
-  <img src="https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white">
-</div>
-
-<!-- <h3>AI</h3>
-<div style="display: flex;">
-  <img src= "https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=MySQL&logoColor=white">
-</div> -->
-
-<h3>DB</h3>
-<div style="display: flex;">
-  <img src= "https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=MySQL&logoColor=white">
-</div>
+![architecture](assets/images/architecture.png)
 
 ---
 
