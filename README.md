@@ -52,7 +52,7 @@
 ## 사용 API
 
 <div align="center">
-<img src="assets/images/usedAPI.png" width="600"/>
+<img src="assets/images/API.png" width="600"/>
 </div>
 
 ---
