@@ -1,3 +1,8 @@
 Backend/src/main/resources/bin/
 Backend/src/main/resources/application.properties
 backend/src/main/resources/favorable-logic-442105-e9-a4027010002a.json
+
+.DS_Store
+._.DS_Store
+**/.DS_Store
+**/._.DS_Store
